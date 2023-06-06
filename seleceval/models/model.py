@@ -1,27 +1,26 @@
-import torch
-class Model:
+from ctypes import Union
+from typing import Tuple
 
-    def __init__(self, ):
+import torch
+from abc import ABC, abstractmethod
+
+from torch.nn import Module
+from torch.utils.data import DataLoader
+
+
+class Model(ABC):
+
+    def __init__(self, device):
+        self.DEVICE = device
+
+    @abstractmethod
+    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False):
         pass
 
-    def train(self, net, trainloader, client_name, epochs: int, verbose=False):
-        criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(net.parameters())
-        net.train()
-        for epoch in range(epochs):
-            correct, total, epoch_loss = 0, 0, 0.0
-            for images, labels in trainloader:
-                images, labels = images.to(DEVICE), labels.to(DEVICE)
-                optimizer.zero_grad()
-                outputs = net(images)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-                # Metrics
-                epoch_loss += loss
-                total += labels.size(0)
-                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-            epoch_loss /= len(trainloader.dataset)
-            epoch_acc = correct / total
-            if verbose:
-                print(f"{client_name} Epoch {epoch + 1}: train loss {epoch_loss}, accuracy {epoch_acc}")
+
+    @abstractmethod
+    def test(self, testloader: DataLoader) -> Tuple[float, float]:
+        pass
+    @abstractmethod
+    def get_net(self):
+        pass
