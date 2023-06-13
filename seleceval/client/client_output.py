@@ -7,8 +7,9 @@ from seleceval.client.client_state import ClientState
 
 class ClientOutput:
 
-    def __init__(self, state: ClientState):
-        self.output_dict = {'client_name': state.get('clientName'), 'state': state.get_all()}
+    def __init__(self, state: ClientState, server_round: int, file: str):
+        self.file = file
+        self.output_dict = {'server_round': server_round, 'client_name': state.get('client_name'), 'state': state.get_all()}
 
     def set(self, key: Union[str, int], value: Any):
         self.output_dict[key] = value
@@ -18,6 +19,6 @@ class ClientOutput:
 
     def write(self):
         self.output_dict['current_timestamp'] = time.time()
-        f = open("output.txt", "a")
+        f = open(self.file, "a")
         f.write(json.dumps(self.output_dict) + "\n")
         f.close()

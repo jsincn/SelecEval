@@ -1,0 +1,10 @@
+{
+  "no_rounds": 5,
+  "no_epochs": 3,
+  "no_clients": 200,
+  "verbose": "True",
+  "device": "cpu",
+  "generate_client_states": "False",
+  "client_state_file": "client_states.csv",
+  "output_file": "output.json"
+}

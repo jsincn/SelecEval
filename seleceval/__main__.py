@@ -9,30 +9,32 @@ from seleceval.datahandler.cifar10 import Cifar10DataHandler
 from seleceval.models.resnet18 import Resnet18
 from seleceval.selection.min_cpu import MinCPU
 from seleceval.strategy.adjusted_fed_avg import AdjustedFedAvg
-from seleceval.util import Arguments
+from seleceval.util import Arguments, Config
 import flwr as fl
-
-from seleceval.util.generate_initial_state import generate_initial_state
+from seleceval.simulation.state import generate_initial_state
 
 
 def main():
     args = Arguments()
-    print(args.get_args())
-    generate_initial_state(100)
-    DEVICE = torch.device("cuda")
-    NUM_CLIENTS = 10
+    config = Config(vars(args.get_args())['CONFIG_FILE'])
+
+    DEVICE = torch.device(config.initial_config['device'])
+    NUM_CLIENTS = config.initial_config['no_clients']
+
+    generate_initial_state(NUM_CLIENTS)
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
 
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-    client_fn = ClientFunction(Client, trainloaders, valloaders, model).client_fn
+    client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
     client_selector = MinCPU()
     # Create FedAvg strategy
 
     strategy = AdjustedFedAvg(
         net=model.get_net(),
-        client_selector=client_selector
+        client_selector=client_selector,
+        config=config
     )
 
     ram_memory = 100_000 * 1024 * 1024
@@ -43,13 +45,13 @@ def main():
         client_resources = {"num_gpus": 0.05,
                             "num_cpus": 1}
     else:
-        client_resources = {"num_cpus": 0.5}
+        client_resources = {"num_cpus": 1}
 
     # Start simulation
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
-        config=fl.server.ServerConfig(num_rounds=2),
+        config=fl.server.ServerConfig(num_rounds=config.initial_config['no_rounds']),
         strategy=strategy,
         client_resources=client_resources,
         ray_init_args={
@@ -60,8 +62,8 @@ def main():
 
     val()
 
-def val():
 
+def val():
     DEVICE = torch.device("cuda")
     NUM_CLIENTS = 10
 
@@ -78,6 +80,7 @@ def val():
 
     loss, acc = model.test(testloader)
     print(acc)
+
 
 if __name__ == "__main__":
     main()
