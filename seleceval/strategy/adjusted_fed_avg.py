@@ -45,7 +45,8 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
                 results.remove(i)
                 failures.append(i)
 
-
+        print(len(results))
+        print(len(failures))
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 

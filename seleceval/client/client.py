@@ -5,7 +5,7 @@ import flwr as fl
 
 from seleceval.client.client_output import ClientOutput
 from seleceval.client.client_state import ClientState
-from seleceval.client.helpers import get_parameters, set_parameters
+from seleceval.client.helpers import get_parameters, set_parameters, get_net_size
 
 
 class Client(fl.client.NumPyClient):
@@ -21,12 +21,16 @@ class Client(fl.client.NumPyClient):
         self.net = self.model.get_net()
 
     def fit(self, parameters, cfg):
-        if random() < self.state.get('i_reliability'):
+        if random() < self.state.get('i_reliability') \
+                or get_net_size(self.net) > self.state.get('network_bandwidth') \
+                / 8 * self.config.initial_config['timeout']:
             self.output.set('train_output', {})
-            self.output.set('execution_time', {})
+            self.output.set('execution_time', self.config.initial_config['timeout'])
             self.output.set('status', 'fail')
+            self.output.set('reason', 'reliability or bandwidth low')
             self.output.write()
             return get_parameters(self.net), -1, {}
+        print(get_net_size(self.net))
         start_time = time.time()
         set_parameters(self.net, parameters)
         train_output = self.model.train(self.trainloader, self.state.get('client_name'),
@@ -34,6 +38,17 @@ class Client(fl.client.NumPyClient):
                                         verbose=self.config.initial_config['verbose'])
         end_time = time.time()
         last_execution_time = end_time - start_time
+        if get_net_size(self.net) > self.state.get('network_bandwidth') \
+                / 8 * (self.config.initial_config['timeout'] - last_execution_time):
+            self.output.set('train_output', {})
+            self.output.set('execution_time', self.config.initial_config['timeout'])
+            self.output.set('actual_execution_time',
+                            get_net_size(self.net) / self.state.get('network_bandwidth') / 8 + last_execution_time)
+            self.output.set('status', 'fail')
+            self.output.set('reason', 'timeout')
+            self.output.write()
+            return get_parameters(self.net), -1, {}
+
         self.output.set('train_output', train_output)
         self.output.set('execution_time', last_execution_time)
         self.output.set('status', 'success')
