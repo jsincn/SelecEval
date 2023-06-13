@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict
 
 import torch.nn
 from torch import nn
@@ -30,11 +30,14 @@ class Resnet18(Model):
         # Load model and data
         self.net = resnet.to(self.DEVICE)
 
-    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> None:
+    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
         # Train self.network on training set using Cross Entropy Loss
         loss_function = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.net.parameters())
         self.net.train()
+        output = {}
+        output['accuracy'] = []
+        output['avg_epoch_loss'] = []
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -50,8 +53,11 @@ class Resnet18(Model):
                 correct += (torch.max(out.data, 1)[1] == labels).sum().item()
             avg_epoch_loss = avg_epoch_loss / total
             epoch_accuracy = correct / total
+            output['accuracy'].append(epoch_accuracy)
+            output['avg_epoch_loss'].append(avg_epoch_loss)
             if verbose:
                 print(f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}")
+        return output
 
     def test(self, testloader: DataLoader) -> Tuple[float, float]:
         loss_function = torch.nn.CrossEntropyLoss()

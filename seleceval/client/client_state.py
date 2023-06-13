@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Dict
 
 import pandas as pd
 
@@ -19,3 +19,6 @@ class ClientState:
         state_df = pd.read_csv("client_states.csv")
         state_df.loc[int(self.cid), self.state.keys()] = self.state.values()
         state_df.to_csv("client_states.csv", index=False)
+
+    def get_all(self) -> Dict:
+        return self.state

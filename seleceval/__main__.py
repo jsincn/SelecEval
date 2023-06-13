@@ -3,8 +3,8 @@ import os
 
 import torch
 
+from seleceval.client.client import Client
 from seleceval.client.client_fn import ClientFunction
-from seleceval.client.resnet18_client import Resnet18Client
 from seleceval.datahandler.cifar10 import Cifar10DataHandler
 from seleceval.models.resnet18 import Resnet18
 from seleceval.selection.min_cpu import MinCPU
@@ -18,15 +18,15 @@ from seleceval.util.generate_initial_state import generate_initial_state
 def main():
     args = Arguments()
     print(args.get_args())
-    generate_initial_state(10)
+    generate_initial_state(100)
     DEVICE = torch.device("cuda")
-    NUM_CLIENTS = 1
+    NUM_CLIENTS = 10
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
 
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-    client_fn = ClientFunction(Resnet18Client, trainloaders, valloaders, model).client_fn
+    client_fn = ClientFunction(Client, trainloaders, valloaders, model).client_fn
     client_selector = MinCPU()
     # Create FedAvg strategy
 
@@ -49,7 +49,7 @@ def main():
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
-        config=fl.server.ServerConfig(num_rounds=10),
+        config=fl.server.ServerConfig(num_rounds=2),
         strategy=strategy,
         client_resources=client_resources,
         ray_init_args={
@@ -57,6 +57,8 @@ def main():
         }
     )
     torch.cuda.empty_cache()
+
+    val()
 
 def val():
 
@@ -67,7 +69,7 @@ def val():
 
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-    list_of_files = [fname for fname in glob.glob("./model_round_6*")]
+    list_of_files = [fname for fname in glob.glob("./model_round_5*")]
     print(list_of_files)
     latest_round_file = max(list_of_files, key=os.path.getctime)
     print("Loading pre-trained model from: ", latest_round_file)
@@ -77,7 +79,5 @@ def val():
     loss, acc = model.test(testloader)
     print(acc)
 
-
-
 if __name__ == "__main__":
-    val()
+    main()
