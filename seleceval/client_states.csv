@@ -1,0 +1,6 @@
+cpu,ram,network_bandwidth,i_reliability,i_performance_tier,client_name
+4.52,7.23,41.57,0.03419,2,warm-app
+5.43,7.08,0.0,0.02418,3,inflammable-bogey
+5.24,9.34,89.17,0.08772,3,advanced-ginger
+4.62,10.62,44.31,0.02488,2,chocolate-cheese
+4.22,7.69,77.75,0.18317,1,chocolate-grapnel
