@@ -21,16 +21,22 @@ class Client(fl.client.NumPyClient):
         self.net = self.model.get_net()
 
     def fit(self, parameters, cfg):
+        execution_time = self.state.get('expected_execution_time') * self.state.get('i_performance_factor')
+        upload_time = self.model.get_size() / self.state.get('network_bandwidth') * 8
         if random() < self.state.get('i_reliability'):
             self.output.set('train_output', {})
-            self.output.set('execution_time', self.config.initial_config['timeout'])
+            self.output.set('execution_time', execution_time)
+            self.output.set('upload_time', upload_time)
+            self.output.set('total_time', self.config.initial_config['timeout'])
             self.output.set('status', 'fail')
             self.output.set('reason', 'reliability failure')
             self.output.write()
             return get_parameters(self.net), -1, {}
         if self._calculate_timeout():
             self.output.set('train_output', {})
-            self.output.set('execution_time', self.config.initial_config['timeout'])
+            self.output.set('execution_time', execution_time)
+            self.output.set('upload_time', upload_time)
+            self.output.set('total_time', self.config.initial_config['timeout'])
             self.output.set('status', 'fail')
             self.output.set('reason', 'timeout failure')
             self.output.write()
@@ -43,7 +49,11 @@ class Client(fl.client.NumPyClient):
         end_time = time.time()
         last_execution_time = end_time - start_time
         self.output.set('train_output', train_output)
-        self.output.set('execution_time', last_execution_time)
+        self.output.set('actual_execution_time', last_execution_time)
+        self.output.set('execution_time', execution_time)
+        self.output.set('upload_time', upload_time)
+        total_time = upload_time + execution_time
+        self.output.set('total_time', total_time)
         self.output.set('status', 'success')
         self.output.write()
         self.state.commit()

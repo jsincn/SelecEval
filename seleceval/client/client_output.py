@@ -1,5 +1,5 @@
 import json
-import time
+import datetime
 from typing import Any, Union
 
 from .client_state import ClientState
@@ -18,7 +18,7 @@ class ClientOutput:
         return self.output_dict['key']
 
     def write(self):
-        self.output_dict['current_timestamp'] = time.time()
+        self.output_dict['current_timestamp'] = datetime.datetime.now()
         f = open(self.file, "a")
         f.write(json.dumps(self.output_dict) + "\n")
         f.close()
