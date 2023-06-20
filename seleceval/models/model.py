@@ -24,3 +24,7 @@ class Model(ABC):
     @abstractmethod
     def get_net(self):
         pass
+
+    @abstractmethod
+    def get_size(self):
+        pass

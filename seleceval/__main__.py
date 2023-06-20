@@ -7,6 +7,7 @@ from seleceval.client.client import Client
 from seleceval.client.client_fn import ClientFunction
 from seleceval.datahandler.cifar10 import Cifar10DataHandler
 from seleceval.models.resnet18 import Resnet18
+from seleceval.selection.fedcs import FedCS
 from seleceval.selection.min_cpu import MinCPU
 from seleceval.strategy.adjusted_fed_avg import AdjustedFedAvg
 from seleceval.util import Arguments, Config
@@ -21,14 +22,14 @@ def main():
     DEVICE = torch.device(config.initial_config['device'])
     NUM_CLIENTS = config.initial_config['no_clients']
 
-    generate_initial_state(NUM_CLIENTS)
+    generate_initial_state(NUM_CLIENTS, config)
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
 
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
     client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
-    client_selector = MinCPU()
+    client_selector = FedCS(model.get_size(), config.initial_config['timeout'])
     # Create FedAvg strategy
 
     strategy = AdjustedFedAvg(

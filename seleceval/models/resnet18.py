@@ -14,6 +14,19 @@ class Resnet18(Model):
     def get_net(self) -> nn.Module:
         return self.net
 
+    def get_size(self) -> int:
+
+        params = 0
+        for p in self.net.parameters():
+            params += p.nelement() * p.element_size()
+        buffer = 0
+        for b in self.net.buffers():
+            buffer += b.nelement() * buffer.element_size()
+
+        size = (params + buffer) / 1024 / 1024
+
+        return size
+
     def __init__(self, device, num_classes: int, n: int = 2):
         super().__init__(device)
         resnet = nn.Sequential(
