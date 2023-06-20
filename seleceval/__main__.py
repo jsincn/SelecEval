@@ -59,13 +59,12 @@ def main():
             "include_dashboard": True
         }
     )
-    torch.cuda.empty_cache()
 
     val()
 
 
 def val():
-    DEVICE = torch.device("cuda")
+    DEVICE = torch.device("cpu")
     NUM_CLIENTS = 10
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
