@@ -6,7 +6,7 @@
   "device": "cpu",
   "timeout": 60,
   "generate_client_states": "False",
-  "client_state_file": "client_states.csv",
-  "output_file": "output.json",
-  "client_configuration_file": "client_configurations.csv"
+  "client_state_file": "seleceval/client_states.csv",
+  "output_file": "seleceval/output.json",
+  "client_configuration_file": "seleceval/client_configurations.csv"
 }
