@@ -35,7 +35,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
             failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         # Update client state
-        run_state_update()
+        run_state_update(self.config)
         self.config.set_current_round(server_round)
 
         # Filter results with negative sample size:

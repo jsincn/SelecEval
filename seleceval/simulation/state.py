@@ -22,11 +22,11 @@ def generate_initial_state(num_clients, config):
     df = pd.DataFrame(records,
                       columns=["cpu", "ram", "network_bandwidth", "i_reliability", "performance_tier",
                                "expected_execution_time", "i_performance_factor", "client_name"])
-    df.to_csv('client_states.csv', index=False)
+    df.to_csv(config.initial_config['client_state_file'], index=False)
 
 
-def run_state_update():
-    state_df = pd.read_csv("client_states.csv")
+def run_state_update(config):
+    state_df = pd.read_csv(config.initial_config['client_state_file'])
     state_df['network_bandwidth'] = state_df['network_bandwidth'].transform(
         lambda x: max([round(random.gauss(50, 30), 2), 0]))
-    state_df.to_csv('client_states.csv', index=False)
+    state_df.to_csv(config.initial_config['client_state_file'], index=False)
