@@ -2,3 +2,5 @@ flwr~=1.4.0
 numpy~=1.24.3
 pandas~=2.0.2
 randomname~=0.2.1
+torch
+torchvision
