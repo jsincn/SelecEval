@@ -2,7 +2,7 @@ import json
 import time
 from typing import Any, Union
 
-from seleceval.client.client_state import ClientState
+from .client_state import ClientState
 
 
 class ClientOutput:

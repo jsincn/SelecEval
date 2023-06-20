@@ -6,7 +6,7 @@ from torch.nn import Module
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 
-from seleceval.models.model import Model
+from .model import Model
 
 
 class Resnet18(Model):

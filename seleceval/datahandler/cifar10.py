@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split, Subset
 from torchvision.datasets import CIFAR10
 
-from seleceval.datahandler.datahandler import DataHandler
+from .datahandler import DataHandler
 
 
 class Cifar10DataHandler(DataHandler):

@@ -3,16 +3,16 @@ import os
 
 import torch
 
-from seleceval.client.client import Client
-from seleceval.client.client_fn import ClientFunction
-from seleceval.datahandler.cifar10 import Cifar10DataHandler
-from seleceval.models.resnet18 import Resnet18
-from seleceval.selection.fedcs import FedCS
-from seleceval.selection.min_cpu import MinCPU
-from seleceval.strategy.adjusted_fed_avg import AdjustedFedAvg
-from seleceval.util import Arguments, Config
+from .client.client import Client
+from .client.client_fn import ClientFunction
+from .datahandler.cifar10 import Cifar10DataHandler
+from .models.resnet18 import Resnet18
+from .selection.fedcs import FedCS
+from .selection.min_cpu import MinCPU
+from .strategy.adjusted_fed_avg import AdjustedFedAvg
+from .util import Arguments, Config
 import flwr as fl
-from seleceval.simulation.state import generate_initial_state
+from .simulation.state import generate_initial_state
 
 
 def main():

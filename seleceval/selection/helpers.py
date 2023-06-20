@@ -3,7 +3,7 @@ from typing import List, Tuple, Union
 from flwr.common import FitRes, Code
 from flwr.server.client_proxy import ClientProxy
 
-from seleceval.client.client import Client
+from ..client.client import Client
 import flwr as fl
 import concurrent
 

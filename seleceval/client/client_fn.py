@@ -1,4 +1,4 @@
-from seleceval.client.client import Client
+from .client import Client
 
 
 class ClientFunction:

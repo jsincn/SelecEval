@@ -3,9 +3,9 @@ from random import random
 
 import flwr as fl
 
-from seleceval.client.client_output import ClientOutput
-from seleceval.client.client_state import ClientState
-from seleceval.client.helpers import get_parameters, set_parameters
+from .client_output import ClientOutput
+from .client_state import ClientState
+from .helpers import get_parameters, set_parameters
 
 
 class Client(fl.client.NumPyClient):

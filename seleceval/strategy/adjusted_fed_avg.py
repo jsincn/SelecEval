@@ -6,10 +6,10 @@ import torch
 from flwr.common import FitRes, Scalar, Parameters
 from flwr.server.client_proxy import ClientProxy
 
-from seleceval.selection.client_selection import ClientSelection
-from seleceval.simulation.state import run_state_update
-from seleceval.strategy.common import weighted_average
-from seleceval.util import Config
+from ..selection.client_selection import ClientSelection
+from ..simulation.state import run_state_update
+from ..strategy.common import weighted_average
+from ..util import Config
 
 
 class AdjustedFedAvg(fl.server.strategy.FedAvg):
