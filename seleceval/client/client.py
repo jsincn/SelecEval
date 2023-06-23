@@ -22,7 +22,10 @@ class Client(fl.client.NumPyClient):
 
     def fit(self, parameters, cfg):
         execution_time = self.state.get('expected_execution_time') * self.state.get('i_performance_factor')
-        upload_time = self.model.get_size() / self.state.get('network_bandwidth') * 8
+        if self.state.get('network_bandwidth') > 0:
+            upload_time = self.model.get_size() / self.state.get('network_bandwidth') * 8
+        else:
+            upload_time = -1
         if random() < self.state.get('i_reliability'):
             self.output.set('train_output', {})
             self.output.set('execution_time', execution_time)
@@ -74,6 +77,6 @@ class Client(fl.client.NumPyClient):
                 "expected_execution_time": self.state.get('expected_execution_time')}
 
     def _calculate_timeout(self) -> bool:
-        t = self.model.get_size() / self.state.get('network_bandwidth') * 8
+        t = self.model.get_size() / (self.state.get('network_bandwidth') + .000001) * 8
         t += self.state.get('expected_execution_time') * self.state.get('i_performance_factor')
         return t > self.config.initial_config['timeout']
