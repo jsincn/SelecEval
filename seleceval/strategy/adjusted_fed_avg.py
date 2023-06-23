@@ -16,7 +16,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
 
     def __init__(self, net, client_selector: ClientSelection, config: Config):
         super().__init__(fraction_fit=0.5,  # Sample 100% of available clients for training
-                         fraction_evaluate=0.5,  # Sample 50% of available clients for evaluation
+                         fraction_evaluate=0.01,  # Sample 50% of available clients for evaluation
                          min_fit_clients=1,  # Never sample less than 10 clients for training
                          min_evaluate_clients=1,  # Never sample less than 5 clients for evaluation
                          min_available_clients=1,  # Wait until all 10 clients are available
