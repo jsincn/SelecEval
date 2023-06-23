@@ -65,6 +65,6 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
             self.net.load_state_dict(state_dict, strict=True)
 
             # Save the model
-            torch.save(self.net.state_dict(), f"model_round_{server_round}.pth")
+            torch.save(self.net.state_dict(), f"model_round_{server_round}_{self.config.initial_config['algorithm']}.pth")
 
         return aggregated_parameters, aggregated_metrics

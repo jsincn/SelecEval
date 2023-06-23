@@ -3,6 +3,7 @@ import os
 
 import torch
 
+from seleceval.selection.random import RandomSelection
 from .client.client import Client
 from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
@@ -29,7 +30,10 @@ def main():
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
     client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
-    client_selector = FedCS(model.get_size(), config.initial_config['timeout'])
+    if config.initial_config['algorithm'] == 'FedCS':
+        client_selector = FedCS(model.get_size(), config.initial_config['timeout'])
+    elif config.initial_config['algorithm'] == 'random':
+        client_selector = RandomSelection(0.2)
     # Create FedAvg strategy
 
     strategy = AdjustedFedAvg(
@@ -59,8 +63,6 @@ def main():
             "include_dashboard": True
         }
     )
-
-    val()
 
 
 def val():
