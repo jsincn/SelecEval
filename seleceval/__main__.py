@@ -42,8 +42,6 @@ def main():
         config=config
     )
 
-    ram_memory = 100_000 * 1024 * 1024
-
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
     client_resources = None
     if DEVICE.type == "cuda":

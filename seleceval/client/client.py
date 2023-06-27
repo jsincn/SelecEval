@@ -64,7 +64,8 @@ class Client(fl.client.NumPyClient):
 
     def evaluate(self, parameters, config):
         set_parameters(self.net, parameters)
-        loss, accuracy = self.model.test(self.valloader)
+        loss, accuracy = self.model.test(self.valloader, self.state.get('client_name'),
+                                         self.config.initial_config['verbose'])
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
     def get_parameters(self, config):
@@ -74,7 +75,9 @@ class Client(fl.client.NumPyClient):
         return {"cpu": self.state.get('cpu'), "ram": self.state.get('ram'),
                 "network_bandwidth": self.state.get('network_bandwidth'),
                 "client_name": self.state.get('client_name'),
-                "expected_execution_time": self.state.get('expected_execution_time')}
+                "expected_execution_time": self.state.get('expected_execution_time'),
+                "sample_size": len(self.trainloader.dataset)
+                }
 
     def _calculate_timeout(self) -> bool:
         t = self.model.get_size() / (self.state.get('network_bandwidth') + .000001) * 8

@@ -72,19 +72,24 @@ class Resnet18(Model):
                 print(f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}")
         return output
 
-    def test(self, testloader: DataLoader) -> Tuple[float, float]:
+    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float]:
         loss_function = torch.nn.CrossEntropyLoss()
         correct, total, avg_loss = 0, 0, 0.0
         total_loss = 0.0
+        torch.no_grad()
+        print("Called test")
         for images, labels in testloader:
             images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
             out = self.net(images)
             loss = loss_function(out, labels)
             total_loss += loss.item()
             total += labels.size(0)
-            correct += (torch.max(out.data, 1)[1] == labels).sum().item()
+            _, predicted = torch.max(out.data, 1)
+            correct += (predicted == labels).sum().item()
         avg_loss = avg_loss / total
         accuracy = correct / total
+        if verbose:
+            print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")
         return avg_loss, accuracy
 
 

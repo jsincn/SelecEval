@@ -19,7 +19,7 @@ class Model(ABC):
 
 
     @abstractmethod
-    def test(self, testloader: DataLoader) -> Tuple[float, float]:
+    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float]:
         pass
     @abstractmethod
     def get_net(self):
