@@ -8,7 +8,8 @@ import torch.nn.functional as F
 
 from .model import Model
 
-
+# Note on the resnet implementation:
+# It is currently heavily based on the implementation of resnet from the Machine learning Lecture by Professor Guennemann at TUM.
 class Resnet18(Model):
 
     def get_net(self) -> nn.Module:
@@ -86,7 +87,7 @@ class Resnet18(Model):
             total += labels.size(0)
             _, predicted = torch.max(out.data, 1)
             correct += (predicted == labels).sum().item()
-        avg_loss = avg_loss / total
+        avg_loss = total_loss / total
         accuracy = correct / total
         if verbose:
             print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")

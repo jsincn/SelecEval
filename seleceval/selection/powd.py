@@ -1,8 +1,9 @@
 import concurrent
+from random import choices
 
 from flwr.server.server import evaluate_client
 
-from random import random
+import random
 from typing import List, Tuple, Union
 
 import flwr as fl
@@ -15,6 +16,8 @@ from .helpers import get_client_properties, _handle_finished_future_after_parame
 from ..client.helpers import get_parameters
 from ..models.model import Model
 from ..util import Config
+
+import numpy as np
 
 
 class PowD(ClientSelection):
@@ -57,10 +60,10 @@ class PowD(ClientSelection):
             })
             total_data_size += client_props.properties['sample_size']
 
-        clients_for_evaluation = []
-        for c in possible_clients:
-            if c['sample_size'] / total_data_size > random():
-                clients_for_evaluation.append(c)
+        clients_for_evaluation = choices(possible_clients,
+                                        weights=list(map(
+                                            lambda x: x['sample_size'], possible_clients
+                                        )), k=int(self.c_param * 2 * len(possible_clients)))
 
         print(possible_clients)
         print(clients_for_evaluation)
