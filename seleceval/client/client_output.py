@@ -1,6 +1,7 @@
 import json
 import datetime
 from typing import Any, Union
+import fcntl
 
 from .client_state import ClientState
 
@@ -19,6 +20,7 @@ class ClientOutput:
 
     def write(self):
         self.output_dict['current_timestamp'] = str(datetime.datetime.now())
-        f = open(self.file, "a")
-        f.write(json.dumps(self.output_dict) + "\n")
-        f.close()
+        with open(self.file, "a") as g:
+            fcntl.flock(g, fcntl.LOCK_EX)
+            g.write(json.dumps(self.output_dict) + "\n")
+            fcntl.flock(g, fcntl.LOCK_UN)

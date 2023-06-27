@@ -3,6 +3,7 @@ import os
 
 import torch
 
+from seleceval.selection.powd import PowD
 from seleceval.selection.random import RandomSelection
 from .client.client import Client
 from .client.client_fn import ClientFunction
@@ -31,9 +32,11 @@ def main():
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
     client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
     if config.initial_config['algorithm'] == 'FedCS':
-        client_selector = FedCS(model.get_size(), config.initial_config['timeout'])
+        client_selector = FedCS(model.get_size(), config)
+    if config.initial_config['algorithm'] == 'PowD':
+        client_selector = PowD(config)
     elif config.initial_config['algorithm'] == 'random':
-        client_selector = RandomSelection(0.2)
+        client_selector = RandomSelection(config)
     # Create FedAvg strategy
 
     strategy = AdjustedFedAvg(

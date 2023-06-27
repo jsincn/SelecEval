@@ -7,12 +7,13 @@ from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
 from .helpers import get_client_properties, _handle_finished_future_after_parameter_get
+from ..util import Config
 
 
 class RandomSelection(ClientSelection):
-    def __init__(self, threshold_clients: float = 0.2):
-        super().__init__()
-        self.threshold = threshold_clients
+    def __init__(self, config: Config):
+        super().__init__(config)
+        self.threshold = config.initial_config['algorithm_config']['c']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:

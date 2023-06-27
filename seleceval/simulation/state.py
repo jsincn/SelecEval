@@ -29,4 +29,6 @@ def run_state_update(config):
     state_df = pd.read_csv(config.initial_config['client_state_file'])
     state_df['network_bandwidth'] = state_df['network_bandwidth'].transform(
         lambda x: max([round(random.gauss(50, 30), 2), 0]))
+    state_df['i_performance_factor'] = state_df['i_performance_factor'].transform(
+        lambda x: round(random.gauss(1, 0.2), 2))
     state_df.to_csv(config.initial_config['client_state_file'], index=False)

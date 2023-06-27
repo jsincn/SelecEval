@@ -7,13 +7,14 @@ from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
 from .helpers import get_client_properties, _handle_finished_future_after_parameter_get
+from ..util import Config
 
 
 class FedCS(ClientSelection):
-    def __init__(self, model_size: int, timeout: int):
-        super().__init__()
+    def __init__(self, model_size: int, config: Config):
+        super().__init__(config)
         self.model_size = model_size
-        self.timeout = timeout
+        self.timeout = config.initial_config['timeout']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:

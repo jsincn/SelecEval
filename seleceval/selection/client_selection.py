@@ -2,10 +2,14 @@ from abc import abstractmethod, ABC
 
 import flwr as fl
 
+from ..util import Config
+
 
 class ClientSelection(ABC):
 
-    def __init__(self):
+    def __init__(self, config: Config):
+        print("Starting Client Selection")
+        self.config = config
         pass
 
     @abstractmethod

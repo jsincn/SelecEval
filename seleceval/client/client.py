@@ -59,7 +59,6 @@ class Client(fl.client.NumPyClient):
         self.output.set('total_time', total_time)
         self.output.set('status', 'success')
         self.output.write()
-        self.state.commit()
         return get_parameters(self.net), len(self.trainloader), train_output
 
     def evaluate(self, parameters, config):
