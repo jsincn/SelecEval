@@ -61,11 +61,12 @@ class FedCS(ClientSelection):
             t = self._calculate_Td_s(clients + [best_client]) + theta_d
             print(self.timeout)
             if t < self.timeout:
-                print("Best client: " + best_client['client_name'] + " Added " + str(t))
+                #print("Best client: " + best_client['client_name'] + " Added " + str(t))
                 theta = theta_d
                 clients.append(best_client)
             else:
-                print("Best client: " + best_client['client_name'] + " Skipped " + str(t))
+                #print("Best client: " + best_client['client_name'] + " Skipped " + str(t))
+                pass
         print("Selected clients: " + str(list(map(lambda x: x['client_name'], clients))))
         return [(client['proxy'], fit_ins) for client in clients]
 
