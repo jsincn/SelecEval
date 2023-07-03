@@ -31,6 +31,7 @@ def main():
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
     client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
+    print("Simulating with ", config.initial_config['algorithm'], " algorithm")
     if config.initial_config['algorithm'] == 'FedCS':
         client_selector = FedCS(model.get_size(), config)
     if config.initial_config['algorithm'] == 'PowD':
