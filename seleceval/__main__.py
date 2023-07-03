@@ -1,20 +1,20 @@
 import glob
 import os
 
+import flwr as fl
 import torch
 
-from seleceval.selection.powd import PowD
-from seleceval.selection.random import RandomSelection
+from .selection.powd import PowD
+from .selection.random import RandomSelection
+from .validation.validation import Validation
 from .client.client import Client
 from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
 from .models.resnet18 import Resnet18
 from .selection.fedcs import FedCS
-from .selection.min_cpu import MinCPU
+from .simulation.state import generate_initial_state
 from .strategy.adjusted_fed_avg import AdjustedFedAvg
 from .util import Arguments, Config
-import flwr as fl
-from .simulation.state import generate_initial_state
 
 
 def main():
@@ -37,6 +37,8 @@ def main():
         client_selector = PowD(config)
     elif config.initial_config['algorithm'] == 'random':
         client_selector = RandomSelection(config)
+    else:
+        client_selector = RandomSelection(config)
     # Create FedAvg strategy
 
     strategy = AdjustedFedAvg(
@@ -46,7 +48,6 @@ def main():
     )
 
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
-    client_resources = None
     if DEVICE.type == "cuda":
         client_resources = {"num_gpus": 0.05,
                             "num_cpus": 1}
@@ -65,24 +66,9 @@ def main():
         }
     )
 
-
-def val():
-    DEVICE = torch.device("cpu")
-    NUM_CLIENTS = 10
-
-    datahandler = Cifar10DataHandler(NUM_CLIENTS)
-
-    trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
-    model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-    list_of_files = [fname for fname in glob.glob("./model_round_5*")]
-    print(list_of_files)
-    latest_round_file = max(list_of_files, key=os.path.getctime)
-    print("Loading pre-trained model from: ", latest_round_file)
-    state_dict = torch.load(latest_round_file)
-    model.get_net().load_state_dict(state_dict)
-
-    loss, acc = model.test(testloader)
-    print(acc)
+    # Evaluation generation
+    val = Validation(config, trainloaders, valloaders, len(datahandler.get_classes()))
+    val.evaluate()
 
 
 if __name__ == "__main__":

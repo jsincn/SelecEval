@@ -1,12 +1,10 @@
-import concurrent
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import flwr as fl
-from flwr.common import FitIns, GetPropertiesIns, GetPropertiesRes
+from flwr.common import FitIns
 from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
-from .helpers import get_client_properties, _handle_finished_future_after_parameter_get
 
 
 class MinCPU(ClientSelection):

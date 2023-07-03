@@ -1,12 +1,10 @@
-import concurrent
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import flwr as fl
-from flwr.common import FitIns, GetPropertiesIns, GetPropertiesRes
+from flwr.common import FitIns
 from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
-from .helpers import get_client_properties, _handle_finished_future_after_parameter_get
 from ..util import Config
 
 
@@ -24,6 +22,7 @@ class FedCS(ClientSelection):
         :param parameters: The current parameters
         :param server_round: The current server round
         :return: Selected clients
+        TODO: Implement Pre-Selection and Method for setting the number of clients
         """
         config = {}
         fit_ins = FitIns(parameters, config)
@@ -48,16 +47,13 @@ class FedCS(ClientSelection):
                               key=lambda x: self._calc_update_upload(x, clients, theta))
 
             possible_clients.remove(best_client)
-            theta_d = theta + self._calculate_tUL_k(best_client) \
-                      + max(0, self._calculate_tUD_k(best_client) - theta)
+            theta_d = theta + self._calculate_tUL_k(best_client) + max(0, self._calculate_tUD_k(best_client) - theta)
             t = self._calculate_Td_s(clients + [best_client]) + theta_d
             print(self.timeout)
             if t < self.timeout:
-                #print("Best client: " + best_client['client_name'] + " Added " + str(t))
                 theta = theta_d
                 clients.append(best_client)
             else:
-                #print("Best client: " + best_client['client_name'] + " Skipped " + str(t))
                 pass
         print("Selected clients: " + str(list(map(lambda x: x['client_name'], clients))))
         return [(client['proxy'], fit_ins) for client in clients]
@@ -76,6 +72,7 @@ class FedCS(ClientSelection):
         return client['expected_execution_time']
 
     def _calc_update_upload(self, client, clients, theta):
+        # TODO: Check if this is correct
         score = self._calculate_Td_s(clients + [client])
         score = self._calculate_Td_s(clients)
         score += self._calculate_tUL_k(client)

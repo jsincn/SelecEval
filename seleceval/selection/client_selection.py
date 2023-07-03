@@ -7,8 +7,8 @@ from flwr.common import GetPropertiesIns, GetPropertiesRes, EvaluateIns, Paramet
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.server import evaluate_client
 
-from .helpers import get_client_properties, _handle_finished_future_after_parameter_get, \
-    _handle_finished_future_after_evaluate
+from .helpers import get_client_properties, _handle_finished_future_after_evaluate, \
+    _handle_finished_future_after_properties_get
 from ..util import Config
 
 
@@ -32,8 +32,8 @@ class ClientSelection(ABC):
         pass
 
     def run_task_get_properties(self, clients: List[ClientProxy]) \
-            -> Tuple[List[Tuple[ClientProxy, GetPropertiesRes]],
-            List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]]]:
+            -> Tuple[List[Tuple[ClientProxy, GetPropertiesRes]], List[
+                Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]]]:
         """
         Run the get properties task on the given clients
         :param clients: List of clients
@@ -52,14 +52,13 @@ class ClientSelection(ABC):
         results: List[Tuple[ClientProxy, GetPropertiesRes]] = []
         failures: List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]] = []
         for future in finished_fs:
-            _handle_finished_future_after_parameter_get(
+            _handle_finished_future_after_properties_get(
                 future=future, results=results, failures=failures
             )
         return results, failures
 
     def run_task_evaluate(self, clients: List[ClientProxy], parameters: Parameters) -> \
-            Tuple[List[Tuple[ClientProxy, EvaluateRes]],
-            List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]]:
+            Tuple[List[Tuple[ClientProxy, EvaluateRes]], List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]]:
         """
         Run the evaluate task on the given clients
         :param clients: List of clients

@@ -3,9 +3,9 @@ from .client import Client
 
 class ClientFunction:
 
-    def __init__(self, clientClass, trainloaders, valloaders, model, config):
+    def __init__(self, clientclass, trainloaders, valloaders, model, config):
         self.model = model
-        self.clientClass = clientClass
+        self.clientClass = clientclass
         self.trainloaders = trainloaders
         self.valloaders = valloaders
         self.config = config

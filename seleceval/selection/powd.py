@@ -1,23 +1,12 @@
-import concurrent
-from random import choices
-
-from flwr.server.server import evaluate_client
-
-import random
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple
 
 import flwr as fl
-from flwr.common import FitIns, GetPropertiesIns, GetPropertiesRes, EvaluateIns, Parameters, EvaluateRes
+from flwr.common import FitIns
 from flwr.server.client_proxy import ClientProxy
 
+import random
 from .client_selection import ClientSelection
-from .helpers import get_client_properties, _handle_finished_future_after_parameter_get, \
-    _handle_finished_future_after_evaluate
-from ..client.helpers import get_parameters
-from ..models.model import Model
 from ..util import Config
-
-import numpy as np
 
 
 class PowD(ClientSelection):
@@ -25,6 +14,7 @@ class PowD(ClientSelection):
     def __init__(self, config: Config):
         super().__init__(config)
         self.c_param = config.initial_config['algorithm_config']['c']
+        self.pre_param = config.initial_config['algorithm_config']['pre_sampling']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:
@@ -39,7 +29,8 @@ class PowD(ClientSelection):
         fit_ins = FitIns(parameters, config)
         all_clients: dict[str, ClientProxy] = client_manager.all()
         results, failures = self.run_task_get_properties(list(all_clients.values()))
-
+        print(failures)
+        print(results)
         possible_clients = []
         total_data_size = 0
         for (client_proxy, client_props) in results:
@@ -51,15 +42,15 @@ class PowD(ClientSelection):
             })
             total_data_size += client_props.properties['sample_size']
 
-        clients_for_evaluation = choices(possible_clients,
-                                        weights=list(map(
-                                            lambda x: x['sample_size'], possible_clients
-                                        )), k=int(self.c_param * 2 * len(possible_clients)))
+        clients_for_evaluation = random.choices(possible_clients,
+                                         weights=list(map(
+                                             lambda x: x['sample_size'], possible_clients
+                                         )), k=int(self.pre_param * len(possible_clients)))
 
-        results, failures = self.run_task_evaluate(clients_for_evaluation, parameters)
+        results, failures = self.run_task_evaluate(list(map(lambda x: x['proxy'], clients_for_evaluation)), parameters)
+        print(failures)
 
         possible_clients = []
-        total_data_size = 0
         for (client_proxy, evaluate_res) in results:
             possible_clients.append({
                 'proxy': client_proxy,
@@ -76,6 +67,3 @@ class PowD(ClientSelection):
             total_client_count -= 1
 
         return [(client, fit_ins) for client in clients]
-
-
-

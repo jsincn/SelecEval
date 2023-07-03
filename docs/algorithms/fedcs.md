@@ -6,7 +6,7 @@ This reduces the number of clients that participate, but fail to contribute to t
 It is based on the paper 
 ```
 Client Selection for Federated Learning with Heterogeneous Resources in Mobile Edge.
-Nishio, Takayuki, and Ryo Yonetani. 2018. arXiv [cs.NI]. arXiv. http://arxiv.org/abs/1804.08333.
+Nishio, Takayuki, and Ryo Yonetani. 2018. arXiv [cs.NI]. arXiv. https://arxiv.org/abs/1804.08333.
 ```
 The algorithm may be selected by choosing `FedCS` as the algorithm in the config file.
 

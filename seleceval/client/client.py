@@ -1,11 +1,9 @@
 import time
 from random import random
-from typing import List
 
 import flwr as fl
 import flwr.common
-from argon2 import Parameters
-from flwr.common import GetParametersRes, GetParametersIns
+from flwr.common import GetParametersIns
 from numpy import ndarray
 from torch.utils.data import DataLoader
 

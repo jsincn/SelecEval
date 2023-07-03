@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union, Dict, Optional, OrderedDict
+from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
 import numpy as np
@@ -64,7 +64,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
 
         # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
-
+        print("Saving aggregated_parameters...")
         if aggregated_parameters is not None:
             print(f"Saving round {server_round} aggregated_parameters...")
 
@@ -77,6 +77,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
             self.net.load_state_dict(state_dict, strict=True)
 
             # Save the model
-            torch.save(self.net.state_dict(), f"model_round_{server_round}_{self.config.initial_config['algorithm']}.pth")
+            torch.save(self.net.state_dict(),
+                       f"{self.config.initial_config['model_output_prefix']}{server_round}.pth")
 
         return aggregated_parameters, aggregated_metrics

@@ -15,7 +15,7 @@ def generate_initial_state(num_clients: int, config: Config):
     records = []
     client_configurations = pd.read_csv(config.initial_config['client_configuration_file']).to_dict('records')
     for i in range(num_clients):
-        performance_tier = random.randint(0,3)
+        performance_tier = random.randint(0, 3)
         cpu = client_configurations[performance_tier]['cpu']
         ram = client_configurations[performance_tier]['ram']
         expected_execution_time = client_configurations[performance_tier]['expected_execution_time']

@@ -1,12 +1,13 @@
 from typing import Tuple, Dict
 
 import torch.nn
-from torch import nn
-from torch.nn import Module
-from torch.utils.data import DataLoader
 import torch.nn.functional as F
+import torchvision
+from torch import nn
+from torch.utils.data import DataLoader
 
 from .model import Model
+
 
 # Note on the resnet implementation:
 # It is currently heavily based on the implementation of resnet from the Machine learning Lecture by Professor Guennemann at TUM.
@@ -15,14 +16,14 @@ class Resnet18(Model):
     def get_net(self) -> nn.Module:
         return self.net
 
-    def get_size(self) -> int:
+    def get_size(self) -> float:
 
         params = 0
         for p in self.net.parameters():
             params += p.nelement() * p.element_size()
         buffer = 0
         for b in self.net.buffers():
-            buffer += b.nelement() * buffer.element_size()
+            buffer += b.nelement() * b.element_size()
 
         size = (params + buffer) / 1024 / 1024
 
@@ -30,17 +31,18 @@ class Resnet18(Model):
 
     def __init__(self, device, num_classes: int, n: int = 2):
         super().__init__(device)
-        resnet = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.InstanceNorm2d(16),
-            nn.ReLU(),
-            ResidualStack(16, 16, stride=1, num_blocks=n),
-            ResidualStack(16, 32, stride=2, num_blocks=n),
-            ResidualStack(32, 64, stride=2, num_blocks=n),
-            nn.AdaptiveAvgPool2d(1),
-            Lambda(lambda x: x.squeeze()),
-            nn.Linear(64, num_classes)
-        )
+        # resnet = nn.Sequential(
+        #     nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False),
+        #     nn.InstanceNorm2d(16),
+        #     nn.ReLU(),
+        #     ResidualStack(16, 16, stride=1, num_blocks=n),
+        #     ResidualStack(16, 32, stride=2, num_blocks=n),
+        #     ResidualStack(32, 64, stride=2, num_blocks=n),
+        #     nn.AdaptiveAvgPool2d(1),
+        #     Lambda(lambda x: x.squeeze()),
+        #     nn.Linear(64, num_classes)
+        # )
+        resnet = torchvision.models.resnet18()
         # Load model and data
         self.net = resnet.to(self.DEVICE)
 
@@ -49,9 +51,7 @@ class Resnet18(Model):
         loss_function = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.net.parameters())
         self.net.train()
-        output = {}
-        output['accuracy'] = []
-        output['avg_epoch_loss'] = []
+        output = {'accuracy': [], 'avg_epoch_loss': []}
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -78,7 +78,6 @@ class Resnet18(Model):
         correct, total, avg_loss = 0, 0, 0.0
         total_loss = 0.0
         torch.no_grad()
-        print("Called test")
         for images, labels in testloader:
             images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
             out = self.net(images)

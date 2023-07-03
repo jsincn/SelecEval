@@ -22,3 +22,5 @@ The following table lists all attributes and their possible values.
 | output_file               | File to use for output. Will not be overwritten.                                                                                                      | `output.json`                       |
 | client_configuration_file | File that contains the available client configurations. See documentation on Client Configuration.                                                    | `client_configurations.csv`         |
 | max_workers               | Maximum number of workers that should be used when running distributed tasks. (May not always be enforced)                                            | 32                                  |
+| enable_validation         | Whether to run validation at the end, gathering validation accuracy for all clients over all rounds                                                   | `True`                              |
+| validation_config         | Configuration of the final validation runs                                                                                                            | See validation configuration        |

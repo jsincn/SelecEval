@@ -1,7 +1,7 @@
-import json
 import datetime
-from typing import Any, Union
 import fcntl
+import json
+from typing import Any, Union
 
 from .client_state import ClientState
 
@@ -10,7 +10,8 @@ class ClientOutput:
 
     def __init__(self, state: ClientState, server_round: int, file: str):
         self.file = file
-        self.output_dict = {'server_round': server_round, 'client_name': state.get('client_name'), 'state': state.get_all()}
+        self.output_dict = {'server_round': server_round, 'client_name': state.get('client_name'),
+                            'state': state.get_all()}
 
     def set(self, key: Union[str, int], value: Any):
         """
@@ -21,7 +22,7 @@ class ClientOutput:
         self.output_dict[key] = value
 
     def get(self, key: Union[str, int]) -> Any:
-        return self.output_dict['key']
+        return self.output_dict[key]
 
     def write(self):
         """

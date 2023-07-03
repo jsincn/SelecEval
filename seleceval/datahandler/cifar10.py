@@ -22,7 +22,6 @@ class Cifar10DataHandler(DataHandler):
 
         # Split training set into 10 partitions to simulate the individual dataset
         partition_size = len(trainset) // self.NUM_CLIENTS
-        lengths = [partition_size] * self.NUM_CLIENTS
         dataset_size = len(trainset)
         dataset_indices = list(range(dataset_size))
         datasets = []
