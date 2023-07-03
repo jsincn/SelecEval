@@ -11,6 +11,11 @@ class ClientFunction:
         self.config = config
 
     def client_fn(self, cid: str) -> Client:
+        """
+        Function used to create clients
+        :param cid:
+        :return:
+        """
         trainloader = self.trainloaders[int(cid)]
         valloader = self.valloaders[int(cid)]
         return self.clientClass(self.model, trainloader, valloader, cid, self.config)

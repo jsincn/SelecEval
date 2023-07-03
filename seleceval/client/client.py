@@ -1,16 +1,24 @@
 import time
 from random import random
+from typing import List
 
 import flwr as fl
+import flwr.common
+from argon2 import Parameters
+from flwr.common import GetParametersRes, GetParametersIns
+from numpy import ndarray
+from torch.utils.data import DataLoader
 
 from .client_output import ClientOutput
 from .client_state import ClientState
 from .helpers import get_parameters, set_parameters
+from ..models.model import Model
+from ..util import Config
 
 
 class Client(fl.client.NumPyClient):
 
-    def __init__(self, model, trainloader, valloader, cid, config):
+    def __init__(self, model: Model, trainloader: DataLoader, valloader: DataLoader, cid: str, config: Config) -> None:
         self.model = model
         self.trainloader = trainloader
         self.valloader = valloader
@@ -20,7 +28,13 @@ class Client(fl.client.NumPyClient):
         self.config = config
         self.net = self.model.get_net()
 
-    def fit(self, parameters, cfg):
+    def fit(self, parameters: list[ndarray], config: flwr.common.FitIns) -> tuple[list[ndarray], int, dict]:
+        """
+        Fit the model, write output and return parameters and metrics
+        :param parameters: The current parameters of the global model
+        :param config: Configuration for this fit
+        :return: The parameters of the global model, the number of samples used and the metrics
+        """
         execution_time = self.state.get('expected_execution_time') * self.state.get('i_performance_factor')
         if self.state.get('network_bandwidth') > 0:
             upload_time = self.model.get_size() / self.state.get('network_bandwidth') * 8
@@ -62,15 +76,26 @@ class Client(fl.client.NumPyClient):
         return get_parameters(self.net), len(self.trainloader), train_output
 
     def evaluate(self, parameters, config):
+        """
+        Evaluate the model
+        :param parameters: model parameters
+        :param config: configuration for this evaluation
+        :return: loss, number of samples and metrics
+        """
         set_parameters(self.net, parameters)
         loss, accuracy = self.model.test(self.valloader, self.state.get('client_name'),
                                          self.config.initial_config['verbose'])
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
-    def get_parameters(self, config):
+    def get_parameters(self, config: GetParametersIns) -> list[ndarray]:
         return get_parameters(self.net)
 
-    def get_properties(self, config={}):
+    def get_properties(self, config=None) -> dict:
+        """
+        Return properties of the current client
+        :param config: Config for getting the properties
+        :return:
+        """
         return {"cpu": self.state.get('cpu'), "ram": self.state.get('ram'),
                 "network_bandwidth": self.state.get('network_bandwidth'),
                 "client_name": self.state.get('client_name'),
@@ -79,6 +104,11 @@ class Client(fl.client.NumPyClient):
                 }
 
     def _calculate_timeout(self) -> bool:
+        """
+        Calculates if execution of training would be feasible giving network bandwidth,
+        expected execution time and performance factor
+        :return:
+        """
         t = self.model.get_size() / (self.state.get('network_bandwidth') + .000001) * 8
         t += self.state.get('expected_execution_time') * self.state.get('i_performance_factor')
         return t > self.config.initial_config['timeout']

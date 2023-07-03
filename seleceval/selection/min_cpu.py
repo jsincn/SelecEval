@@ -13,26 +13,17 @@ class MinCPU(ClientSelection):
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:
+        """
+        Select clients based on the MinCPU algorithm
+        :param client_manager: The client manager
+        :param parameters: The current parameters
+        :param server_round: The current server round
+        :return: Selected clients
+        """
         config = {}
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
-            submitted_fs = {
-                executor.submit(get_client_properties, all_clients[i], GetPropertiesIns({}), 5)
-                for i in all_clients
-            }
-            finished_fs, _ = concurrent.futures.wait(
-                fs=submitted_fs,
-                timeout=None,  # Handled in the respective communication stack
-            )
-
-        # Gather results
-        results: List[Tuple[ClientProxy, GetPropertiesRes]] = []
-        failures: List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]] = []
-        for future in finished_fs:
-            _handle_finished_future_after_parameter_get(
-                future=future, results=results, failures=failures
-            )
+        results, failures = self.run_task_get_properties(list(all_clients.values()))
 
         # Client Selection happens here:
         clients = []

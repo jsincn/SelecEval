@@ -3,8 +3,15 @@ import random
 import pandas as pd
 import randomname
 
+from ..util import Config
 
-def generate_initial_state(num_clients, config):
+
+def generate_initial_state(num_clients: int, config: Config):
+    """
+    Generates the initial state of the clients and saves it to a csv file
+    :param num_clients: number of clients
+    :param config: config object describing the simulation
+    """
     records = []
     client_configurations = pd.read_csv(config.initial_config['client_configuration_file']).to_dict('records')
     for i in range(num_clients):
@@ -25,7 +32,11 @@ def generate_initial_state(num_clients, config):
     df.to_csv(config.initial_config['client_state_file'], index=False)
 
 
-def run_state_update(config):
+def run_state_update(config: Config):
+    """
+    Runs the state update for the clients
+    :param config: config object describing the simulation
+    """
     state_df = pd.read_csv(config.initial_config['client_state_file'])
     state_df['network_bandwidth'] = state_df['network_bandwidth'].transform(
         lambda x: max([round(random.gauss(50, 30), 2), 0]))

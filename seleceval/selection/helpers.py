@@ -1,6 +1,7 @@
 from typing import List, Tuple, Union
 
-from flwr.common import FitRes, Code, EvaluateRes
+import flwr.common
+from flwr.common import FitRes, Code, EvaluateRes, GetParametersRes
 from flwr.server.client_proxy import ClientProxy
 
 from ..client.client import Client
@@ -15,8 +16,8 @@ def get_client_properties(client: Client, property_ins: fl.common.GetPropertiesI
 
 def _handle_finished_future_after_parameter_get(
     future: concurrent.futures.Future,  # type: ignore
-    results: List[Tuple[ClientProxy, FitRes]],
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    results: List[Tuple[ClientProxy, GetParametersRes]],
+    failures: List[Union[Tuple[ClientProxy, GetParametersRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
 
@@ -27,7 +28,7 @@ def _handle_finished_future_after_parameter_get(
         return
 
     # Successfully received a result from a client
-    result: Tuple[ClientProxy, FitRes] = future.result()
+    result: Tuple[ClientProxy, GetParametersRes] = future.result()
     _, res = result
 
     # Check result status code

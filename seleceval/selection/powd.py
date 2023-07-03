@@ -4,7 +4,7 @@ from random import choices
 from flwr.server.server import evaluate_client
 
 import random
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 
 import flwr as fl
 from flwr.common import FitIns, GetPropertiesIns, GetPropertiesRes, EvaluateIns, Parameters, EvaluateRes
@@ -28,26 +28,17 @@ class PowD(ClientSelection):
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:
+        """
+        Select clients based on the Pow-D algorithm
+        :param client_manager:  The client manager
+        :param parameters: The current parameters
+        :param server_round: The current server round
+        :return: Selected clients
+        """
         config = {}
         fit_ins = FitIns(parameters, config)
-        all_clients = client_manager.all()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
-            submitted_fs = {
-                executor.submit(get_client_properties, all_clients[i], GetPropertiesIns({}), 5)
-                for i in all_clients
-            }
-            finished_fs, _ = concurrent.futures.wait(
-                fs=submitted_fs,
-                timeout=None,  # Handled in the respective communication stack
-            )
-
-        # Gather results
-        results: List[Tuple[ClientProxy, GetPropertiesRes]] = []
-        failures: List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]] = []
-        for future in finished_fs:
-            _handle_finished_future_after_parameter_get(
-                future=future, results=results, failures=failures
-            )
+        all_clients: dict[str, ClientProxy] = client_manager.all()
+        results, failures = self.run_task_get_properties(list(all_clients.values()))
 
         possible_clients = []
         total_data_size = 0
@@ -65,26 +56,7 @@ class PowD(ClientSelection):
                                             lambda x: x['sample_size'], possible_clients
                                         )), k=int(self.c_param * 2 * len(possible_clients)))
 
-        print(possible_clients)
-        print(clients_for_evaluation)
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
-            submitted_fs = {
-                executor.submit(evaluate_client, c['proxy'], EvaluateIns(parameters, {}), 5)
-                for c in clients_for_evaluation
-            }
-            finished_fs, _ = concurrent.futures.wait(
-                fs=submitted_fs,
-                timeout=None,  # Handled in the respective communication stack
-            )
-
-        # Gather results
-        results: List[Tuple[ClientProxy, EvaluateRes]] = []
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
-        for future in finished_fs:
-            _handle_finished_future_after_evaluate(
-                future=future, results=results, failures=failures
-            )
+        results, failures = self.run_task_evaluate(clients_for_evaluation, parameters)
 
         possible_clients = []
         total_data_size = 0
@@ -104,3 +76,6 @@ class PowD(ClientSelection):
             total_client_count -= 1
 
         return [(client, fit_ins) for client in clients]
+
+
+

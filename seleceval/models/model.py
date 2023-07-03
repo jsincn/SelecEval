@@ -1,5 +1,5 @@
 from ctypes import Union
-from typing import Tuple
+from typing import Tuple, Dict
 
 import torch
 from abc import ABC, abstractmethod
@@ -14,7 +14,7 @@ class Model(ABC):
         self.DEVICE = device
 
     @abstractmethod
-    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False):
+    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
         pass
 
 

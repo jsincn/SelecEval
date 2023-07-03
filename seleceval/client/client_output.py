@@ -13,12 +13,20 @@ class ClientOutput:
         self.output_dict = {'server_round': server_round, 'client_name': state.get('client_name'), 'state': state.get_all()}
 
     def set(self, key: Union[str, int], value: Any):
+        """
+        Set output key to values
+        :param key:
+        :param value:
+        """
         self.output_dict[key] = value
 
     def get(self, key: Union[str, int]) -> Any:
         return self.output_dict['key']
 
     def write(self):
+        """
+        Write output
+        """
         self.output_dict['current_timestamp'] = str(datetime.datetime.now())
         with open(self.file, "a") as g:
             fcntl.flock(g, fcntl.LOCK_EX)

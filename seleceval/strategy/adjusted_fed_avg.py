@@ -4,6 +4,7 @@ import flwr as fl
 import numpy as np
 import torch
 from flwr.common import FitRes, Scalar, Parameters
+from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
 from ..selection.client_selection import ClientSelection
@@ -25,7 +26,14 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         self.net = net
         self.config = config
 
-    def configure_fit(self, server_round, parameters, client_manager):
+    def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager):
+        """
+        Configure the fit process
+        :param server_round:
+        :param parameters:
+        :param client_manager:
+        :return:
+        """
         return self.client_selector.select_clients(client_manager, parameters, server_round)
 
     def aggregate_fit(
@@ -34,6 +42,13 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
             results: List[Tuple[ClientProxy, fl.common.FitRes]],
             failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """
+        Aggregate model weights using weighted average and store checkpoint, update state, set current round
+        :param server_round:
+        :param results:
+        :param failures:
+        :return:
+        """
         # Update client state
         run_state_update(self.config)
         self.config.set_current_round(server_round)
@@ -44,9 +59,6 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
             if i[1].num_examples == -1:
                 results.remove(i)
                 failures.append(i)
-
-        print(len(results))
-        print(len(failures))
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
