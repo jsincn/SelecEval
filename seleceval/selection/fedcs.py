@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple
 
 import flwr as fl
@@ -9,10 +10,15 @@ from ..util import Config
 
 
 class FedCS(ClientSelection):
-    def __init__(self, model_size: int, config: Config):
+    def __init__(self, model_size: float, config: Config):
         super().__init__(config)
         self.model_size = model_size
+        print(f"Model Size: {self.model_size}")
         self.timeout = config.initial_config['timeout']
+        self.pre_param = config.initial_config['algorithm_config']['pre_sampling']
+        self.fixed_client_no = config.initial_config['algorithm_config']['fixed_client_no']
+        if self.fixed_client_no:
+            self.c_clients = config.initial_config['algorithm_config']['c']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:
@@ -22,12 +28,16 @@ class FedCS(ClientSelection):
         :param parameters: The current parameters
         :param server_round: The current server round
         :return: Selected clients
-        TODO: Implement Pre-Selection and Method for setting the number of clients
         """
         config = {}
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
-        results, failures = self.run_task_get_properties(list(all_clients.values()))
+        if self.pre_param > 0:
+            client_list = random.choices(list(all_clients.values()), k=int(self.pre_param * len(all_clients)))
+        else:
+            client_list = list(all_clients.values())
+
+        results, failures = self.run_task_get_properties(client_list)
 
         # Client Selection happens here:
         clients = []
@@ -47,10 +57,16 @@ class FedCS(ClientSelection):
                               key=lambda x: self._calc_update_upload(x, clients, theta))
 
             possible_clients.remove(best_client)
+            print(best_client)
+            print("Theta: " + str(theta))
             theta_d = theta + self._calculate_tUL_k(best_client) + max(0, self._calculate_tUD_k(best_client) - theta)
+            print("tULx: ", self._calculate_tUL_k(best_client))
+            print("tUDx: ", self._calculate_tUD_k(best_client))
+            print("Theta_d: " + str(theta_d))
             t = self._calculate_Td_s(clients + [best_client]) + theta_d
-            print(self.timeout)
-            if t < self.timeout:
+            print("T: " + str(t))
+            # Select either based on the timeout or the fixed number of clients
+            if t < self.timeout or (self.fixed_client_no and len(clients) < int(self.c_clients*len(all_clients))):
                 theta = theta_d
                 clients.append(best_client)
             else:
@@ -72,9 +88,8 @@ class FedCS(ClientSelection):
         return client['expected_execution_time']
 
     def _calc_update_upload(self, client, clients, theta):
-        # TODO: Check if this is correct
         score = self._calculate_Td_s(clients + [client])
-        score = self._calculate_Td_s(clients)
+        score = score - self._calculate_Td_s(clients)
         score += self._calculate_tUL_k(client)
         score += max(0, self._calculate_tUD_k(client) - theta)
         score += 1E-10

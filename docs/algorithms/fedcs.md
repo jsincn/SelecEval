@@ -12,8 +12,8 @@ The algorithm may be selected by choosing `FedCS` as the algorithm in the config
 
 It requires the following parameters:
 
-| Key             | Description                                                                                           | Example Value     |
-|-----------------|-------------------------------------------------------------------------------------------------------|-------------------|
-| pre_sampling    | Describes the percentage of the total available client to select for participation in client selection | 0.2               |
-| fixed_client_no | Whether the client number should be fixed or not (useful for comparison)                              | `True` or `False` |
-| c_clients       | Describes the share of all clients to participate in the round (only if `fixed_client_no` is `True`)  | 0.2               |
+| Key             | Description                                                                                                                               | Example Value     |
+|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
+| pre_sampling    | Describes the percentage of the total available client to select for participation in client selection. If set to 0 disable preselection. | 0.2               |
+| fixed_client_no | Whether the client number should be fixed or not (useful for comparison)                                                                  | `True` or `False` |
+| c_clients       | Describes the share of all clients to participate in the round (only if `fixed_client_no` is `True`)                                      | 0.2               |

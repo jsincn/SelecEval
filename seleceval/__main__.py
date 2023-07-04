@@ -5,7 +5,7 @@ import flwr as fl
 import torch
 
 from .selection.powd import PowD
-from .selection.random import RandomSelection
+from .selection.random_selection import RandomSelection
 from .validation.validation import Validation
 from .client.client import Client
 from .client.client_fn import ClientFunction
@@ -34,7 +34,7 @@ def main():
     print("Simulating with ", config.initial_config['algorithm'], " algorithm")
     if config.initial_config['algorithm'] == 'FedCS':
         client_selector = FedCS(model.get_size(), config)
-    if config.initial_config['algorithm'] == 'PowD':
+    elif config.initial_config['algorithm'] == 'PowD':
         client_selector = PowD(config)
     elif config.initial_config['algorithm'] == 'random':
         client_selector = RandomSelection(config)

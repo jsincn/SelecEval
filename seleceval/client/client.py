@@ -1,5 +1,6 @@
 import time
 from random import random
+from typing import Dict
 
 import flwr as fl
 import flwr.common
@@ -26,7 +27,7 @@ class Client(fl.client.NumPyClient):
         self.config = config
         self.net = self.model.get_net()
 
-    def fit(self, parameters: list[ndarray], config: flwr.common.FitIns) -> tuple[list[ndarray], int, dict]:
+    def fit(self, parameters: list[ndarray], config: flwr.common.FitIns) -> tuple[list[ndarray], int, Dict]:
         """
         Fit the model, write output and return parameters and metrics
         :param parameters: The current parameters of the global model
