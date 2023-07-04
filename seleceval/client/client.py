@@ -1,6 +1,6 @@
 import time
 from random import random
-from typing import Dict
+from typing import Dict, List, Tuple
 
 import flwr as fl
 import flwr.common
@@ -27,7 +27,7 @@ class Client(fl.client.NumPyClient):
         self.config = config
         self.net = self.model.get_net()
 
-    def fit(self, parameters: list[ndarray], config: flwr.common.FitIns) -> tuple[list[ndarray], int, Dict]:
+    def fit(self, parameters: List[ndarray], config: flwr.common.FitIns) -> Tuple[List[ndarray], int, Dict]:
         """
         Fit the model, write output and return parameters and metrics
         :param parameters: The current parameters of the global model
@@ -86,10 +86,10 @@ class Client(fl.client.NumPyClient):
                                          self.config.initial_config['verbose'])
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
-    def get_parameters(self, config: GetParametersIns) -> list[ndarray]:
+    def get_parameters(self, config: GetParametersIns) -> List[ndarray]:
         return get_parameters(self.net)
 
-    def get_properties(self, config=None) -> dict:
+    def get_properties(self, config=None) -> Dict:
         """
         Return properties of the current client
         :param config: Config for getting the properties
