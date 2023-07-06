@@ -53,7 +53,7 @@ def start_working_state(config: Config):
     state_df.to_csv(config.attributes['working_state_file'], index=False)
 
 
-def run_state_update(config: Config, round: int):
+def run_state_update(config: Config, server_round: int):
     """
     Runs the state update for the clients
     :param config: config object describing the simulation
@@ -64,4 +64,4 @@ def run_state_update(config: Config, round: int):
     state_df['i_performance_factor'] = state_df['i_performance_factor'].transform(
         lambda x: round(random.gauss(1, 0.2), 2))
     state_df.to_csv(config.attributes['working_state_file'], index=False)
-    state_df.to_csv(config.attributes['state_output_prefix'] + str(round) + '.csv', index=False)
+    state_df.to_csv(config.attributes['state_output_prefix'] + str(server_round) + '.csv', index=False)
