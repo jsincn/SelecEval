@@ -78,6 +78,6 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
 
             # Save the model
             torch.save(self.net.state_dict(),
-                       f"{self.config.initial_config['model_output_prefix']}{server_round}.pth")
+                       f"{self.config.attributes['model_output_prefix']}{server_round}.pth")
 
         return aggregated_parameters, aggregated_metrics

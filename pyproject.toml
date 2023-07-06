@@ -12,6 +12,8 @@ pandas = "^2.0.2"
 randomname = "^0.2.1"
 jupyter = "^1.0.0"
 matplotlib = "^3.7.1"
+seaborn = "^0.12.2"
+cerberus = "^1.3.4"
 
 
 [build-system]
