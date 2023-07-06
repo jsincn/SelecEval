@@ -12,7 +12,7 @@ from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
 from .models.resnet18 import Resnet18
 from .selection.fedcs import FedCS
-from .simulation.state import generate_initial_state
+from .simulation.state import generate_initial_state, get_initial_state, start_working_state
 from .strategy.adjusted_fed_avg import AdjustedFedAvg
 from .util import Arguments, Config
 
@@ -24,7 +24,10 @@ def main():
     DEVICE = torch.device(config.initial_config['device'])
     NUM_CLIENTS = config.initial_config['no_clients']
 
-    generate_initial_state(NUM_CLIENTS, config)
+    if config.initial_config['generate_clients']:
+        generate_initial_state(NUM_CLIENTS, config)
+    else:
+        get_initial_state(NUM_CLIENTS, config)
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
@@ -35,6 +38,7 @@ def main():
         client_resources = {"num_cpus": 1}
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     for algorithm in config.initial_config['algorithm']:
+        start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
         client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
         config.generate_paths(algorithm, config.initial_config['dataset'], config.initial_config['no_clients'])

@@ -22,7 +22,7 @@ class Client(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.valloader = valloader
         self.cid = cid
-        self.state = ClientState(cid, config.initial_config['client_state_file'])
+        self.state = ClientState(cid, config.attributes['working_state_file'])
         self.output = ClientOutput(self.state, config.get_current_round(), config.attributes['output_path'])
         self.config = config
         self.net = self.model.get_net()

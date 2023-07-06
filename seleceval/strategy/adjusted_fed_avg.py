@@ -50,7 +50,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         :return:
         """
         # Update client state
-        run_state_update(self.config)
+        run_state_update(self.config, server_round)
         self.config.set_current_round(server_round)
 
         # Filter results with negative sample size:

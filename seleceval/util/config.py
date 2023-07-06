@@ -38,7 +38,8 @@ class Config:
             if not v.validate(config_dict):
                 raise ValueError(v.errors)
             self.initial_config = config_dict
-        self.attributes = {}
+        self.attributes = {'input_state_file': self.initial_config['output_dir'] + '/input_state.csv',
+                           'working_state_file': self.initial_config['output_dir'] + '/working_state.csv'}
         # If necessary create output dir + subdirs
         if not os.path.isdir(self.initial_config['output_dir']):
             os.mkdir(path=self.initial_config['output_dir'])
@@ -48,6 +49,8 @@ class Config:
             os.mkdir(path=self.initial_config['output_dir'] + '/model_output')
         if not os.path.isdir(self.initial_config['output_dir'] + '/validation'):
             os.mkdir(path=self.initial_config['output_dir'] + '/validation')
+        if not os.path.isdir(self.initial_config['output_dir'] + '/state'):
+            os.mkdir(path=self.initial_config['output_dir'] + '/state')
 
     def set_current_round(self, i: int):
         self.current_round = i
@@ -60,4 +63,7 @@ class Config:
                                          algorithm + '_' + dataset + '_' + str(no_clients) + '.json'
         self.attributes['model_output_prefix'] = self.initial_config[
                                                      'output_dir'] + '/model_output/' + 'model_output_' + \
+                                                 algorithm + '_' + dataset + '_' + str(no_clients) + '_'
+        self.attributes['state_output_prefix'] = self.initial_config[
+                                                     'output_dir'] + '/state/' + 'state_' + \
                                                  algorithm + '_' + dataset + '_' + str(no_clients) + '_'
