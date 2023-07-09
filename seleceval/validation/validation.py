@@ -29,7 +29,7 @@ class Validation:
             print("Loading net from ", file)
             state_dict = torch.load(file)
             model.get_net().load_state_dict(state_dict)
-            state_df = pd.read_csv(self.config.initial_config['client_state_file'])
+            state_df = pd.read_csv(self.config.attributes['input_state_file'], index_col=0)
             states = state_df.to_dict(orient='records')
             for c in range(self.config.initial_config['no_clients']):
                 state = states[c]

@@ -31,12 +31,33 @@ def main():
 
     datahandler = Cifar10DataHandler(NUM_CLIENTS)
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
+    trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
+
+    if not vars(args.get_args())['evaluate_only']:
+        print("Running training simulation")
+        run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders)
+
+    print("Running evaluation")
+    run_evaluation(config, datahandler, trainloaders, valloaders)
+
+
+def run_evaluation(config, datahandler, trainloaders, valloaders):
+    # Evaluation generation
+    if config.initial_config['enable_validation']:
+        for algorithm in config.initial_config['algorithm']:
+            print("Generating validation data for ", algorithm)
+            current_run = {'algorithm': algorithm, 'dataset': config.initial_config['dataset'],
+                           'no_clients': config.initial_config['no_clients']}
+            val = Validation(config, trainloaders, valloaders, len(datahandler.get_classes()), current_run)
+            val.evaluate()
+
+
+def run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders):
     if DEVICE.type == "cuda":
         client_resources = {"num_gpus": 0.05,
                             "num_cpus": 1}
     else:
         client_resources = {"num_cpus": 1}
-    trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
     for algorithm in config.initial_config['algorithm']:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
@@ -68,15 +89,6 @@ def main():
                 "include_dashboard": True
             }
         )
-
-    # Evaluation generation
-    if config.initial_config['enable_validation']:
-        for algorithm in config.initial_config['algorithm']:
-            print("Generating validation data for ", algorithm)
-            current_run = {'algorithm': algorithm, 'dataset': config.initial_config['dataset'],
-                           'no_clients': config.initial_config['no_clients']}
-            val = Validation(config, trainloaders, valloaders, len(datahandler.get_classes()), current_run)
-            val.evaluate()
 
 
 if __name__ == "__main__":
