@@ -11,25 +11,39 @@ class Config:
             'no_rounds': {'type': 'integer', 'min': 1},
             'algorithm': {'type': 'list', 'allowed': ['FedCS', 'PowD', 'random']},
             'dataset': {'type': 'string', 'allowed': ['cifar10', 'imagenet']},
-            'algorithm_config': {'type': 'dict', 'schema': {
-                'c': {'type': 'float', 'min': 0, 'max': 1},
-                'fixed_client_no': {'type': 'boolean'},
-                'pre_sampling': {'type': 'float', 'min': 0, 'max': 1}
+            'algorithm_config': {'type': 'dict', 'default': {}, 'schema': {
+                'c': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.2},
+                'fixed_client_no': {'type': 'boolean', 'default': True},
+                'pre_sampling': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.4},
             }},
-            'no_epochs': {'type': 'integer', 'min': 1},
+            'data_config': {'type': 'dict', 'default': {}, 'schema': {
+                'data_label_distribution_skew': {'type': 'string', 'allowed': ['none', 'quantity', 'dirichlet'], 'default': 'none'},
+                'data_label_class_quantity': {'type': 'integer', 'min': 1, 'default': 2},
+                'data_label_distribution_parameter': {'type': 'float', 'min': 0, 'default': 0.5},
+                'data_feature_distortion': {'type': 'string', 'allowed': ['none', 'gaussian'], 'default': 'none'},
+                'data_feature_distortion_parameter_mu': {'type': 'float', 'min': 0, 'default': 0},
+                'data_feature_distortion_parameter_deviation': {'type': 'float', 'min': 0, 'default': 1},
+                'data_quantity_skew': {'type': 'string', 'allowed': ['none', 'dirichlet'], 'default': 'none'},
+                'data_quantity_base_parameter': {'type': 'float', 'min': 0.001, 'max': 1, 'default': 0.01},
+                'data_quantity_skew_parameter': {'type': 'float', 'min': 0, 'default': 0.5},
+                'data_quantity_min_parameter': {'type': 'integer', 'min': 0, 'default': 10},
+            }},
+            'no_epochs': {'type': 'integer', 'min': 1, 'default': 1},
             'no_clients': {'type': 'integer', 'min': 1},
-            'device': {'type': 'string', 'allowed': ['cuda', 'cpu']},
-            'verbose': {'type': 'boolean'},
+            'batch_size': {'type': 'integer', 'min': 1, 'default': 32},
+            'device': {'type': 'string', 'allowed': ['cuda', 'cpu'], 'default': 'cpu'},
+            'verbose': {'type': 'boolean', 'default': True},
             'timeout': {'type': 'integer', 'min': 1},
-            'generate_clients': {'type': 'boolean'},
+            'generate_clients': {'type': 'boolean', 'default': True},
             'client_state_file': {'type': 'string'},
             'output_dir': {'type': 'string'},
             'client_configuration_file': {'type': 'string'},
-            'enable_validation': {'type': 'boolean'},
-            'validation_config': {'type': 'dict', 'schema': {
-                'device': {'type': 'string', 'allowed': ['cuda', 'cpu']}
+            'validation_config': {'type': 'dict', 'default': {}, 'schema': {
+                'enable_validation': {'type': 'boolean', 'default': True},
+                'enable_data_distribution': {'type': 'boolean', 'default': True},
+                'device': {'type': 'string', 'allowed': ['cuda', 'cpu'], 'default': 'cpu'},
             }},
-            'max_workers': {'type': 'integer', 'min': 1}
+            'max_workers': {'type': 'integer', 'min': 1, 'default': 32}
         }
         v = Validator(schema, require_all=True)
         self.current_round = 0
@@ -37,7 +51,9 @@ class Config:
             config_dict = json.load(json_file)
             if not v.validate(config_dict):
                 raise ValueError(v.errors)
-            self.initial_config = config_dict
+            print(v.normalized(config_dict))
+            self.initial_config = v.normalized(config_dict)
+
         self.attributes = {'input_state_file': self.initial_config['output_dir'] + '/input_state.csv',
                            'working_state_file': self.initial_config['output_dir'] + '/working_state.csv'}
         # If necessary create output dir + subdirs
@@ -51,6 +67,8 @@ class Config:
             os.mkdir(path=self.initial_config['output_dir'] + '/validation')
         if not os.path.isdir(self.initial_config['output_dir'] + '/state'):
             os.mkdir(path=self.initial_config['output_dir'] + '/state')
+        if not os.path.isdir(self.initial_config['output_dir'] + '/data_distribution'):
+            os.mkdir(path=self.initial_config['output_dir'] + '/data_distribution')
 
     def set_current_round(self, i: int):
         self.current_round = i

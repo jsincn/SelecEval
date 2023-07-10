@@ -20,26 +20,9 @@ class Cifar10DataHandler(DataHandler):
         trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
         testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
 
-        # Split training set into 10 partitions to simulate the individual dataset
-        partition_size = len(trainset) // self.NUM_CLIENTS
-        dataset_size = len(trainset)
-        dataset_indices = list(range(dataset_size))
-        datasets = []
-        for i in range(self.NUM_CLIENTS):
-            np.random.shuffle(dataset_indices)
-            datasets.append(Subset(trainset, dataset_indices[:10000]))
-        # Split each partition into train/val and create DataLoader
-        trainloaders = []
-        valloaders = []
-        for ds in datasets:
-            len_val = len(ds) // 10  # 10 % validation set
-            len_train = len(ds) - len_val
-            lengths = [len_train, len_val]
-            ds_train, ds_val = random_split(ds, lengths, torch.Generator().manual_seed(42))
-            trainloaders.append(DataLoader(ds_train, batch_size=self.BATCH_SIZE, shuffle=True))
-            valloaders.append(DataLoader(ds_val, batch_size=self.BATCH_SIZE))
-        testloader = DataLoader(testset, batch_size=self.BATCH_SIZE)
+        testloader, trainloaders, valloaders = self.split_and_transform_data(testset, trainset)
         return trainloaders, valloaders, testloader
+
 
     def get_classes(self):
         return (

@@ -1,9 +1,11 @@
 import glob
 import os
+from collections import Counter
 
 import flwr as fl
 import torch
 
+from .validation.datadistribution import DataDistribution
 from .selection.powd import PowD
 from .selection.random_selection import RandomSelection
 from .validation.validation import Validation
@@ -29,7 +31,7 @@ def main():
     else:
         get_initial_state(NUM_CLIENTS, config)
 
-    datahandler = Cifar10DataHandler(NUM_CLIENTS)
+    datahandler = Cifar10DataHandler(config)
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
 
@@ -42,17 +44,40 @@ def main():
 
 
 def run_evaluation(config, datahandler, trainloaders, valloaders):
+    """
+    Evaluates the performance of the algorithms
+    :param config:
+    :param datahandler:
+    :param trainloaders:
+    :param valloaders:
+    """
+    # Data distribution generation
+    if config.initial_config['validation_config']['enable_data_distribution']:
+        print("Generating data distribution")
+        current_run = {'dataset': config.initial_config['dataset'], 'no_clients': config.initial_config['no_clients']}
+        d = DataDistribution(config, trainloaders, valloaders, datahandler, current_run)
+        d.evaluate()
+
     # Evaluation generation
-    if config.initial_config['enable_validation']:
+    if config.initial_config['validation_config']['enable_validation']:
         for algorithm in config.initial_config['algorithm']:
             print("Generating validation data for ", algorithm)
             current_run = {'algorithm': algorithm, 'dataset': config.initial_config['dataset'],
                            'no_clients': config.initial_config['no_clients']}
-            val = Validation(config, trainloaders, valloaders, len(datahandler.get_classes()), current_run)
+            val = Validation(config, trainloaders, valloaders, datahandler, current_run)
             val.evaluate()
 
 
 def run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders):
+    """
+    Runs the training simulation
+    :param DEVICE:
+    :param NUM_CLIENTS:
+    :param config:
+    :param datahandler:
+    :param trainloaders:
+    :param valloaders:
+    """
     if DEVICE.type == "cuda":
         client_resources = {"num_gpus": 0.05,
                             "num_cpus": 1}

@@ -1,18 +1,22 @@
 import pandas as pd
 import torch
 
+from .evaluator import Evaluator
+from ..datahandler.datahandler import DataHandler
 from ..models.resnet18 import Resnet18
 from ..util import Config
 
 
-class Validation:
+class Validation(Evaluator):
 
-    def __init__(self, config: Config, trainloaders: list, valloaders: list, no_classes: int, current_run: dict):
+    def __init__(self, config: Config, trainloaders: list, valloaders: list, data_handler: DataHandler,
+                 current_run: dict):
+        super().__init__(config, trainloaders, valloaders, data_handler, current_run)
         self.config = config
         self.device = self.config.initial_config['validation_config']['device']
-        self.trainloader = trainloaders
+        self.trainloaders = trainloaders
         self.valloaders = valloaders
-        self.no_classes = no_classes
+        self.no_classes = len(data_handler.get_classes())
         self.output_path = self.config.initial_config['output_dir'] + '/validation/' + 'validation_' +\
                            current_run['algorithm'] + '_' + current_run['dataset'] + '_' +\
                            str(current_run['no_clients']) + '.csv'
