@@ -57,7 +57,7 @@ class PowD(ClientSelection):
                 'loss': evaluate_res.loss
             })
 
-        total_client_count = max(self.c_param * len(possible_clients), 1)
+        total_client_count = max(self.c_param * len(all_clients), 1)
         clients = []
         while total_client_count > 0:
             best_client = max(possible_clients,
