@@ -9,7 +9,7 @@ class Config:
     def __init__(self, file_name: str):
         schema = {
             'no_rounds': {'type': 'integer', 'min': 1},
-            'algorithm': {'type': 'list', 'allowed': ['FedCS', 'PowD', 'random']},
+            'algorithm': {'type': 'list', 'allowed': ['FedCS', 'PowD', 'random', 'CEP']},
             'dataset': {'type': 'string', 'allowed': ['cifar10', 'imagenet']},
             'algorithm_config': {'type': 'dict', 'default': {}, 'schema': {
                 'c': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.2},
