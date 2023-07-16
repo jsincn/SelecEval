@@ -73,7 +73,7 @@ class CEP(ClientSelection):
                 ddf = df[df['client_name'] == c['client_name']]
                 if ddf['status'].to_list()[-1] == 'success':
                     self.client_scores[c['client_name']] += 10
-                elif len(set(ddf[ddf['round'] >= server_round-5]['status'].to_list())) == 1:
+                elif len(set(ddf[ddf['server_round'] >= server_round-5]['status'].to_list())) == 1:
                     self.client_scores[c['client_name']] -= 20
                 else:
                     self.client_scores[c['client_name']] -= 5
