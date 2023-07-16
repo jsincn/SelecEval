@@ -99,7 +99,7 @@ class Client(fl.client.NumPyClient):
                 "network_bandwidth": self.state.get('network_bandwidth'),
                 "client_name": self.state.get('client_name'),
                 "expected_execution_time": self.state.get('expected_execution_time'),
-                "sample_size": 500
+                "sample_size": len(self.trainloader)
                 }
 
     def _calculate_timeout(self) -> bool:
