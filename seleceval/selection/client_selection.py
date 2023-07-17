@@ -67,7 +67,7 @@ class ClientSelection(ABC):
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config.initial_config['max_workers']) as executor:
             submitted_fs = {
-                executor.submit(evaluate_client, c, EvaluateIns(parameters, {}), 5)
+                executor.submit(evaluate_client, c, EvaluateIns(parameters, {}), 200)
                 for c in clients
             }
             finished_fs, _ = concurrent.futures.wait(
