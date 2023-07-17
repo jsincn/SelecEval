@@ -49,7 +49,7 @@ class CEP(ClientSelection):
         clients = []
         i = 0
         print(self.config.initial_config['algorithm_config']['c'] * len(all_clients))
-        while len(clients) < (self.config.initial_config['algorithm_config']['c'] * len(all_clients)):
+        while len(clients) < (self.config.initial_config['algorithm_config']['c'] * len(all_clients)) and i < len(possible_clients):
             print("trying ")
             c = possible_clients[i]
             if c['expected_execution_time'] <= self.config.initial_config['timeout']:

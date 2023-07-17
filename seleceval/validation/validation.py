@@ -37,8 +37,9 @@ class Validation(Evaluator):
             states = state_df.to_dict(orient='records')
             for c in range(self.config.initial_config['no_clients']):
                 state = states[c]
-                loss, acc = model.test(self.valloaders[c], state['client_name'], verbose=False)
-                output = {'round': validate_round, 'client': state['client_name'], 'loss': loss, 'acc': acc}
+                loss, acc, total, correct = model.test(self.valloaders[c], state['client_name'], verbose=False)
+                output = {'round': validate_round, 'client': state['client_name'], 'loss': loss, 'acc': acc, 'total': total,
+                          'correct': correct}
                 output_dfs.append(pd.DataFrame(output, index=[0]))
             print("Validation round ", validate_round, " done")
 

@@ -82,9 +82,9 @@ class Client(fl.client.NumPyClient):
         :return: loss, number of samples and metrics
         """
         set_parameters(self.net, parameters)
-        loss, accuracy = self.model.test(self.valloader, self.state.get('client_name'),
+        loss, accuracy, total, correct = self.model.test(self.valloader, self.state.get('client_name'),
                                          self.config.initial_config['verbose'])
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+        return float(loss), len(self.valloader), {"accuracy": float(accuracy), "total": total, "correct": correct}
 
     def get_parameters(self, config: GetParametersIns) -> List[ndarray]:
         return get_parameters(self.net)

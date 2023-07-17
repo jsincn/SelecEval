@@ -73,7 +73,7 @@ class Resnet18(Model):
                 print(f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}")
         return output
 
-    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float]:
+    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> tuple[float, float, int, int]:
         loss_function = torch.nn.CrossEntropyLoss()
         correct, total, avg_loss = 0, 0, 0.0
         total_loss = 0.0
@@ -90,7 +90,7 @@ class Resnet18(Model):
         accuracy = correct / total
         if verbose:
             print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")
-        return avg_loss, accuracy
+        return avg_loss, accuracy, correct, total
 
 
 class ResidualStack(nn.Module):
