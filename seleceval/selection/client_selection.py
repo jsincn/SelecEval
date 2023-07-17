@@ -65,6 +65,7 @@ class ClientSelection(ABC):
         :param parameters: Current global network parameters
         :return: successful and failed executions
         """
+        print("Running evaluate task")
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config.initial_config['max_workers']) as executor:
             submitted_fs = {
                 executor.submit(evaluate_client, c, EvaluateIns(parameters, {}), 200)
