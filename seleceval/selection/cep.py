@@ -71,10 +71,21 @@ class CEP(ClientSelection):
             if len(df[df['client_name'] == c['client_name']]) > 0:
                 print(df[df['client_name'] == c['client_name']])
                 ddf = df[df['client_name'] == c['client_name']]
+                # Increase by 5 every round
+                self.client_scores[c['client_name']] += 5
                 if ddf['status'].to_list()[-1] == 'success':
-                    self.client_scores[c['client_name']] += 10
-                elif len(set(ddf[ddf['server_round'] >= server_round-5]['status'].to_list())) == 1:
-                    self.client_scores[c['client_name']] -= 20
-                else:
+                    # Client participated in last round and was successful
+                    # Add Ka = 5 + Km = 10
+                    self.client_scores[c['client_name']] += 15
+                elif ddf['status'].to_list()[-1] == 'failure':
+                    # Client participated in last round and failed
+                    # Client failed the task subtract Ka = 5
                     self.client_scores[c['client_name']] -= 5
+                    if len(set(ddf[ddf['server_round'] >= server_round-5]['status'].to_list())) == 1 \
+                            and len(ddf[ddf['server_round'] >= server_round-5].index) >= 5:
+                        # Client failed in last 5 consecutive rounds
+                        self.client_scores[c['client_name']] -= 20
+                    else:
+                        # Client failed in last round
+                        self.client_scores[c['client_name']] -= 5
 
