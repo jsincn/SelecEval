@@ -9,12 +9,15 @@ class Config:
     def __init__(self, file_name: str):
         schema = {
             'no_rounds': {'type': 'integer', 'min': 1},
-            'algorithm': {'type': 'list', 'allowed': ['FedCS', 'PowD', 'random', 'CEP']},
+            'algorithm': {'type': 'list', 'allowed': ['FedCS', 'PowD', 'random', 'CEP', 'ActiveFL']},
             'dataset': {'type': 'string', 'allowed': ['cifar10', 'imagenet']},
             'algorithm_config': {'type': 'dict', 'default': {}, 'schema': {
                 'c': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.2},
                 'fixed_client_no': {'type': 'boolean', 'default': True},
                 'pre_sampling': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.4},
+                'alpha1': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.75},
+                'alpha2': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.01},
+                'alpha3': {'type': 'float', 'min': 0, 'max': 1, 'default': 0.1}
             }},
             'data_config': {'type': 'dict', 'default': {}, 'schema': {
                 'data_label_distribution_skew': {'type': 'string', 'allowed': ['none', 'quantity', 'dirichlet'], 'default': 'none'},
@@ -46,7 +49,7 @@ class Config:
             'max_workers': {'type': 'integer', 'min': 1, 'default': 32}
         }
         v = Validator(schema, require_all=True)
-        self.current_round = 0
+        self.current_round = 1
         with open(file_name) as json_file:
             config_dict = json.load(json_file)
             if not v.validate(config_dict):

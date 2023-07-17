@@ -5,6 +5,7 @@ from collections import Counter
 import flwr as fl
 import torch
 
+from .selection.active import ActiveFL
 from .selection.cep import CEP
 from .validation.datadistribution import DataDistribution
 from .selection.powd import PowD
@@ -96,6 +97,8 @@ def run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloade
             client_selector = PowD(config)
         elif algorithm == 'CEP':
             client_selector = CEP(config)
+        elif algorithm == 'ActiveFL':
+            client_selector = ActiveFL(config)
         elif algorithm == 'random':
             client_selector = RandomSelection(config)
         else:
