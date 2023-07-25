@@ -14,9 +14,10 @@ from ..util import Config
 
 class ClientSelection(ABC):
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, model_size: int):
         print("Starting Client Selection")
         self.config = config
+        self.model_size = model_size
         pass
 
     @abstractmethod

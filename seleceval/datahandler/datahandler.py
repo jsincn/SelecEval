@@ -1,3 +1,4 @@
+import ast
 import random
 from abc import ABC, abstractmethod
 import importlib
@@ -91,6 +92,7 @@ class DataHandler(ABC):
             data_set_ids.append(class_subsets)
             s_set = Subset(trainset, class_subsets)
             datasets.append(s_set)
+            print(len(class_subsets))
             # np.random.shuffle(temp_set)
             # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
         data_distribution = pd.DataFrame()
@@ -106,10 +108,14 @@ class DataHandler(ABC):
         """
         datasets = []
         data_distribution = pd.read_csv(self.config.initial_config['data_distribution_file'])
+        print(data_distribution)
         if len(data_distribution) < self.NUM_CLIENTS:
             raise Exception("Not enough clients in state file")
-        data_set_ids = data_distribution['distr']
+        data_set_ids = list(data_distribution['distr'].apply(lambda x: np.fromstring(x[1:-1], dtype=int, sep=' ')))
+        print(data_set_ids)
         for i in range(self.NUM_CLIENTS):
+            print(len(data_set_ids[i]))
             s_set = Subset(trainset, data_set_ids[i])
             datasets.append(s_set)
+            print(len(s_set))
         return datasets

@@ -11,10 +11,10 @@ from ..util import Config
 
 class PowD(ClientSelection):
 
-    def __init__(self, config: Config):
-        super().__init__(config)
-        self.c_param = config.initial_config['algorithm_config']['c']
-        self.pre_param = config.initial_config['algorithm_config']['pre_sampling']
+    def __init__(self, config: Config, model_size: int):
+        super().__init__(config, model_size)
+        self.c_param = config.initial_config['algorithm_config']['PowD']['c']
+        self.pre_param = config.initial_config['algorithm_config']['PowD']['pre_sampling']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:

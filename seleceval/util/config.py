@@ -2,9 +2,9 @@ import json
 import os
 
 from cerberus import Validator
-
+from datetime import datetime
 from .config_parameters import *
-
+import shutil
 
 class Config:
     def __init__(self, file_name: str):
@@ -26,6 +26,7 @@ class Config:
                       'enable_data_distribution': {'type': 'boolean', 'default': True},
                       'device': {'type': 'string', 'allowed': ['cuda', 'cpu'], 'default': 'cpu'},
                   }}, 'max_workers': {'type': 'integer', 'min': 1, 'default': 32},
+                  'base_strategy': {'type': 'string', 'allowed': available_strategies, 'default': default_strategy},
                   'data_config': {'type': 'dict', 'default': {}, 'schema': {
                       'data_label_distribution_skew': {'type': 'string', 'allowed': data_label_distributions,
                                                        'default': default_label_distribution},
@@ -48,6 +49,8 @@ class Config:
             print(v.normalized(config_dict))
             self.initial_config = v.normalized(config_dict)
 
+        self.initial_config['output_dir'] = self.initial_config['output_dir'] + '_' + datetime.now().strftime(
+            "%Y%m%d_%H%M%S")
         self.attributes = {'input_state_file': self.initial_config['output_dir'] + '/input_state.csv',
                            'working_state_file': self.initial_config['output_dir'] + '/working_state.csv',
                            'data_distribution_output': self.initial_config['output_dir'] + '/data_distribution.csv'}

@@ -51,16 +51,16 @@ class ActiveFL(ClientSelection):
         # Client Selection happens here:
         possible_clients.sort(key=lambda x: x['valuation'])
         print(possible_clients)
-        alpha1_k = self.config.initial_config['algorithm_config']['alpha1'] * len(all_clients)
+        alpha1_k = self.config.initial_config['algorithm_config']['ActiveFL']['alpha1'] * len(all_clients)
         for i in range(len(possible_clients)):
             if i < int(alpha1_k):
                 possible_clients[i]['valuation'] = -1000000
             possible_clients[i]['p'] = exp(
-                self.config.initial_config['algorithm_config']['alpha2'] * possible_clients[i]['valuation'])
+                self.config.initial_config['algorithm_config']['ActiveFL']['alpha2'] * possible_clients[i]['valuation'])
 
         print(possible_clients)
-        clients_to_select = self.config.initial_config['algorithm_config']['c'] * len(all_clients)
-        alpha3 = self.config.initial_config['algorithm_config']['alpha3']
+        clients_to_select = self.config.initial_config['algorithm_config']['ActiveFL']['c'] * len(all_clients)
+        alpha3 = self.config.initial_config['algorithm_config']['ActiveFL']['alpha3']
         clients_1_set = random.choices(possible_clients,
                                        weights=list(map(
                                            lambda x: x['p'], possible_clients

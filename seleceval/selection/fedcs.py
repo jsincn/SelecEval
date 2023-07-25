@@ -10,15 +10,14 @@ from ..util import Config
 
 
 class FedCS(ClientSelection):
-    def __init__(self, model_size: float, config: Config):
-        super().__init__(config)
-        self.model_size = model_size
+    def __init__(self, config: Config, model_size: int):
+        super().__init__(config, model_size)
         print(f"Model Size: {self.model_size}")
         self.timeout = config.initial_config['timeout']
-        self.pre_param = config.initial_config['algorithm_config']['pre_sampling']
-        self.fixed_client_no = config.initial_config['algorithm_config']['fixed_client_no']
+        self.pre_param = config.initial_config['algorithm_config']['FedCS']['pre_sampling']
+        self.fixed_client_no = config.initial_config['algorithm_config']['FedCS']['fixed_client_no']
         if self.fixed_client_no:
-            self.c_clients = config.initial_config['algorithm_config']['c']
+            self.c_clients = config.initial_config['algorithm_config']['FedCS']['c']
 
     def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
                        server_round: int) -> List[Tuple[ClientProxy, FitIns]]:

@@ -5,6 +5,8 @@ from collections import Counter
 import flwr as fl
 import torch
 
+from seleceval.strategy import strategy_dict
+from .selection import algorithm_dict
 from .selection.active import ActiveFL
 from .selection.cep import CEP
 from .validation.datadistribution import DataDistribution
@@ -90,21 +92,11 @@ def run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloade
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
         client_fn = ClientFunction(Client, trainloaders, valloaders, model, config).client_fn
         config.generate_paths(algorithm, config.initial_config['dataset'], config.initial_config['no_clients'])
-        print("Simulating with ", algorithm, " algorithm")
-        if algorithm == 'FedCS':
-            client_selector = FedCS(model.get_size(), config)
-        elif algorithm == 'PowD':
-            client_selector = PowD(config)
-        elif algorithm == 'CEP':
-            client_selector = CEP(config)
-        elif algorithm == 'ActiveFL':
-            client_selector = ActiveFL(config)
-        elif algorithm == 'random':
-            client_selector = RandomSelection(config)
-        else:
-            client_selector = RandomSelection(config)
+        print("Simulating with", algorithm, "algorithm using", config.initial_config['dataset'], "dataset with",
+              config.initial_config['no_clients'], "clients and", config.initial_config['base_strategy'])
+        client_selector = algorithm_dict[algorithm](config, model.get_size())
 
-        strategy = AdjustedFedAvg(
+        strategy = strategy_dict[config.initial_config['base_strategy']](
             net=model.get_net(),
             client_selector=client_selector,
             config=config
