@@ -16,12 +16,12 @@ class DataDistribution(Evaluator):
         self.trainloaders = trainloaders
         self.valloaders = valloaders
         self.data_handler = data_handler
-        self.output_path_train = self.config.initial_config['output_dir'] + '/data_distribution/' + 'data_distribution_train' +\
+        self.output_path_train = self.config.initial_config['output_dir'] + '/data_distribution.md/' + 'data_distribution_train' +\
                            '_' + current_run['dataset'] + '_' +\
                            str(current_run['no_clients']) + '_' \
                                       + self.config.initial_config['data_config']['data_quantity_skew'] +\
                                       '_' + self.config.initial_config['data_config']['data_label_distribution_skew'] + '.csv'
-        self.output_path_validation = self.config.initial_config['output_dir'] + '/data_distribution/' + 'data_distribution_validation' +\
+        self.output_path_validation = self.config.initial_config['output_dir'] + '/data_distribution.md/' + 'data_distribution_validation' +\
                             '_' + current_run['dataset'] + '_' +\
                            str(current_run['no_clients']) + '_' \
                                       + self.config.initial_config['data_config']['data_quantity_skew'] +\

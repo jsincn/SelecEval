@@ -1,10 +1,13 @@
 import random
 from abc import ABC, abstractmethod
-
+import importlib
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Subset, random_split, DataLoader
 
+from .data_label_distribution import *
+from .data_quantity_distribution import *
 from ..util import Config
 
 
@@ -31,42 +34,44 @@ class DataHandler(ABC):
         :return:
         """
         # Define partition sizes
-        if self.config.initial_config['data_config']['data_quantity_skew'] == 'none':
-            # Uses a uniform distribution to split the data quantity
-            partition_sizes = np.repeat(len(trainset) * self.config.initial_config['data_config']['data_quantity_base_parameter'], self.NUM_CLIENTS)
+        # Standard import
+        if self.config.initial_config['distribute_data']:
+            # Get Quantity and Label distribution
+            c = data_quantity_distribution_dict[self.config.initial_config['data_config']['data_quantity_skew']]
+            quantity_distribution = c(self.config)
+            partition_sizes = quantity_distribution.get_partition_sizes(testset, trainset)
+            c = data_label_distribution_dict[self.config.initial_config['data_config']['data_label_distribution_skew']]
+            label_distribution = c(self.config, self.get_classes())
+            label_distribution = label_distribution.get_label_distribution()
+            # Distribute data
+            datasets = self.distribute_data(label_distribution, partition_sizes, trainset)
         else:
-            # Uses a dirichlet distribution to skew the data quantity
-            min_size = 0
-            partition_sizes = np.zeros(self.NUM_CLIENTS)
-            while min_size < self.config.initial_config['data_config']['data_quantity_min_parameter']:
-                partition_sizes = np.random.dirichlet(np.repeat(self.config.initial_config['data_config']['data_quantity_skew_parameter'], self.NUM_CLIENTS))
-                partition_sizes = partition_sizes/partition_sizes.sum()
-                min_size = np.min(partition_sizes * len(trainset))
-            print(partition_sizes)
-            partition_sizes = partition_sizes * len(trainset)
-            partition_sizes = partition_sizes.astype(int)
-        print(partition_sizes)
-        # Skew label distribution
-        if self.config.initial_config['data_config']['data_label_distribution_skew'] == 'none':
-            # Uses a uniform distribution to skew the label distribution
-            label_distribution = np.broadcast_to(np.repeat(1/len(self.get_classes()), len(self.get_classes())), (self.NUM_CLIENTS, len(self.get_classes())))
-        elif self.config.initial_config['data_config']['data_label_distribution_skew'] == 'dirichlet':
-            label_distribution = np.random.dirichlet(np.repeat(self.config.initial_config['data_config']['data_label_distribution_parameter'], self.NUM_CLIENTS * len(self.get_classes())))
-            label_distribution = label_distribution.reshape((self.NUM_CLIENTS, len(self.get_classes())))
-            label_distribution = label_distribution / label_distribution.sum(axis=1)[:, None]
-        else:
-            label_distribution = np.repeat(0.0, len(self.get_classes())*self.NUM_CLIENTS)
-            for i in range(self.NUM_CLIENTS):
-                classes = random.choices(range(len(self.get_classes())),
-                                         k=self.config.initial_config['data_config']['data_label_class_quantity'])
+            # Load existing distribution
+            datasets = self.load_existing_distribtion(trainset)
 
-                print(classes)
-                for j in classes:
-                    label_distribution[i*len(self.get_classes())+j] = 1/len(classes)
-            label_distribution = np.reshape(label_distribution, (self.NUM_CLIENTS, len(self.get_classes())))
+        # Split each partition into train/val and create DataLoader
+        trainloaders = []
+        valloaders = []
+        for ds in datasets:
+            len_val = len(ds) // int(self.config.initial_config['validation_split'] * 100)  # 10 % validation set
+            len_train = len(ds) - len_val
+            lengths = [len_train, len_val]
+            ds_train, ds_val = random_split(ds, lengths, torch.Generator().manual_seed(42))
+            trainloaders.append(DataLoader(ds_train, batch_size=self.BATCH_SIZE, shuffle=True))
+            valloaders.append(DataLoader(ds_val, batch_size=self.BATCH_SIZE))
+        testloader = DataLoader(testset, batch_size=self.BATCH_SIZE)
+        return testloader, trainloaders, valloaders
 
-        print(label_distribution)
+    def distribute_data(self, label_distribution, partition_sizes, trainset):
+        """
+        Distribute the data according to the label distribution and partition sizes
+        :param label_distribution: np.array of shape (NUM_CLIENTS, NUM_CLASSES)
+        :param partition_sizes: np.array of shape (NUM_CLIENTS)
+        :param trainset: torch.utils.data.Dataset
+        :return: list of torch.utils.data.Subset
+        """
         datasets = []
+        data_set_ids = []
         for i in range(self.NUM_CLIENTS):
             class_subsets = []
             total = 0
@@ -79,25 +84,32 @@ class DataHandler(ABC):
                 class_subsets.append(idx_to_keep[:label_count])
             # Add random samples to make sure the partition size is correct
             if total < 32:
-                class_subsets.append(random.choices(range(len(self.get_classes())), k=32-total))
+                class_subsets.append(random.choices(range(len(self.get_classes())), k=32 - total))
             elif total % 32 != 0:
                 class_subsets.append(random.choices(range(len(self.get_classes())), k=32 - (total % 32)))
             class_subsets = np.concatenate(class_subsets)
-            print(total)
+            data_set_ids.append(class_subsets)
             s_set = Subset(trainset, class_subsets)
             datasets.append(s_set)
-                # np.random.shuffle(temp_set)
-                # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
+            # np.random.shuffle(temp_set)
+            # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
+        data_distribution = pd.DataFrame()
+        data_distribution['distr'] = data_set_ids
+        data_distribution.to_csv(self.config.attributes['data_distribution_output'], index=False)
+        return datasets
 
-        # Split each partition into train/val and create DataLoader
-        trainloaders = []
-        valloaders = []
-        for ds in datasets:
-            len_val = len(ds) // 10  # 10 % validation set
-            len_train = len(ds) - len_val
-            lengths = [len_train, len_val]
-            ds_train, ds_val = random_split(ds, lengths, torch.Generator().manual_seed(42))
-            trainloaders.append(DataLoader(ds_train, batch_size=self.BATCH_SIZE, shuffle=True))
-            valloaders.append(DataLoader(ds_val, batch_size=self.BATCH_SIZE))
-        testloader = DataLoader(testset, batch_size=self.BATCH_SIZE)
-        return testloader, trainloaders, valloaders
+    def load_existing_distribtion(self, trainset):
+        """
+        Load an existing data distribution from a file
+        :param trainset: torch.utils.data.Dataset
+        :return: List of torch.utils.data.Subset
+        """
+        datasets = []
+        data_distribution = pd.read_csv(self.config.initial_config['data_distribution_file'])
+        if len(data_distribution) < self.NUM_CLIENTS:
+            raise Exception("Not enough clients in state file")
+        data_set_ids = data_distribution['distr']
+        for i in range(self.NUM_CLIENTS):
+            s_set = Subset(trainset, data_set_ids[i])
+            datasets.append(s_set)
+        return datasets

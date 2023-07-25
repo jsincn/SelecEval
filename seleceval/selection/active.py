@@ -49,20 +49,25 @@ class ActiveFL(ClientSelection):
 
         print(possible_clients)
         # Client Selection happens here:
-        possible_clients.sort(key=lambda x: x['valuation'], reverse=True)
+        possible_clients.sort(key=lambda x: x['valuation'])
+        print(possible_clients)
         alpha1_k = self.config.initial_config['algorithm_config']['alpha1'] * len(all_clients)
-        for i in range(alpha1_k):
-            possible_clients[i]['valuation'] = -1000000
+        for i in range(len(possible_clients)):
+            if i < int(alpha1_k):
+                possible_clients[i]['valuation'] = -1000000
             possible_clients[i]['p'] = exp(
                 self.config.initial_config['algorithm_config']['alpha2'] * possible_clients[i]['valuation'])
 
-        clients_to_select = self.config.initial_config['c'] * len(all_clients)
+        print(possible_clients)
+        clients_to_select = self.config.initial_config['algorithm_config']['c'] * len(all_clients)
         alpha3 = self.config.initial_config['algorithm_config']['alpha3']
         clients_1_set = random.choices(possible_clients,
                                        weights=list(map(
                                            lambda x: x['p'], possible_clients
                                        )), k=int((1-alpha3) * clients_to_select))
-        possible_clients.remove(clients_1_set)
+        # for c in clients_1_set:
+        #     possible_clients.remove(c)
+        print(clients_1_set)
         clients_2_set = random.choices(possible_clients, k=int(alpha3 * clients_to_select))
         clients_1 = list(map(lambda x: x['proxy'], clients_1_set))
         clients_2 = list(map(lambda x: x['proxy'], clients_2_set))
@@ -79,6 +84,9 @@ class ActiveFL(ClientSelection):
         # Filter only for last round
         df = df[df['server_round'] == server_round - 1]
         for c in df['client_name']:
-            training_loss = df[df['client_name'] == c]['train_output.avg_epoch_loss'].values[-1]
-            sample_size = df[df['client_name'] == c]['train_output.no_samples'].values[-1]
-            self.client_valuation[c] = (1 / sqrt(sample_size)) * training_loss
+            if df[df['client_name'] == c]['status'].to_list()[-1] == 'success':
+                training_loss = df[df['client_name'] == c]['train_output.avg_epoch_loss'].values[0][-1]
+                print(training_loss)
+                sample_size = df[df['client_name'] == c]['train_output.no_samples'].values[-1]
+                print(sample_size)
+                self.client_valuation[c] = (1 / sqrt(sample_size)) * training_loss
