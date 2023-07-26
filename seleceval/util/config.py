@@ -65,8 +65,8 @@ class Config:
             os.mkdir(path=self.initial_config['output_dir'] + '/validation')
         if not os.path.isdir(self.initial_config['output_dir'] + '/state'):
             os.mkdir(path=self.initial_config['output_dir'] + '/state')
-        if not os.path.isdir(self.initial_config['output_dir'] + '/data_distribution.md'):
-            os.mkdir(path=self.initial_config['output_dir'] + '/data_distribution.md')
+        if not os.path.isdir(self.initial_config['output_dir'] + '/data_distribution'):
+            os.mkdir(path=self.initial_config['output_dir'] + '/data_distribution')
 
     def set_current_round(self, i: int):
         self.current_round = i
