@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Distribution Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Data Distribution Report</h1>
+    Data Distribution Report for the SelecEval run at {{ date.strftime('%Y-%m-%d %H:%M:%S') }}.
+    <div class="row">
+        <h3>Training Data Distribution</h3>
+        <img src="figures/data_distribution_train_heatmap.svg">
+    </div>
+    <div class="row">
+        <h3>Validation Data Distribution</h3>
+        <img src="figures/data_distribution_validation_heatmap.svg">
+    </div>
+    <div class="row">
+        <h3>Data Quantity Distribution</h3>
+        <img src="figures/data_distribution_quantity.svg">
+    </div>
+    <div class="row">
+        <h3>Configuration overview</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, value in data_config.items() %}
+            <tr>
+                <td> {{ key }}</td>
+                <td> {{ value }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+</body>
+</html>

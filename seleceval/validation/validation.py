@@ -43,6 +43,7 @@ class Validation(Evaluator):
         self.trainloaders = trainloaders
         self.valloaders = valloaders
         self.no_classes = len(data_handler.get_classes())
+        self.classes = data_handler.get_classes()
         self.output_dfs = {}
 
     def evaluate(self, current_run: dict):
@@ -67,9 +68,12 @@ class Validation(Evaluator):
                 loss, acc, out_dict = model.test(self.valloaders[c], state['client_name'], verbose=False)
                 output = {'round': validate_round, 'client': state['client_name'], 'loss': loss, 'acc': acc,
                           'total': out_dict['total'],
-                          'correct': out_dict['correct'],
-                          'class_statistics': out_dict['class_statistics']}
-                output_dfs.append(pd.DataFrame(output, index=[0]))
+                          'correct': out_dict['correct']}
+                output_df = pd.DataFrame(output, index=[0])
+                output_df['class_accuracy'] = 0
+                output_df['class_accuracy'] = output_df['class_accuracy'].astype(object)
+                output_df.at[0, 'class_accuracy'] = out_dict['class_statistics']
+                output_dfs.append(output_df)
             print("Validation round ", validate_round, " done")
 
         output_df = pd.concat(output_dfs, ignore_index=True)
@@ -89,6 +93,8 @@ class Validation(Evaluator):
         self._generate_mean_quantile_loss(df)
         self._generate_fairness_diagrams(df)
         self._generate_mean_quantile_accuracy(df)
+        self._generate_class_fairness_final(df, self.classes)
+        self._generate_class_fairness_progress(df, self.classes)
         time_to_accuracy = _generate_time_to_accuracy(df)
         # Generate HTML report
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=os.path.dirname(__file__)))
@@ -167,6 +173,7 @@ class Validation(Evaluator):
         plt.xlabel('Round')
         plt.legend(loc='upper left', ncols=3)
         plt.savefig(self.config.initial_config['output_dir'] + '/figures/mean_accuracy_comparison.svg', bbox_inches='tight')
+        plt.close()
 
     def _generate_fairness_diagrams(self, df):
         df_plot = df[df['round'] == max(df['round'])][['acc', 'algorithm', 'client']]
@@ -180,4 +187,38 @@ class Validation(Evaluator):
         plt.savefig(self.config.initial_config['output_dir'] + '/figures/fairness_boxplot.svg', bbox_inches='tight')
         plt.close()
 
+    def _generate_class_fairness_final(self, df, classes):
+        df_plot = df[df['round'] == max(df['round'])][['class_accuracy', 'algorithm']]
+        df_temps = []
+        for i in df_plot['algorithm'].unique():
+            df_temp = pd.DataFrame(df_plot[df_plot['algorithm'] == i]['class_accuracy'].to_list(), columns=classes)
+            df_temp['algorithm'] = i
+            df_temps.append(df_temp)
+        df_plot = pd.concat(df_temps).groupby(['algorithm']).mean().reset_index()
+        df_plot = df_plot.melt(id_vars=['algorithm'], var_name='class', value_name='acc')
+        print(df_plot)
+        df_plot['class'] = df_plot['class'].astype('category')
+        sns.catplot(
+            df_plot, x="class", y='acc', col="algorithm", height=3, aspect=2,
+            kind="bar", margin_titles=True
+        )
+        plt.savefig(self.config.initial_config['output_dir'] + '/figures/class_fairness_catplot.svg', bbox_inches='tight')
+        plt.close()
 
+    def _generate_class_fairness_progress(self, df, classes):
+        df_plot = df[['class_accuracy', 'algorithm', 'round']]
+        df_temps = []
+        for i in df_plot['algorithm'].unique():
+            for j in df_plot['round'].unique():
+                df_temp = df_plot[df_plot['round'] == j]
+                df_temp = pd.DataFrame(df_temp[df_temp['algorithm'] == i]['class_accuracy'].to_list(), columns=classes)
+                df_temp['algorithm'] = i
+                df_temp['round'] = j
+                df_temps.append(df_temp)
+        df_plot = pd.concat(df_temps).groupby(['algorithm', 'round']).mean().reset_index()
+        df_plot = df_plot.melt(id_vars=['algorithm', 'round'], var_name='class', value_name='acc')
+        print(df_plot)
+        df_plot['class'] = df_plot['class'].astype('category')
+        sns.lineplot(data=df_plot, x="round", y="acc", hue="class", style="algorithm")
+        plt.savefig(self.config.initial_config['output_dir'] + '/figures/class_fairness_progress.svg', bbox_inches='tight')
+        plt.close()

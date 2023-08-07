@@ -4,11 +4,12 @@ import numpy as np
 import torch.nn
 import torch.nn.functional as F
 import torchvision
-from torch import nn
+from torch import nn, tensor
 from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
+
 
 # Note on the resnet implementation:
 # It is currently heavily based on the implementation of resnet from the Machine learning Lecture by Professor Guennemann at TUM.
@@ -71,8 +72,8 @@ class Resnet18(Model):
         total_loss = 0.0
         self.net.eval()
         torch.no_grad()
-        class_statistics = np.zeros(self.num_classes)
-        no_batches = 0
+        predicted_full = []
+        labels_full = []
         for images, labels in testloader:
             images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
             out = self.net(images)
@@ -81,15 +82,14 @@ class Resnet18(Model):
             total += labels.size(0)
             _, predicted = torch.max(out.data, 1)
             correct += (predicted == labels).sum().item()
-            print(mlp(predicted.cpu(), labels.cpu()).numpy())
-            print(class_statistics.shape)
-            print(mlp(predicted.cpu(), labels.cpu()).numpy().shape)
-            class_statistics = mlp(predicted.cpu(), labels.cpu()).numpy() + class_statistics
-            no_batches += 1
-        class_statistics = class_statistics / no_batches
+            labels_full += labels.tolist()
+            predicted_full += predicted.tolist()
+        try:
+            class_statistics = mlp(tensor(predicted_full), tensor(labels_full)).tolist()
+        except:
+            class_statistics = np.repeat(0, self.num_classes).tolist()
         avg_loss = total_loss / total
         accuracy = correct / total
-        print(class_statistics)
         if verbose:
             print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")
         further_results = {'correct': correct, 'total': total, 'class_statistics': class_statistics}

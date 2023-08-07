@@ -84,7 +84,7 @@ class Training(Evaluator):
         df_plot = df[['server_round', 'status', 'algorithm', 'client_name', 'reason']].groupby(
             ['server_round', 'status', 'reason', 'algorithm']).count().reset_index()
         sns.set_theme(style="darkgrid")
-        sns.set(rc={'figure.figsize': (11.7, 8.27)})
+        #sns.set(rc={'figure.figsize': (11.7, 8.27)})
         sns.catplot(
             df_plot, x="server_round", y='client_name', row="status", hue="reason", col="algorithm", height=3, aspect=2,
             kind="bar", margin_titles=True
