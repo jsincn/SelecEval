@@ -14,7 +14,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, int, int]:
+    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, dict]:
         pass
 
     @abstractmethod

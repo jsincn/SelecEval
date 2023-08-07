@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Distribution Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Data Distribution Report</h1>
+    Data Distribution Report for the SelecEval run at {{ date.strftime('%Y-%m-%d %H:%M:%S') }}.
+    <div class="row">
+        <h3>Comparison of accuracy of algorithms</h3>
+        <img src="figures/accuracy_comparison.svg">
+    </div>
+    <div class="row">
+        <h3>Comparison of accuracy of algorithms</h3>
+        <img src="figures/mean_loss_comparison.svg">
+    </div>
+    <h2>Fairness</h2>
+    <div class="row">
+        <h3>Comparison of Accuracy Distribution among clients</h3>
+        <img src="figures/fairness_histograms.svg">
+    </div>
+    <div class="row">
+        <h3>Accuracy distribution among clients</h3>
+        <img src="figures/fairness_boxplot.svg">
+    </div>
+    <div class="row">
+        <h2>Time to accuracy overview</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Algorithm</th>
+                <th>50% Accuracy</th>
+                <th>80% Accuracy</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, values in time_to_accuracy.items() %}
+            <tr>
+                <td> {{ key }}</td>
+                <td>{{ values['50%'] }}</td>
+                <td>{{ values['80%'] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <div class="row">
+        <h2>Algorithm Configuration overview</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, values in algorithm_config.items() %}
+            <tr>
+                <td> {{ key }}</td>
+                <td>
+                    {% for k, value in values.items() %}
+                    <b>{{k}}:</b> {{value}}<br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+</body>
+</html>

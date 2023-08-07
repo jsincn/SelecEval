@@ -1,13 +1,14 @@
 from typing import Tuple, Dict
 
+import numpy as np
 import torch.nn
 import torch.nn.functional as F
 import torchvision
 from torch import nn
 from torch.utils.data import DataLoader
-
+from sklearn.metrics import classification_report
 from .model import Model
-
+from torchmetrics.classification import MulticlassPrecision
 
 # Note on the resnet implementation:
 # It is currently heavily based on the implementation of resnet from the Machine learning Lecture by Professor Guennemann at TUM.
@@ -29,11 +30,12 @@ class Resnet18(Model):
 
         return size
 
-    def __init__(self, device, num_classes: int, n: int = 2):
+    def __init__(self, device, num_classes: int):
         super().__init__(device)
         resnet = torchvision.models.resnet18()
         # Load model and data
         self.net = resnet.to(self.DEVICE)
+        self.num_classes = num_classes
 
     def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
         # Train self.network on training set using Cross Entropy Loss
@@ -62,11 +64,15 @@ class Resnet18(Model):
                 print(f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}")
         return output
 
-    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, int, int]:
+    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, dict]:
+        mlp = MulticlassPrecision(num_classes=self.num_classes, average=None)
         loss_function = torch.nn.CrossEntropyLoss()
         correct, total, avg_loss = 0, 0, 0.0
         total_loss = 0.0
+        self.net.eval()
         torch.no_grad()
+        class_statistics = np.zeros(self.num_classes)
+        no_batches = 0
         for images, labels in testloader:
             images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
             out = self.net(images)
@@ -75,8 +81,16 @@ class Resnet18(Model):
             total += labels.size(0)
             _, predicted = torch.max(out.data, 1)
             correct += (predicted == labels).sum().item()
+            print(mlp(predicted.cpu(), labels.cpu()).numpy())
+            print(class_statistics.shape)
+            print(mlp(predicted.cpu(), labels.cpu()).numpy().shape)
+            class_statistics = mlp(predicted.cpu(), labels.cpu()).numpy() + class_statistics
+            no_batches += 1
+        class_statistics = class_statistics / no_batches
         avg_loss = total_loss / total
         accuracy = correct / total
+        print(class_statistics)
         if verbose:
             print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")
-        return avg_loss, accuracy, correct, total
+        further_results = {'correct': correct, 'total': total, 'class_statistics': class_statistics}
+        return avg_loss, accuracy, further_results

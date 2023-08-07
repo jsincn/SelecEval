@@ -10,7 +10,7 @@ class Config:
     def __init__(self, file_name: str):
         schema = {'no_rounds': {'type': 'integer', 'min': 1},
                   'algorithm': {'type': 'list', 'allowed': algorithm_parameter_dict.keys()},
-                  'dataset': {'type': 'string', 'allowed': ['cifar10']},
+                  'dataset': {'type': 'string', 'allowed': ['cifar10', 'mnist']},
                   'algorithm_config': {'type': 'dict', 'default': {}, 'schema': algorithm_parameter_dict},
                   'no_epochs': {'type': 'integer', 'min': 1, 'default': 1},
                   'no_clients': {'type': 'integer', 'min': 1},
@@ -25,7 +25,18 @@ class Config:
                       'enable_validation': {'type': 'boolean', 'default': True},
                       'enable_data_distribution': {'type': 'boolean', 'default': True},
                       'device': {'type': 'string', 'allowed': ['cuda', 'cpu'], 'default': 'cpu'},
-                  }}, 'max_workers': {'type': 'integer', 'min': 1, 'default': 32},
+                  }},
+                  'simulation_config': {'type': 'dict', 'default': {}, 'schema': {
+                      'network_bandwidth_mean': {'type': 'float', 'default': 20.0},
+                      'network_bandwidth_std': {'type': 'float', 'default': 10.0},
+                      'network_bandwidth_min': {'type': 'float', 'default': 0.0, 'min': 0.0},
+                      'performance_factor_mean': {'type': 'float', 'default': 1.0},
+                      'performance_factor_std': {'type': 'float', 'default': 0.2},
+                      'reliability_parameter': {'type': 'float', 'default': 10.0},
+                      'number_of_performance_tiers': {'type': 'integer', 'min': 1, 'default': 4},
+                      'state_simulation_seed': {'type': 'integer', 'min': 0, 'default': 12367123871238713871}
+                  }}
+            , 'max_workers': {'type': 'integer', 'min': 1, 'default': 32},
                   'base_strategy': {'type': 'string', 'allowed': available_strategies, 'default': default_strategy},
                   'data_config': {'type': 'dict', 'default': {}, 'schema': {
                       'data_label_distribution_skew': {'type': 'string', 'allowed': data_label_distributions,
@@ -41,7 +52,7 @@ class Config:
         # Set data_config_schema
 
         v = Validator(schema, require_all=True)
-        self.current_round = 1
+        self.current_round = 0
         with open(file_name) as json_file:
             config_dict = json.load(json_file)
             if not v.validate(config_dict):
@@ -67,6 +78,8 @@ class Config:
             os.mkdir(path=self.initial_config['output_dir'] + '/state')
         if not os.path.isdir(self.initial_config['output_dir'] + '/data_distribution'):
             os.mkdir(path=self.initial_config['output_dir'] + '/data_distribution')
+        if not os.path.isdir(self.initial_config['output_dir'] + '/figures'):
+            os.mkdir(path=self.initial_config['output_dir'] + '/figures')
 
     def set_current_round(self, i: int):
         self.current_round = i
