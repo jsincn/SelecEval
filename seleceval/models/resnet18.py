@@ -1,3 +1,6 @@
+"""
+Resnet18 model for federated learning
+"""
 from typing import Tuple, Dict
 
 import numpy as np
@@ -11,15 +14,22 @@ from .model import Model
 from torchmetrics.classification import MulticlassPrecision
 
 
-# Note on the resnet implementation:
-# It is currently heavily based on the implementation of resnet from the Machine learning Lecture by Professor Guennemann at TUM.
 class Resnet18(Model):
-
+    """
+    Resnet18 model for federated learning
+    """
     def get_net(self) -> nn.Module:
+        """
+        Returns the current deep network
+        :return: The current deep network
+        """
         return self.net
 
     def get_size(self) -> float:
-
+        """
+        Returns the size of the current deep network
+        :return: The size of the current deep network
+        """
         params = 0
         for p in self.net.parameters():
             params += p.nelement() * p.element_size()
@@ -39,7 +49,14 @@ class Resnet18(Model):
         self.num_classes = num_classes
 
     def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
-        # Train self.network on training set using Cross Entropy Loss
+        """
+        Method for running a training round using cross entropy loss
+        :param trainloader: Data loader for training data
+        :param client_name: Name of the current client
+        :param epochs: Number of epochs to train
+        :param verbose: Whether to print verbose output
+        :return: Metrics of the training round
+        """
         loss_function = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.net.parameters())
         self.net.train()
@@ -66,6 +83,13 @@ class Resnet18(Model):
         return output
 
     def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, dict]:
+        """
+        Method for running a test round
+        :param testloader: Data loader for test data
+        :param client_name: Name of the current client
+        :param verbose: Whether to print verbose output
+        :return: Metrics of the test round
+        """
         mlp = MulticlassPrecision(num_classes=self.num_classes, average=None)
         loss_function = torch.nn.CrossEntropyLoss()
         correct, total, avg_loss = 0, 0, 0.0
@@ -84,6 +108,7 @@ class Resnet18(Model):
             correct += (predicted == labels).sum().item()
             labels_full += labels.tolist()
             predicted_full += predicted.tolist()
+        # Calculate class statistics only if output was regularm otherwise return 0 array
         try:
             class_statistics = mlp(tensor(predicted_full), tensor(labels_full)).tolist()
         except:

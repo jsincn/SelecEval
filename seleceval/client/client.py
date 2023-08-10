@@ -1,3 +1,6 @@
+"""
+Client class for the federated learning framework
+"""
 import time
 from random import random
 from typing import Dict, List, Tuple

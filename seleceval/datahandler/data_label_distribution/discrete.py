@@ -1,4 +1,6 @@
-# Uses a uniform distribution to skew the label distribution
+"""
+Discrete data label distribution
+"""
 import random
 
 import numpy as np
@@ -6,13 +8,20 @@ from .data_label_distribution import DataLabelDistribution
 
 
 class Discrete(DataLabelDistribution):
+    """
+    Discrete data label distribution
+    """
 
     def __init__(self, config, classes):
         super().__init__(config, classes)
         pass
 
     def get_label_distribution(self):
-        # Allows each client to have only a subset of the classes
+        """
+        Returns the label distribution as an array of dimension no_clients, no_classes
+        Allows each client to have only a subset of the classes
+        :return: label_distribution
+        """
         label_distribution = np.repeat(0.0, len(self.classes) * self.config.initial_config['no_clients'])
         for i in range(self.config.initial_config['no_clients']):
             classes = random.choices(range(len(self.classes)),

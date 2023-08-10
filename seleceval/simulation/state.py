@@ -1,3 +1,6 @@
+"""
+This module contains the functions for generating the initial state of the clients and for running the state update
+"""
 import random
 
 import pandas as pd
@@ -74,6 +77,7 @@ def run_state_update(config: Config, server_round: int):
     """
     Runs the state update for the clients
     :param config: config object describing the simulation
+    :param server_round: the current server round
     """
     random.seed(config.initial_config['simulation_config']['state_simulation_seed'] + server_round)
     state_df = pd.read_csv(config.attributes['working_state_file'])

@@ -1,3 +1,6 @@
+"""
+This module contains the Validation class, which is used to evaluate the performance of a federated learning run
+"""
 import os
 from datetime import datetime
 
@@ -15,6 +18,11 @@ from ..util import Config
 
 
 def _generate_time_to_accuracy(df):
+    """
+    Generates a dictionary with the time to accuracy for each algorithm
+    :param df: Dataframe containing the data collected during validation
+    :return: Dictionary with the time to accuracy for each algorithm
+    """
     output = {}
     for algorithm in df['algorithm'].unique():
         output[algorithm] = {}
@@ -47,6 +55,11 @@ class Validation(Evaluator):
         self.output_dfs = {}
 
     def evaluate(self, current_run: dict):
+        """
+        Evaluates the performance of a federated learning run
+        :param current_run: Dictionary containing the parameters of the current run, e.g. algorithm, no_clients, etc.
+        :return: None
+        """
         self.output_path = self.config.initial_config['output_dir'] + '/validation/' + 'validation_' + \
                            current_run['algorithm'] + '_' + current_run['dataset'] + '_' + \
                            str(current_run['no_clients']) + '.csv'
@@ -81,6 +94,10 @@ class Validation(Evaluator):
         self.output_dfs[current_run['algorithm']] = output_df
 
     def generate_report(self):
+        """
+        Generates an HTML report with the results of the validation
+        :return: None
+        """
         if len(self.output_dfs.keys()) == 0:
             raise ValueError("No output dataframes found. Please run evaluate() first.")
 
@@ -105,6 +122,11 @@ class Validation(Evaluator):
             f.write(html)
 
     def _generate_mean_quantile_loss(self, df):
+        """
+        Generates a plot with the mean loss and the 1% quantile of the loss for each algorithm
+        :param df: Dataframe collected during the validation
+        :return: None
+        """
         df_plot = df[['round', 'loss', 'algorithm']].groupby(['algorithm', 'round']).mean().reset_index()
         df_plot_quantiles = df[['round', 'loss', 'algorithm']].groupby(['algorithm', 'round']).quantile(.01).reset_index()
         rounds = df_plot['round'].unique()
@@ -127,6 +149,11 @@ class Validation(Evaluator):
         plt.close()
 
     def _generate_mean_accuracy(self, df):
+        """
+        Generates a plot with the mean accuracy for each algorithm
+        :param df: Dataframe collected during the validation
+        :return: None
+        """
         df_plot = df[['round', 'acc', 'algorithm']].groupby(['algorithm', 'round']).mean().reset_index()
         rounds = df_plot['round'].unique()
         res_dict = {}
@@ -153,6 +180,11 @@ class Validation(Evaluator):
         plt.close(fig)
 
     def _generate_mean_quantile_accuracy(self, df):
+        """
+        Generate a plot with the mean accuracy and the 1% quantile of the accuracy for each algorithm on the validation set
+        :param df: Dataframe collected during the validation
+        :return: None
+        """
         df_plot = df[['round', 'acc', 'algorithm']].groupby(['algorithm', 'round']).mean().reset_index()
         df_plot_quantiles = df[['round', 'acc', 'algorithm']].groupby(['algorithm', 'round']).quantile(.1).reset_index()
         rounds = df_plot['round'].unique()
@@ -176,6 +208,11 @@ class Validation(Evaluator):
         plt.close()
 
     def _generate_fairness_diagrams(self, df):
+        """
+        Generates a histogram and a boxplot of the accuracy for each client and algorithm
+        :param df: Dataframe collected during the validation
+        :return: None
+        """
         df_plot = df[df['round'] == max(df['round'])][['acc', 'algorithm', 'client']]
         g = sns.FacetGrid(df_plot, col="algorithm")
         g.map(sns.histplot, "acc", bins=10, binwidth=0.01)
@@ -188,6 +225,12 @@ class Validation(Evaluator):
         plt.close()
 
     def _generate_class_fairness_final(self, df, classes):
+        """
+        Generates a plot with the accuracy for each class and algorithm
+        :param df: Dataframe collected during the validation
+        :param classes: Classes of the dataset
+        :return: None
+        """
         df_plot = df[df['round'] == max(df['round'])][['class_accuracy', 'algorithm']]
         df_temps = []
         for i in df_plot['algorithm'].unique():
@@ -206,6 +249,12 @@ class Validation(Evaluator):
         plt.close()
 
     def _generate_class_fairness_progress(self, df, classes):
+        """
+        Generates a plot with the accuracy for each class and algorithm across rounds
+        :param df: Dataframe collected during the validation
+        :param classes: Classes of the dataset
+        :return: None
+        """
         df_plot = df[['class_accuracy', 'algorithm', 'round']]
         df_temps = []
         for i in df_plot['algorithm'].unique():

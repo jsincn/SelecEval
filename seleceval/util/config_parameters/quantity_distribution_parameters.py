@@ -1,3 +1,7 @@
+"""
+This file contains the available data quantity distributions as well as their parameters and the default.
+"""
+
 data_quantity_distributions = ['Dirichlet', 'Uniform']
 
 data_quantity_distribution_parameters = \

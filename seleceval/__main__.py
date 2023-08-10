@@ -1,3 +1,6 @@
+"""
+Main file for the simulation
+"""
 import flwr as fl
 import torch
 
@@ -16,6 +19,9 @@ from .validation.validation import Validation
 
 
 def main():
+    """
+    Main function for the simulation
+    """
     args = Arguments()
     config = Config(vars(args.get_args())['CONFIG_FILE'])
 
@@ -47,10 +53,10 @@ def main():
 def run_evaluation(config, datahandler, trainloaders, valloaders):
     """
     Evaluates the performance of the algorithms
-    :param config:
-    :param datahandler:
-    :param trainloaders:
-    :param valloaders:
+    :param config: Config object
+    :param datahandler: Datahandler object
+    :param trainloaders: List of trainloaders
+    :param valloaders: List of valloaders
     """
     # Data distribution generation
     if config.initial_config['validation_config']['enable_data_distribution']:
@@ -77,11 +83,11 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
 def run_training_simulation(DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders):
     """
     Runs the training simulation
-    :param DEVICE:
-    :param NUM_CLIENTS:
-    :param config:
-    :param datahandler:
-    :param trainloaders:
+    :param DEVICE: Device to run the simulation on
+    :param NUM_CLIENTS: Number of clients
+    :param config: Config object
+    :param datahandler: Datahandler object
+    :param trainloaders: Trainloaders
     :param valloaders:
     """
     if DEVICE.type == "cuda":

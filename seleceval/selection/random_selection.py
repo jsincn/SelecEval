@@ -1,3 +1,10 @@
+"""
+Random Selection algorithm
+Provided as a baseline for comparison
+McMahan, H. Brendan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Agüera y. Arcas. 2016.
+“Communication-Efficient Learning of Deep Networks from Decentralized Data.”
+arXiv [cs.LG]. arXiv. http://arxiv.org/abs/1602.05629.
+"""
 from typing import List, Tuple
 
 import flwr as fl
@@ -9,6 +16,9 @@ from ..util import Config
 
 
 class RandomSelection(ClientSelection):
+    """
+    Random Selection algorithm
+    """
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
         self.threshold = config.initial_config['algorithm_config']['random']['c']
@@ -23,7 +33,6 @@ class RandomSelection(ClientSelection):
         :return: Selected Clients
         """
         no_clients = int(round(self.threshold * len(client_manager.all()), 0))
-        print(f"""Sampling {no_clients} Clients""")
         config = {}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(no_clients)

@@ -1,3 +1,6 @@
+"""
+Data Distribution Evaluator
+"""
 from datetime import datetime
 import os
 from collections import Counter
@@ -14,7 +17,9 @@ from ..util import Config, config
 
 
 class DataDistribution(Evaluator):
-
+    """
+    Data Distribution Evaluator
+    """
     def __init__(self, config: Config, trainloaders: list, valloaders: list, data_handler: DataHandler):
         super().__init__(config, trainloaders, valloaders, data_handler)
         self.output_path_validation = None
@@ -25,6 +30,10 @@ class DataDistribution(Evaluator):
         self.data_handler = data_handler
 
     def evaluate(self, current_run: dict):
+        """
+        Evaluates the data distribution
+        :param current_run: Dict containing details on the current run icnluding dataset, no_clients
+        """
         self.output_path_train = self.config.initial_config[
                                      'output_dir'] + '/data_distribution/' + 'data_distribution_train' + \
                                  '_' + current_run['dataset'] + '_' + \
@@ -74,6 +83,9 @@ class DataDistribution(Evaluator):
         output_df.to_csv(self.output_path_validation, index=False)
 
     def generate_report(self):
+        """
+        Generates a report on the data distribution and saves it to the output directory
+        """
         train_df = pd.read_csv(self.output_path_train)
         val_df = pd.read_csv(self.output_path_validation)
         train_df.set_index(['client'], inplace=True)

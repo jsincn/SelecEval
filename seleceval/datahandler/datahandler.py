@@ -1,3 +1,7 @@
+"""
+This contains the abstract data handler that defines the interface for any implemented
+data handlers and provides some universal methods
+"""
 import ast
 import random
 from abc import ABC, abstractmethod
@@ -13,7 +17,9 @@ from ..util import Config
 
 
 class DataHandler(ABC):
-
+    """
+    DataHandler is an abstract class that defines the interface for any implemented data handlers
+    """
     def __init__(self, config: Config):
         self.NUM_CLIENTS = config.initial_config['no_clients']
         self.BATCH_SIZE = config.initial_config['batch_size']
@@ -21,18 +27,24 @@ class DataHandler(ABC):
 
     @abstractmethod
     def load_distributed_datasets(self):
+        """
+        Called to load the dataset
+        """
         pass
 
     @abstractmethod
     def get_classes(self):
+        """
+        Returns the classes of the dataset
+        """
         pass
 
     def split_and_transform_data(self, testset, trainset):
         """
         Split the data into partitions and create DataLoaders
-        :param testset:
-        :param trainset:
-        :return:
+        :param testset: test dataset
+        :param trainset: training dataset
+        :return: testloader, trainloaders, valloaders
         """
         # Define partition sizes
         # Standard import
@@ -48,7 +60,7 @@ class DataHandler(ABC):
             datasets = self.distribute_data(label_distribution, partition_sizes, trainset)
         else:
             # Load existing distribution
-            datasets = self.load_existing_distribtion(trainset)
+            datasets = self.load_existing_distribution(trainset)
 
         # Split each partition into train/val and create DataLoader
         trainloaders = []
@@ -100,7 +112,7 @@ class DataHandler(ABC):
         data_distribution.to_csv(self.config.attributes['data_distribution_output'], index=False)
         return datasets
 
-    def load_existing_distribtion(self, trainset):
+    def load_existing_distribution(self, trainset):
         """
         Load an existing data distribution from a file
         :param trainset: torch.utils.data.Dataset

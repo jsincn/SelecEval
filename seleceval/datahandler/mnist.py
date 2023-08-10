@@ -1,3 +1,9 @@
+"""
+MNIST data handler
+LeCun, Yann, Corinna Cortes, and C. J. Burges. n.d.
+“MNIST Handwritten Digit Database.”
+ATT Labs [Online]. Available: Http://yann. Lecun. Com/exdb/mnist.
+"""
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -25,6 +31,10 @@ class MNISTDataHandler(DataHandler):
         return trainloaders, valloaders, testloader
 
     def get_classes(self):
+        """
+        Returns the classes of the dataset
+        :return: List of classes
+        """
         return (
             "0",
             "1",

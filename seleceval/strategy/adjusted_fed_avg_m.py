@@ -1,3 +1,10 @@
+"""
+Adjusted FedAvgM strategy
+Based on the FedAvgM strategy from Flower
+Hsu, Tzu-Ming Harry, Hang Qi, and Matthew Brown. 2019.
+“Measuring the Effects of Non-Identical Data Distribution for Federated Visual Classification.”
+arXiv [cs.LG]. arXiv. http://arxiv.org/abs/1909.06335.
+"""
 from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
@@ -29,10 +36,10 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager):
         """
         Configure the fit process
-        :param server_round:
-        :param parameters:
-        :param client_manager:
-        :return:
+        :param server_round: The current server round
+        :param parameters: The current model parameters
+        :param client_manager:  The client manager
+        :return: List of clients to train on
         """
         return self.client_selector.select_clients(client_manager, parameters, server_round)
 
@@ -44,10 +51,10 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Aggregate model weights using weighted average and store checkpoint, update state, set current round
-        :param server_round:
-        :param results:
-        :param failures:
-        :return:
+        :param server_round: The current server round
+        :param results: The results from the clients
+        :param failures: The failures from the clients
+        :return: The aggregated parameters and metrics
         """
         # Update client state
         run_state_update(self.config, server_round)

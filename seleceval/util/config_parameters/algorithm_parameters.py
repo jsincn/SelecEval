@@ -1,3 +1,6 @@
+"""
+This file provides a dictionary of the available algorithms and their parameters.
+"""
 algorithm_parameter_dict = {
     'FedCS':
         {'type': 'dict', 'default': {},

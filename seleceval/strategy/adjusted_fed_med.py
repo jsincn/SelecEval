@@ -1,3 +1,10 @@
+"""
+Adjusted FedMedian strategy
+Based on the FedMedian strategy from Flower
+Yin, Dong, Yudong Chen, Kannan Ramchandran, and Peter Bartlett. 2018.
+“Byzantine-Robust Distributed Learning: Towards Optimal Statistical Rates.”
+arXiv [cs.LG]. arXiv. http://arxiv.org/abs/1803.01498.
+"""
 from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
@@ -28,11 +35,11 @@ class AdjustedFedMedian(fl.server.strategy.FedMedian):
 
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager):
         """
-        Configure the fit process
-        :param server_round:
-        :param parameters:
-        :param client_manager:
-        :return:
+        Configure the fit process and select clients
+        :param server_round:    The current server round
+        :param parameters:     The current model parameters
+        :param client_manager: The client manager
+        :return: List of clients to train on
         """
         return self.client_selector.select_clients(client_manager, parameters, server_round)
 
@@ -44,10 +51,10 @@ class AdjustedFedMedian(fl.server.strategy.FedMedian):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Aggregate model weights using weighted average and store checkpoint, update state, set current round
-        :param server_round:
-        :param results:
-        :param failures:
-        :return:
+        :param server_round: The current server round
+        :param results:     The results from the clients
+        :param failures:    The failures from the clients
+        :return:           The aggregated parameters and metrics
         """
         # Update client state
         run_state_update(self.config, server_round)

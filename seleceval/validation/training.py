@@ -1,3 +1,6 @@
+"""
+Class for training performance evaluation
+"""
 import json
 import os
 from datetime import datetime
@@ -16,6 +19,9 @@ from ..util import Config
 
 
 class Training(Evaluator):
+    """
+    Class for training performance evaluation
+    """
     def __init__(self, config: Config, trainloaders: list, valloaders: list, data_handler: DataHandler):
         super().__init__(config, trainloaders, valloaders, data_handler)
         self.config = config
@@ -25,6 +31,9 @@ class Training(Evaluator):
         pass
 
     def generate_report(self):
+        """
+        Generates a report on the training performance  (e.g. loss, accuracy), diagrams and stores it as a .html file
+        """
         file_dfs = []
         file_list = [f for f in listdir(self.config.initial_config['output_dir'] + '/client_output/') if
                      isfile(join(self.config.initial_config['output_dir'] + '/client_output/', f))]
@@ -62,6 +71,11 @@ class Training(Evaluator):
             f.write(html)
 
     def _generate_execution_time_by_algorithm(self, df):
+        """
+        Generates a diagram comparing the execution time of the different algorithms
+        :param df: Dataframe containing the training metadata collected during simulation
+        :return: None
+        """
         df_temp = df
         df_plot = df_temp[['server_round', 'status', 'execution_time', 'upload_time', 'algorithm']].groupby(
             ['server_round', 'status', 'algorithm']).mean().reset_index()
@@ -71,6 +85,11 @@ class Training(Evaluator):
         plt.close()
 
     def _generate_training_accuracy(self, df):
+        """
+        Generates a diagram comparing the training accuracy of the different algorithms
+        :param df: Dataframe containing the training metadata collected during simulation
+        :return: None
+        """
         df_temp = df[df.status == 'success']
         df_temp['train_output.avg_accuracy'] = df_temp['train_output.accuracy'].apply(lambda x: x[len(x) - 1])
         df_plot = df_temp[['server_round', 'status', 'train_output.avg_accuracy', 'algorithm']].groupby(
@@ -81,6 +100,11 @@ class Training(Evaluator):
         plt.close()
 
     def _generate_round_participation(self, df):
+        """
+        Generates a diagram comparing the round participation of clients of the different algorithms
+        :param df: Dataframe containing the training metadata collected during simulation
+        :return: None
+        """
         df_plot = df[['server_round', 'status', 'algorithm', 'client_name', 'reason']].groupby(
             ['server_round', 'status', 'reason', 'algorithm']).count().reset_index()
         sns.set_theme(style="darkgrid")

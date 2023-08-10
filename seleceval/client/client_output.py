@@ -1,3 +1,6 @@
+"""
+Utility class for handling client output
+"""
 import datetime
 import fcntl
 import json
@@ -16,12 +19,17 @@ class ClientOutput:
     def set(self, key: Union[str, int], value: Any):
         """
         Set output key to values
-        :param key:
-        :param value:
+        :param key: String or integer key
+        :param value: Value to set
         """
         self.output_dict[key] = value
 
     def get(self, key: Union[str, int]) -> Any:
+        """
+        Get output value for key
+        :param key: String or integer key
+        :return: Value for key
+        """
         return self.output_dict[key]
 
     def write(self):

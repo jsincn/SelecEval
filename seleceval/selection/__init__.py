@@ -1,3 +1,6 @@
+"""
+Client Selection algorithms for federated learning.
+"""
 from .active import ActiveFL
 from .cep import CEP
 from .client_selection import ClientSelection

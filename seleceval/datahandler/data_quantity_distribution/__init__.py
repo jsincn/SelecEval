@@ -1,3 +1,7 @@
+"""
+This module contains the classes for skewing data quantity distributions
+"""
+
 from .dirichlet import Dirichlet
 from .uniform import Uniform
 

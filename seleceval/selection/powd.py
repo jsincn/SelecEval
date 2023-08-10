@@ -1,3 +1,10 @@
+"""
+Client selection algorithm based on the Pow-D algorithm
+Power of Choice
+Cho, Yae Jee, Jianyu Wang, and Gauri Joshi. 2020.
+“Client Selection in Federated Learning: Convergence Analysis and Power-of-Choice Selection Strategies.”
+arXiv.org. https://www.semanticscholar.org/paper/e245f15bdddac514454fecf32f2a3ecb069f6dec.
+"""
 from typing import List, Tuple
 
 import flwr as fl
@@ -10,6 +17,9 @@ from ..util import Config
 
 
 class PowD(ClientSelection):
+    """
+    Pow-D algorithm for client selection
+    """
 
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
@@ -29,8 +39,6 @@ class PowD(ClientSelection):
         fit_ins = FitIns(parameters, config)
         all_clients: dict[str, ClientProxy] = client_manager.all()
         results, failures = self.run_task_get_properties(list(all_clients.values()))
-        print(failures)
-        print(results)
         possible_clients = []
         total_data_size = 0
         for (client_proxy, client_props) in results:
@@ -48,7 +56,6 @@ class PowD(ClientSelection):
                                          )), k=int(self.pre_param * len(possible_clients)))
 
         results, failures = self.run_task_evaluate(list(map(lambda x: x['proxy'], clients_for_evaluation)), parameters)
-        print(failures)
 
         possible_clients = []
         for (client_proxy, evaluate_res) in results:

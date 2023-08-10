@@ -1,3 +1,6 @@
+"""
+This module contains the configuration parameters for the different strategies, data distributions and algorithms.
+"""
 from .base_strategy_parameters import *
 from .algorithm_parameters import *
 from .label_distribution_parameters import *

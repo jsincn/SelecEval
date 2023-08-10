@@ -1,3 +1,6 @@
+"""
+Abstract class for client selection algorithms
+"""
 import concurrent
 from abc import abstractmethod, ABC
 from typing import Tuple, Union, List
@@ -13,7 +16,9 @@ from ..util import Config
 
 
 class ClientSelection(ABC):
-
+    """
+    Abstract class for client selection algorithms
+    """
     def __init__(self, config: Config, model_size: int):
         print("Starting Client Selection")
         self.config = config

@@ -1,3 +1,6 @@
+"""
+This module contains the Config class which is used to parse the configuration file and validate the parameters.
+"""
 import json
 import os
 
@@ -6,7 +9,11 @@ from datetime import datetime
 from .config_parameters import *
 import shutil
 
+
 class Config:
+    """
+    This class is used to parse the configuration file and validate the parameters.
+    """
     def __init__(self, file_name: str):
         schema = {'no_rounds': {'type': 'integer', 'min': 1},
                   'algorithm': {'type': 'list', 'allowed': algorithm_parameter_dict.keys()},
@@ -82,12 +89,28 @@ class Config:
             os.mkdir(path=self.initial_config['output_dir'] + '/figures')
 
     def set_current_round(self, i: int):
+        """
+        Sets the current round
+        :param i: The current round
+        :return: None
+        """
         self.current_round = i
 
     def get_current_round(self):
+        """
+        Returns the current round
+        :return: The current round
+        """
         return self.current_round
 
     def generate_paths(self, algorithm: str, dataset: str, no_clients: int):
+        """
+        Generates the paths for the output files
+        :param algorithm: Current algorithm simulated
+        :param dataset: Current dataset used
+        :param no_clients: Number of clients used
+        :return: None
+        """
         self.attributes['output_path'] = self.initial_config['output_dir'] + '/client_output/' + 'client_output_' + \
                                          algorithm + '_' + dataset + '_' + str(no_clients) + '.json'
         self.attributes['model_output_prefix'] = self.initial_config[

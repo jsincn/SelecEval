@@ -1,3 +1,9 @@
+"""
+CIFAR-10 data handler
+He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015.
+“Deep Residual Learning for Image Recognition.”
+arXiv [cs.CV]. arXiv. http://arxiv.org/abs/1512.03385.
+"""
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -8,10 +14,14 @@ from .datahandler import DataHandler
 
 
 class Cifar10DataHandler(DataHandler):
+    """
+    Data handler for CIFAR-10
+    """
+
     def load_distributed_datasets(self):
         """
         Load the CIFAR-10 dataset and divide it into partitions
-        :return:
+        :return: Train, validation and test data loaders
         """
         # Download and transform CIFAR-10 (train and test)
         transform = transforms.Compose(
@@ -23,8 +33,11 @@ class Cifar10DataHandler(DataHandler):
         testloader, trainloaders, valloaders = self.split_and_transform_data(testset, trainset)
         return trainloaders, valloaders, testloader
 
-
     def get_classes(self):
+        """
+        Get the classes of the CIFAR-10 dataset
+        :return: List of classes
+        """
         return (
             "plane",
             "car",

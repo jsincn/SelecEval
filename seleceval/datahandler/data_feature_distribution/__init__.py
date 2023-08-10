@@ -1,4 +1,6 @@
-
+"""
+This module contains methods of skewing data features
+"""
 
 
 #data_feature_distribution_dict = {'Uniform': Uniform, 'Normal': Normal}

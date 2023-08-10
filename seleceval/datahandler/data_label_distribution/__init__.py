@@ -1,3 +1,6 @@
+"""
+This module contains methods of skewing data labels
+"""
 from .discrete import Discrete
 from .dirichlet import Dirichlet
 from .uniform import Uniform

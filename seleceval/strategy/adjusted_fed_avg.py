@@ -1,3 +1,10 @@
+"""
+Adjusted FedAvg strategy
+Based on the FedAvg strategy from Flower
+McMahan, H. Brendan, Eider Moore, Daniel Ramage, Seth Hampson, and Blaise Agüera y. Arcas. 2016.
+“Communication-Efficient Learning of Deep Networks from Decentralized Data.”
+arXiv [cs.LG]. arXiv. http://arxiv.org/abs/1602.05629.
+"""
 from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
@@ -29,10 +36,10 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
     def configure_fit(self, server_round: int, parameters: Parameters, client_manager: ClientManager):
         """
         Configure the fit process
-        :param server_round:
-        :param parameters:
-        :param client_manager:
-        :return:
+        :param server_round: Current server round
+        :param parameters: Current model parameters
+        :param client_manager: Client manager
+        :return: List of clients to train
         """
         return self.client_selector.select_clients(client_manager, parameters, server_round)
 
@@ -44,10 +51,10 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Aggregate model weights using weighted average and store checkpoint, update state, set current round
-        :param server_round:
-        :param results:
-        :param failures:
-        :return:
+        :param server_round: Current server round
+        :param results: List of results from clients
+        :param failures: List of failures from clients
+        :return: Aggregated parameters and metrics
         """
         # Update client state
         run_state_update(self.config, server_round)

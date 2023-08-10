@@ -1,3 +1,7 @@
+"""
+Example of a custom client selection algorithm
+Not available for testing - can be used as a template for implementing new algorithms
+"""
 from typing import List, Tuple
 
 import flwr as fl
