@@ -5,11 +5,9 @@ from typing import Tuple, Dict
 
 import numpy as np
 import torch.nn
-import torch.nn.functional as F
 import torchvision
 from torch import nn, tensor
 from torch.utils.data import DataLoader
-from sklearn.metrics import classification_report
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
 

@@ -56,8 +56,6 @@ class Training(Evaluator):
         if len(self.config.initial_config['algorithm']) > 1:
             df['server_round'] = np.where(df['server_round'] == max(df['server_round']), 0, df['server_round'])
 
-        print(df)
-        print(df[df.server_round == 1].groupby(['algorithm', 'status']).count())
         df['reason'].fillna('success', inplace=True)
         self._generate_round_participation(df)
         self._generate_training_accuracy(df)

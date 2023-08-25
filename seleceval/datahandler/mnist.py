@@ -4,10 +4,7 @@ LeCun, Yann, Corinna Cortes, and C. J. Burges. n.d.
 “MNIST Handwritten Digit Database.”
 ATT Labs [Online]. Available: Http://yann. Lecun. Com/exdb/mnist.
 """
-import numpy as np
-import torch
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, random_split, Subset
 from torchvision.datasets import MNIST
 
 from .datahandler import DataHandler
@@ -20,10 +17,7 @@ class MNISTDataHandler(DataHandler):
         :return:
         """
         # Download and transform CIFAR-10 (train and test)
-        transform = transforms.Compose(
-            [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
-             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-        )
+        transform = self.generate_transforms([transforms.Lambda(lambda x: x.repeat(3, 1, 1))])
         trainset = MNIST("./dataset", train=True, download=True, transform=transform)
         testset = MNIST("./dataset", train=False, download=True, transform=transform)
 

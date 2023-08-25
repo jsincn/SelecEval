@@ -2,16 +2,16 @@
 This contains the abstract data handler that defines the interface for any implemented
 data handlers and provides some universal methods
 """
-import ast
 import random
 from abc import ABC, abstractmethod
-import importlib
 import numpy as np
 import pandas as pd
 import torch
+import torchvision.transforms as transforms
 from torch.utils.data import Subset, random_split, DataLoader
 
 from .data_label_distribution import *
+from .data_feature_distribution import *
 from .data_quantity_distribution import *
 from ..util import Config
 
@@ -131,3 +131,21 @@ class DataHandler(ABC):
             datasets.append(s_set)
             print(len(s_set))
         return datasets
+
+    def generate_transforms(self, custom_transforms=None):
+        """
+        Generate the transforms for the dataset
+
+        Custom transforms are applied after a tensor was created and before normalization and feature skewing
+        :param custom_transforms: List of custom transforms
+        :return: Composed transforms
+        """
+        if custom_transforms is None:
+            custom_transforms = []
+        skew = self.config.initial_config['data_config']['data_feature_skew']
+        trans = [transforms.ToTensor()]
+        trans += custom_transforms
+        trans += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        if data_feature_distribution_dict[skew] is not None:
+            trans += [data_feature_distribution_dict[skew](self.config)]
+        return transforms.Compose(trans)

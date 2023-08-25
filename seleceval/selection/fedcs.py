@@ -19,6 +19,7 @@ class FedCS(ClientSelection):
     """
     FedCS algorithm for client selection
     """
+
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
         # print(f"Model Size: {self.model_size}")
@@ -74,7 +75,7 @@ class FedCS(ClientSelection):
             t = self._calculate_Td_s(clients + [best_client]) + theta_d
             # print("T: " + str(t))
             # Select either based on the timeout or the fixed number of clients
-            if t < self.timeout or (self.fixed_client_no and len(clients) < int(self.c_clients*len(all_clients))):
+            if t < self.timeout or (self.fixed_client_no and len(clients) < int(self.c_clients * len(all_clients))):
                 theta = theta_d
                 clients.append(best_client)
             else:

@@ -20,7 +20,6 @@ class Dirichlet(DataQuantityDistribution):
         :return: Array of size (no_clients) containing the number of samples for every client
         """
         # Uses a dirichlet distribution to skew the data quantity
-        min_size = 0
         partition_sizes = np.zeros(self.config.initial_config['no_clients'])
         partition_sizes = np.random.dirichlet(
                 np.repeat(self.config.initial_config['data_config']['data_quantity_skew_parameter'], self.config.initial_config['no_clients']))

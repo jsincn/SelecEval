@@ -11,3 +11,5 @@ matplotlib~=3.7.1
 scikit-learn
 torchmetrics
 flwr[simulation]
+ruff
+black

@@ -6,14 +6,16 @@ import os
 from collections import Counter
 
 import jinja2
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
+import torchvision as torchvision
 
 from .evaluator import Evaluator
 from ..datahandler.datahandler import DataHandler
-from ..util import Config, config
+from ..util import Config
 
 
 class DataDistribution(Evaluator):
@@ -57,7 +59,7 @@ class DataDistribution(Evaluator):
         for c in range(self.config.initial_config['no_clients']):
             state = states[c]
             trainloader = self.trainloaders[c]
-            valloader = self.valloaders[c]
+            self.valloaders[c]
             class_dict = self.data_handler.get_classes()
             train_list = []
             val_list = []
@@ -112,9 +114,22 @@ class DataDistribution(Evaluator):
         plt.savefig(self.config.initial_config['output_dir'] + '/figures/' + 'data_distribution_quantity.svg', bbox_inches='tight')
         plt.close()
 
+
+        # get some random training images
+        dataiter = iter(self.trainloaders[0])
+        images, labels = next(dataiter)
+        self._generate_image(torchvision.utils.make_grid(images))
+
         # Generate HTML report
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=os.path.dirname(__file__)))
         template = env.get_template('templates/data_distribution.html')
         html = template.render(date=datetime.now(), data_config=self.config.initial_config['data_config'])
         with open(self.config.initial_config['output_dir'] + '/data_distribution_report.html', 'w') as f:
             f.write(html)
+
+    def _generate_image(self, img):
+        img = img / 2 + 0.5
+        npimg = img.numpy()
+        plt.imshow(np.transpose(npimg, (1, 2, 0)))
+        plt.savefig(self.config.initial_config['output_dir'] + '/figures/' + 'data_examples.svg')
+        plt.close()

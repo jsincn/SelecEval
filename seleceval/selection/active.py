@@ -50,7 +50,7 @@ class ActiveFL(ClientSelection):
                 'expected_execution_time': client_props.properties['expected_execution_time']
             })
 
-        # Calculate CEP
+        # Calculate Active
         if server_round == 1:
             self.client_valuation = {}
             for c in possible_clients:

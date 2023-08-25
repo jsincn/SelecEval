@@ -7,7 +7,9 @@ import os
 from cerberus import Validator
 from datetime import datetime
 from .config_parameters import *
-import shutil
+
+from .config_parameters.feature_distribution_parameters import data_feature_distribution_parameters, \
+    data_feature_distributions, default_feature_distribution
 
 
 class Config:
@@ -50,8 +52,11 @@ class Config:
                                                        'default': default_label_distribution},
                       'data_quantity_skew': {'type': 'string', 'allowed': data_quantity_distributions,
                                              'default': default_quantity_distribution},
+                      'data_feature_skew': {'type': 'string', 'allowed': data_feature_distributions,
+                                             'default': default_feature_distribution},
                       **data_label_distribution_parameters,
-                      **data_quantity_distribution_parameters
+                      **data_quantity_distribution_parameters,
+                      **data_feature_distribution_parameters
                   }}}
 
         print(schema)

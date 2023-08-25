@@ -7,7 +7,6 @@ from typing import List, Tuple, Union
 from flwr.common import Code, EvaluateRes, GetPropertiesRes, GetPropertiesIns
 from flwr.server.client_proxy import ClientProxy
 
-from ..client.client import Client
 
 
 def get_client_properties(client: ClientProxy, property_ins: GetPropertiesIns, timeout: int):

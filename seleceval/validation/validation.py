@@ -167,7 +167,7 @@ class Validation(Evaluator):
         fig, ax = plt.subplots(layout='constrained', figsize=(20, 10))
         for attribute, measurement in res_dict.items():
             offset = width * multiplier
-            rects = ax.bar(x + offset, measurement, width, label=attribute)
+            ax.bar(x + offset, measurement, width, label=attribute)
             # ax.bar_label(rects, padding=3)
             multiplier += 1
         # Add some text for labels, title and custom x-axis tick labels, etc.
@@ -239,7 +239,6 @@ class Validation(Evaluator):
             df_temps.append(df_temp)
         df_plot = pd.concat(df_temps).groupby(['algorithm']).mean().reset_index()
         df_plot = df_plot.melt(id_vars=['algorithm'], var_name='class', value_name='acc')
-        print(df_plot)
         df_plot['class'] = df_plot['class'].astype('category')
         sns.catplot(
             df_plot, x="class", y='acc', col="algorithm", height=3, aspect=2,
@@ -266,7 +265,6 @@ class Validation(Evaluator):
                 df_temps.append(df_temp)
         df_plot = pd.concat(df_temps).groupby(['algorithm', 'round']).mean().reset_index()
         df_plot = df_plot.melt(id_vars=['algorithm', 'round'], var_name='class', value_name='acc')
-        print(df_plot)
         df_plot['class'] = df_plot['class'].astype('category')
         sns.lineplot(data=df_plot, x="round", y="acc", hue="class", style="algorithm")
         plt.savefig(self.config.initial_config['output_dir'] + '/figures/class_fairness_progress.svg', bbox_inches='tight')
