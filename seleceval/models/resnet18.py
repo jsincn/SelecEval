@@ -16,6 +16,7 @@ class Resnet18(Model):
     """
     Resnet18 model for federated learning
     """
+
     def get_net(self) -> nn.Module:
         """
         Returns the current deep network
@@ -46,7 +47,13 @@ class Resnet18(Model):
         self.net = resnet.to(self.DEVICE)
         self.num_classes = num_classes
 
-    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
+    def train(
+        self,
+        trainloader: DataLoader,
+        client_name: str,
+        epochs: int,
+        verbose: bool = False,
+    ) -> Dict:
         """
         Method for running a training round using cross entropy loss
         :param trainloader: Data loader for training data
@@ -58,7 +65,7 @@ class Resnet18(Model):
         loss_function = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.net.parameters())
         self.net.train()
-        output = {'accuracy': [], 'avg_epoch_loss': [], 'no_samples': len(trainloader)}
+        output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader)}
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -74,13 +81,17 @@ class Resnet18(Model):
                 correct += (torch.max(out.data, 1)[1] == labels).sum().item()
             avg_epoch_loss = total_epoch_loss / total
             epoch_accuracy = correct / total
-            output['accuracy'].append(epoch_accuracy)
-            output['avg_epoch_loss'].append(avg_epoch_loss)
+            output["accuracy"].append(epoch_accuracy)
+            output["avg_epoch_loss"].append(avg_epoch_loss)
             if verbose:
-                print(f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}")
+                print(
+                    f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}"
+                )
         return output
 
-    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, dict]:
+    def test(
+        self, testloader: DataLoader, client_name: str, verbose: bool = False
+    ) -> Tuple[float, float, dict]:
         """
         Method for running a test round
         :param testloader: Data loader for test data
@@ -114,6 +125,12 @@ class Resnet18(Model):
         avg_loss = total_loss / total
         accuracy = correct / total
         if verbose:
-            print(f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set")
-        further_results = {'correct': correct, 'total': total, 'class_statistics': class_statistics}
+            print(
+                f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set"
+            )
+        further_results = {
+            "correct": correct,
+            "total": total,
+            "class_statistics": class_statistics,
+        }
         return avg_loss, accuracy, further_results

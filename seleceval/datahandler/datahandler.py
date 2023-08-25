@@ -20,9 +20,10 @@ class DataHandler(ABC):
     """
     DataHandler is an abstract class that defines the interface for any implemented data handlers
     """
+
     def __init__(self, config: Config):
-        self.NUM_CLIENTS = config.initial_config['no_clients']
-        self.BATCH_SIZE = config.initial_config['batch_size']
+        self.NUM_CLIENTS = config.initial_config["no_clients"]
+        self.BATCH_SIZE = config.initial_config["batch_size"]
         self.config = config
 
     @abstractmethod
@@ -48,16 +49,26 @@ class DataHandler(ABC):
         """
         # Define partition sizes
         # Standard import
-        if self.config.initial_config['distribute_data']:
+        if self.config.initial_config["distribute_data"]:
             # Get Quantity and Label distribution
-            c = data_quantity_distribution_dict[self.config.initial_config['data_config']['data_quantity_skew']]
+            c = data_quantity_distribution_dict[
+                self.config.initial_config["data_config"]["data_quantity_skew"]
+            ]
             quantity_distribution = c(self.config)
-            partition_sizes = quantity_distribution.get_partition_sizes(testset, trainset)
-            c = data_label_distribution_dict[self.config.initial_config['data_config']['data_label_distribution_skew']]
+            partition_sizes = quantity_distribution.get_partition_sizes(
+                testset, trainset
+            )
+            c = data_label_distribution_dict[
+                self.config.initial_config["data_config"][
+                    "data_label_distribution_skew"
+                ]
+            ]
             label_distribution = c(self.config, self.get_classes())
             label_distribution = label_distribution.get_label_distribution()
             # Distribute data
-            datasets = self.distribute_data(label_distribution, partition_sizes, trainset)
+            datasets = self.distribute_data(
+                label_distribution, partition_sizes, trainset
+            )
         else:
             # Load existing distribution
             datasets = self.load_existing_distribution(trainset)
@@ -66,11 +77,17 @@ class DataHandler(ABC):
         trainloaders = []
         valloaders = []
         for ds in datasets:
-            len_val = len(ds) // int(self.config.initial_config['validation_split'] * 100)  # 10 % validation set
+            len_val = len(ds) // int(
+                self.config.initial_config["validation_split"] * 100
+            )  # 10 % validation set
             len_train = len(ds) - len_val
             lengths = [len_train, len_val]
-            ds_train, ds_val = random_split(ds, lengths, torch.Generator().manual_seed(42))
-            trainloaders.append(DataLoader(ds_train, batch_size=self.BATCH_SIZE, shuffle=True))
+            ds_train, ds_val = random_split(
+                ds, lengths, torch.Generator().manual_seed(42)
+            )
+            trainloaders.append(
+                DataLoader(ds_train, batch_size=self.BATCH_SIZE, shuffle=True)
+            )
             valloaders.append(DataLoader(ds_val, batch_size=self.BATCH_SIZE))
         testloader = DataLoader(testset, batch_size=self.BATCH_SIZE)
         return testloader, trainloaders, valloaders
@@ -97,9 +114,13 @@ class DataHandler(ABC):
                 class_subsets.append(idx_to_keep[:label_count])
             # Add random samples to make sure the partition size is correct
             if total < 32:
-                class_subsets.append(random.choices(range(len(self.get_classes())), k=32 - total))
+                class_subsets.append(
+                    random.choices(range(len(self.get_classes())), k=32 - total)
+                )
             elif total % 32 != 0:
-                class_subsets.append(random.choices(range(len(self.get_classes())), k=32 - (total % 32)))
+                class_subsets.append(
+                    random.choices(range(len(self.get_classes())), k=32 - (total % 32))
+                )
             class_subsets = np.concatenate(class_subsets)
             data_set_ids.append(class_subsets)
             s_set = Subset(trainset, class_subsets)
@@ -108,8 +129,10 @@ class DataHandler(ABC):
             # np.random.shuffle(temp_set)
             # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
         data_distribution = pd.DataFrame()
-        data_distribution['distr'] = data_set_ids
-        data_distribution.to_csv(self.config.attributes['data_distribution_output'], index=False)
+        data_distribution["distr"] = data_set_ids
+        data_distribution.to_csv(
+            self.config.attributes["data_distribution_output"], index=False
+        )
         return datasets
 
     def load_existing_distribution(self, trainset):
@@ -119,11 +142,17 @@ class DataHandler(ABC):
         :return: List of torch.utils.data.Subset
         """
         datasets = []
-        data_distribution = pd.read_csv(self.config.initial_config['data_distribution_file'])
+        data_distribution = pd.read_csv(
+            self.config.initial_config["data_distribution_file"]
+        )
         print(data_distribution)
         if len(data_distribution) < self.NUM_CLIENTS:
             raise Exception("Not enough clients in state file")
-        data_set_ids = list(data_distribution['distr'].apply(lambda x: np.fromstring(x[1:-1], dtype=int, sep=' ')))
+        data_set_ids = list(
+            data_distribution["distr"].apply(
+                lambda x: np.fromstring(x[1:-1], dtype=int, sep=" ")
+            )
+        )
         print(data_set_ids)
         for i in range(self.NUM_CLIENTS):
             print(len(data_set_ids[i]))
@@ -142,7 +171,7 @@ class DataHandler(ABC):
         """
         if custom_transforms is None:
             custom_transforms = []
-        skew = self.config.initial_config['data_config']['data_feature_skew']
+        skew = self.config.initial_config["data_config"]["data_feature_skew"]
         trans = [transforms.ToTensor()]
         trans += custom_transforms
         trans += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]

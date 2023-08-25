@@ -8,12 +8,17 @@ from torch.utils.data import DataLoader
 
 
 class Model(ABC):
-
     def __init__(self, device):
         self.DEVICE = device
 
     @abstractmethod
-    def train(self, trainloader: DataLoader, client_name: str, epochs: int, verbose: bool = False) -> Dict:
+    def train(
+        self,
+        trainloader: DataLoader,
+        client_name: str,
+        epochs: int,
+        verbose: bool = False,
+    ) -> Dict:
         """
         Method for running a training round
         :param trainloader: Data loader for training data
@@ -24,7 +29,9 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def test(self, testloader: DataLoader, client_name: str, verbose: bool = False) -> Tuple[float, float, dict]:
+    def test(
+        self, testloader: DataLoader, client_name: str, verbose: bool = False
+    ) -> Tuple[float, float, dict]:
         """
         Method for running a test round
         :param testloader: Data loader for test data

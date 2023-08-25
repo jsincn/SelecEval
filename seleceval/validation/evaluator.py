@@ -11,7 +11,14 @@ class Evaluator(ABC):
     """
     Abstract class for evaluators
     """
-    def __init__(self, config: Config, trainloaders: list, valloaders: list, data_handler: DataHandler):
+
+    def __init__(
+        self,
+        config: Config,
+        trainloaders: list,
+        valloaders: list,
+        data_handler: DataHandler,
+    ):
         pass
 
     def evaluate(self, current_run: dict):

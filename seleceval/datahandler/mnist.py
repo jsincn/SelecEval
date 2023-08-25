@@ -17,11 +17,15 @@ class MNISTDataHandler(DataHandler):
         :return:
         """
         # Download and transform CIFAR-10 (train and test)
-        transform = self.generate_transforms([transforms.Lambda(lambda x: x.repeat(3, 1, 1))])
+        transform = self.generate_transforms(
+            [transforms.Lambda(lambda x: x.repeat(3, 1, 1))]
+        )
         trainset = MNIST("./dataset", train=True, download=True, transform=transform)
         testset = MNIST("./dataset", train=False, download=True, transform=transform)
 
-        testloader, trainloaders, valloaders = self.split_and_transform_data(testset, trainset)
+        testloader, trainloaders, valloaders = self.split_and_transform_data(
+            testset, trainset
+        )
         return trainloaders, valloaders, testloader
 
     def get_classes(self):

@@ -29,12 +29,17 @@ class CEP(ClientSelection):
     """
     Client Eligibility Protocol (CEP) algorithm for client selection in federated learning
     """
+
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
         self.client_scores = None
 
-    def select_clients(self, client_manager: fl.server.ClientManager, parameters: fl.common.Parameters,
-                       server_round: int) -> List[Tuple[ClientProxy, FitIns]]:
+    def select_clients(
+        self,
+        client_manager: fl.server.ClientManager,
+        parameters: fl.common.Parameters,
+        server_round: int,
+    ) -> List[Tuple[ClientProxy, FitIns]]:
         """
         Select clients based on the CEP algorithm
         :param client_manager: The client manager
@@ -48,19 +53,23 @@ class CEP(ClientSelection):
         results, failures = self.run_task_get_properties(list(all_clients.values()))
 
         possible_clients = []
-        for (client_proxy, client_props) in results:
-            possible_clients.append({
-                'proxy': client_proxy,
-                'network_bandwidth': client_props.properties['network_bandwidth'],
-                'client_name': client_props.properties['client_name'],
-                'expected_execution_time': client_props.properties['expected_execution_time']
-            })
+        for client_proxy, client_props in results:
+            possible_clients.append(
+                {
+                    "proxy": client_proxy,
+                    "network_bandwidth": client_props.properties["network_bandwidth"],
+                    "client_name": client_props.properties["client_name"],
+                    "expected_execution_time": client_props.properties[
+                        "expected_execution_time"
+                    ],
+                }
+            )
 
         # Calculate CEP
         if server_round == 1:
             self.client_scores = {}
             for c in possible_clients:
-                self.client_scores[c['client_name']] = 75
+                self.client_scores[c["client_name"]] = 75
         else:
             self.calculate_ces(possible_clients, server_round)
 
@@ -68,12 +77,13 @@ class CEP(ClientSelection):
         clients = []
         i = 0
         while len(clients) < (
-                self.config.initial_config['algorithm_config']['CEP']['c'] * len(all_clients)) and i < len(
-                possible_clients):
+            self.config.initial_config["algorithm_config"]["CEP"]["c"]
+            * len(all_clients)
+        ) and i < len(possible_clients):
             c = possible_clients[i]
-            if c['expected_execution_time'] <= self.config.initial_config['timeout']:
-                if self.client_scores[c['client_name']] >= 75:
-                    clients.append(c['proxy'])
+            if c["expected_execution_time"] <= self.config.initial_config["timeout"]:
+                if self.client_scores[c["client_name"]] >= 75:
+                    clients.append(c["proxy"])
             i += 1
         return [(client, fit_ins) for client in clients]
 
@@ -84,28 +94,37 @@ class CEP(ClientSelection):
         :param server_round: The current server round
         """
         dfs = []
-        with open(self.config.attributes['output_path']) as f:
+        with open(self.config.attributes["output_path"]) as f:
             for line in f.readlines():
                 json_data = pd.json_normalize(json.loads(line))
                 dfs.append(json_data)
         df = pd.concat(dfs, sort=False)
         for c in possible_clients:
-            if len(df[df['client_name'] == c['client_name']]) > 0:
-                ddf = df[df['client_name'] == c['client_name']]
+            if len(df[df["client_name"] == c["client_name"]]) > 0:
+                ddf = df[df["client_name"] == c["client_name"]]
                 # Increase by 5 every round
-                self.client_scores[c['client_name']] += 5
-                if ddf['status'].to_list()[-1] == 'success':
+                self.client_scores[c["client_name"]] += 5
+                if ddf["status"].to_list()[-1] == "success":
                     # Client participated in last round and was successful
                     # Add Ka = 5 + Km = 10
-                    self.client_scores[c['client_name']] += 15
-                elif ddf['status'].to_list()[-1] == 'failure':
+                    self.client_scores[c["client_name"]] += 15
+                elif ddf["status"].to_list()[-1] == "failure":
                     # Client participated in last round and failed
                     # Client failed the task subtract Ka = 5
-                    self.client_scores[c['client_name']] -= 5
-                    if len(set(ddf[ddf['server_round'] >= server_round - 5]['status'].to_list())) == 1 \
-                            and len(ddf[ddf['server_round'] >= server_round - 5].index) >= 5:
+                    self.client_scores[c["client_name"]] -= 5
+                    if (
+                        len(
+                            set(
+                                ddf[ddf["server_round"] >= server_round - 5][
+                                    "status"
+                                ].to_list()
+                            )
+                        )
+                        == 1
+                        and len(ddf[ddf["server_round"] >= server_round - 5].index) >= 5
+                    ):
                         # Client failed in last 5 consecutive rounds
-                        self.client_scores[c['client_name']] -= 20
+                        self.client_scores[c["client_name"]] -= 20
                     else:
                         # Client failed in last round
-                        self.client_scores[c['client_name']] -= 5
+                        self.client_scores[c["client_name"]] -= 5

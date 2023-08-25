@@ -20,6 +20,8 @@ class Uniform(DataLabelDistribution):
         Uses uniform distribution to (not-)skew the data label distribution
         :return: label_distribution
         """
-        label_distribution = np.broadcast_to(np.repeat(1 / len(self.classes), len(self.classes)),
-                                             (self.config.initial_config['no_clients'], len(self.classes)))
+        label_distribution = np.broadcast_to(
+            np.repeat(1 / len(self.classes), len(self.classes)),
+            (self.config.initial_config["no_clients"], len(self.classes)),
+        )
         return label_distribution

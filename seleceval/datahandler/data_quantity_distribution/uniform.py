@@ -24,5 +24,8 @@ class Uniform(DataQuantityDistribution):
         :return:
         """
         partition_sizes = np.repeat(
-            len(trainset) * self.config.initial_config['data_config']['data_quantity_base_parameter'], self.config.initial_config['no_clients'])
+            len(trainset)
+            * self.config.initial_config["data_config"]["data_quantity_base_parameter"],
+            self.config.initial_config["no_clients"],
+        )
         return partition_sizes

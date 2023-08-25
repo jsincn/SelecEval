@@ -8,8 +8,9 @@ from flwr.common import Code, EvaluateRes, GetPropertiesRes, GetPropertiesIns
 from flwr.server.client_proxy import ClientProxy
 
 
-
-def get_client_properties(client: ClientProxy, property_ins: GetPropertiesIns, timeout: int):
+def get_client_properties(
+    client: ClientProxy, property_ins: GetPropertiesIns, timeout: int
+):
     """
     Get the properties of a client
     :param client: The client proxy (for ray)
@@ -22,9 +23,9 @@ def get_client_properties(client: ClientProxy, property_ins: GetPropertiesIns, t
 
 
 def _handle_finished_future_after_properties_get(
-        future: concurrent.futures.Future,  # type: ignore
-        results: List[Tuple[ClientProxy, GetPropertiesRes]],
-        failures: List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]],
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, GetPropertiesRes]],
+    failures: List[Union[Tuple[ClientProxy, GetPropertiesRes], BaseException]],
 ) -> None:
     """
     Convert finished future into either a result or a failure
@@ -53,9 +54,9 @@ def _handle_finished_future_after_properties_get(
 
 
 def _handle_finished_future_after_evaluate(
-        future: concurrent.futures.Future,  # type: ignore
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, EvaluateRes]],
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ) -> None:
     """
     Convert finished future into either a result or a failure

@@ -8,6 +8,7 @@ class ClientFunction:
     """
     Class used to create clients
     """
+
     def __init__(self, clientclass, trainloaders, valloaders, model, config):
         self.model = model
         self.clientClass = clientclass

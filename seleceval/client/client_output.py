@@ -10,11 +10,13 @@ from .client_state import ClientState
 
 
 class ClientOutput:
-
     def __init__(self, state: ClientState, server_round: int, file: str):
         self.file = file
-        self.output_dict = {'server_round': server_round, 'client_name': state.get('client_name'),
-                            'state': state.get_all()}
+        self.output_dict = {
+            "server_round": server_round,
+            "client_name": state.get("client_name"),
+            "state": state.get_all(),
+        }
 
     def set(self, key: Union[str, int], value: Any):
         """
@@ -36,7 +38,7 @@ class ClientOutput:
         """
         Write output
         """
-        self.output_dict['current_timestamp'] = str(datetime.datetime.now())
+        self.output_dict["current_timestamp"] = str(datetime.datetime.now())
         with open(self.file, "a") as g:
             fcntl.flock(g, fcntl.LOCK_EX)
             g.write(json.dumps(self.output_dict) + "\n")

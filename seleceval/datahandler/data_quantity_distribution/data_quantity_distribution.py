@@ -10,6 +10,7 @@ class DataQuantityDistribution(ABC):
     DataQuantityDistribution is an abstract class that defines the
     interface for any implemented data quantity distributions
     """
+
     def __init__(self, config):
         self.config = config
         pass

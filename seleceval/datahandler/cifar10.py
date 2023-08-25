@@ -25,7 +25,9 @@ class Cifar10DataHandler(DataHandler):
         trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
         testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
 
-        testloader, trainloaders, valloaders = self.split_and_transform_data(testset, trainset)
+        testloader, trainloaders, valloaders = self.split_and_transform_data(
+            testset, trainset
+        )
         return trainloaders, valloaders, testloader
 
     def get_classes(self):
