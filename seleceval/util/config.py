@@ -35,6 +35,8 @@ class Config:
             "batch_size": {"type": "integer", "min": 1, "default": 32},
             "validation_split": {"type": "float", "min": 0, "max": 1, "default": 0.1},
             "device": {"type": "string", "allowed": ["cuda", "cpu"], "default": "cpu"},
+            "num_cpu_per_client": {"type": "integer", "min": 1, "max": os.cpu_count(), "default": 2},
+            "num_gpu_per_client": {"type": "float", "min": 0, "default": 0.1},
             "verbose": {"type": "boolean", "default": True},
             "timeout": {"type": "integer", "min": 1},
             "generate_clients": {"type": "boolean", "default": True},

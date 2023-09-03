@@ -106,9 +106,9 @@ def run_training_simulation(
     :param valloaders:
     """
     if DEVICE.type == "cuda":
-        client_resources = {"num_gpus": 0.1, "num_cpus": 6}
+        client_resources = {"num_gpus": config.initial_config['num_gpu_per_client'], "num_cpus": config.initial_config['num_cpu_per_client']}
     else:
-        client_resources = {"num_cpus": 1}
+        client_resources = {"num_cpus": config.initial_config['num_cpu_per_client']}
     for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
