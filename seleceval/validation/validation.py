@@ -98,7 +98,11 @@ class Validation(Evaluator):
             print("Validating round ", validate_round)
             file = self.model_output_path + str(validate_round + 1) + ".pth"
             print("Loading net from ", file)
-            state_dict = torch.load(file)
+            try:
+                state_dict = torch.load(file)
+            except FileNotFoundError:
+                print("File ", file, " not found. Skipping validation round.")
+                continue
             model.get_net().load_state_dict(state_dict)
             state_df = pd.read_csv(
                 self.config.attributes["input_state_file"], index_col=0

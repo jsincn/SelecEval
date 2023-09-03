@@ -20,12 +20,12 @@ from ..util import Config
 
 class Client(fl.client.NumPyClient):
     def __init__(
-        self,
-        model: Model,
-        trainloader: DataLoader,
-        valloader: DataLoader,
-        cid: str,
-        config: Config,
+            self,
+            model: Model,
+            trainloader: DataLoader,
+            valloader: DataLoader,
+            cid: str,
+            config: Config,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
@@ -39,7 +39,7 @@ class Client(fl.client.NumPyClient):
         self.net = self.model.get_net()
 
     def fit(
-        self, parameters: List[ndarray], config: flwr.common.FitIns
+            self, parameters: List[ndarray], config: flwr.common.FitIns
     ) -> Tuple[List[ndarray], int, Dict]:
         """
         Fit the model, write output and return parameters and metrics
@@ -47,12 +47,14 @@ class Client(fl.client.NumPyClient):
         :param config: Configuration for this fit
         :return: The parameters of the global model, the number of samples used and the metrics
         """
+        verbose = self.config.initial_config["verbose"]
+        client_name = self.state.get("client_name")
         execution_time = self.state.get("expected_execution_time") * self.state.get(
             "i_performance_factor"
         )
         if self.state.get("network_bandwidth") > 0:
             upload_time = (
-                self.model.get_size() / self.state.get("network_bandwidth") * 8
+                    self.model.get_size() / self.state.get("network_bandwidth") * 8
             )
         else:
             upload_time = -1
@@ -64,6 +66,10 @@ class Client(fl.client.NumPyClient):
             self.output.set("status", "fail")
             self.output.set("reason", "reliability failure")
             self.output.write()
+            if verbose:
+                print(
+                    f"{client_name}: Reliability failure with reliability {self.state.get('i_reliability')}"
+                )
             return get_parameters(self.net), -1, {}
         if self._calculate_timeout():
             self.output.set("train_output", {})
@@ -73,6 +79,10 @@ class Client(fl.client.NumPyClient):
             self.output.set("status", "fail")
             self.output.set("reason", "timeout failure")
             self.output.write()
+            if verbose:
+                print(
+                    f"{client_name}: Timeout failure with timeout {self._calculate_timeout()} > {self.config.initial_config['timeout']}"
+                )
             return get_parameters(self.net), -1, {}
         start_time = time.time()
         set_parameters(self.net, parameters)
@@ -80,7 +90,7 @@ class Client(fl.client.NumPyClient):
             self.trainloader,
             self.state.get("client_name"),
             epochs=self.config.initial_config["no_epochs"],
-            verbose=self.config.initial_config["verbose"],
+            verbose=,
         )
         end_time = time.time()
         last_execution_time = end_time - start_time
@@ -141,8 +151,17 @@ class Client(fl.client.NumPyClient):
         expected execution time and performance factor
         :return:
         """
+        t = self._calculate_expected_runtime()
+        return t > self.config.initial_config["timeout"]
+
+    def _calculate_expected_runtime(self):
+        """
+        Calculates the expected runtime of the training given the network bandwidth, expected execution time and
+        performance factor
+        :return: t  Expected runtime
+        """
         t = self.model.get_size() / (self.state.get("network_bandwidth") + 0.000001) * 8
         t += self.state.get("expected_execution_time") * self.state.get(
             "i_performance_factor"
         )
-        return t > self.config.initial_config["timeout"]
+        return t

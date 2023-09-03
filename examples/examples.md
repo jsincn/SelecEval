@@ -1,0 +1,16 @@
+# SelecEval Examples
+
+This folder contains a few examples for running SelecEval. The examples are provided as .json files and can be run using the following command:
+Runtime is provided as a rough estimate for a single run on a single GPU (RTX 3070). 
+If you run into memory issues you can try to adjust the share of resources per simulated client in the .json file.
+Alternatively you may disable CUDA acceleration.
+```bash
+python -m seleceval.run example_xxx.json
+```
+
+The examples are provided as follows:
+
+| Example        | Description                                                                                                                                                        | Runtime |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| example_1.json | A simple example with 10 clients and 2 rounds of training on the MNIST dataset. Acceleration using CUDA is disabled. Only Random Selection and FedCS are included. | < 3 min |
+| example_2.json |                                                                                                                                                                 |         |
