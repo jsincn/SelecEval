@@ -25,6 +25,8 @@ class DataHandler(ABC):
         self.NUM_CLIENTS = config.initial_config["no_clients"]
         self.BATCH_SIZE = config.initial_config["batch_size"]
         self.config = config
+        if config.initial_config['verbose']:
+            print("Loading dataset")
 
     @abstractmethod
     def load_distributed_datasets(self):

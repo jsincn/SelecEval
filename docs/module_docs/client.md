@@ -1,12 +1,33 @@
-<a id="client.client_state"></a>
+# Client
 
-# client.client\_state
+## Table of Contents
+
+* [client.client\_state](#client.client_state)
+  * [ClientState](#client.client_state.ClientState)
+    * [get](#client.client_state.ClientState.get)
+    * [get\_all](#client.client_state.ClientState.get_all)
+* [client.client\_output](#client.client_output)
+  * [ClientOutput](#client.client_output.ClientOutput)
+    * [set](#client.client_output.ClientOutput.set)
+    * [get](#client.client_output.ClientOutput.get)
+    * [write](#client.client_output.ClientOutput.write)
+* [client.client\_fn](#client.client_fn)
+  * [ClientFunction](#client.client_fn.ClientFunction)
+    * [client\_fn](#client.client_fn.ClientFunction.client_fn)
+* [client.client](#client.client)
+  * [Client](#client.client.Client)
+    * [fit](#client.client.Client.fit)
+    * [evaluate](#client.client.Client.evaluate)
+    * [get\_properties](#client.client.Client.get_properties)
+* [client.helpers](#client.helpers)
+  * [get\_parameters](#client.helpers.get_parameters)
+  * [set\_parameters](#client.helpers.set_parameters)
+
+<h1 id="client.client_state">client.client_state</h1>
 
 Client state class
 
-<a id="client.client_state.ClientState"></a>
-
-## ClientState Objects
+<h2 id="client.client_state.ClientState">ClientState Objects</h2>
 
 ```python
 class ClientState()
@@ -14,9 +35,7 @@ class ClientState()
 
 Utility class for handling client state
 
-<a id="client.client_state.ClientState.get"></a>
-
-#### get
+<h4 id="client.client_state.ClientState.get">get</h4>
 
 ```python
 def get(attr) -> Union[str, int, float]
@@ -32,9 +51,7 @@ Get attribute from state
 
 Value of attribute
 
-<a id="client.client_state.ClientState.get_all"></a>
-
-#### get\_all
+<h4 id="client.client_state.ClientState.get_all">get_all</h4>
 
 ```python
 def get_all() -> Dict
@@ -46,23 +63,17 @@ Get all attributes from state
 
 Dictionary of all attributes
 
-<a id="client.client_output"></a>
-
-# client.client\_output
+<h1 id="client.client_output">client.client_output</h1>
 
 Utility class for handling client output
 
-<a id="client.client_output.ClientOutput"></a>
-
-## ClientOutput Objects
+<h2 id="client.client_output.ClientOutput">ClientOutput Objects</h2>
 
 ```python
 class ClientOutput()
 ```
 
-<a id="client.client_output.ClientOutput.set"></a>
-
-#### set
+<h4 id="client.client_output.ClientOutput.set">set</h4>
 
 ```python
 def set(key: Union[str, int], value: Any)
@@ -75,9 +86,7 @@ Set output key to values
 - `key`: String or integer key
 - `value`: Value to set
 
-<a id="client.client_output.ClientOutput.get"></a>
-
-#### get
+<h4 id="client.client_output.ClientOutput.get">get</h4>
 
 ```python
 def get(key: Union[str, int]) -> Any
@@ -93,9 +102,7 @@ Get output value for key
 
 Value for key
 
-<a id="client.client_output.ClientOutput.write"></a>
-
-#### write
+<h4 id="client.client_output.ClientOutput.write">write</h4>
 
 ```python
 def write()
@@ -103,15 +110,11 @@ def write()
 
 Write output
 
-<a id="client.client_fn"></a>
-
-# client.client\_fn
+<h1 id="client.client_fn">client.client_fn</h1>
 
 Wrapper to allow Ray to create clients
 
-<a id="client.client_fn.ClientFunction"></a>
-
-## ClientFunction Objects
+<h2 id="client.client_fn.ClientFunction">ClientFunction Objects</h2>
 
 ```python
 class ClientFunction()
@@ -119,9 +122,7 @@ class ClientFunction()
 
 Class used to create clients
 
-<a id="client.client_fn.ClientFunction.client_fn"></a>
-
-#### client\_fn
+<h4 id="client.client_fn.ClientFunction.client_fn">client_fn</h4>
 
 ```python
 def client_fn(cid: str) -> Client
@@ -137,23 +138,17 @@ Function used to create clients
 
 Instance of the client class
 
-<a id="client.client"></a>
-
-# client.client
+<h1 id="client.client">client.client</h1>
 
 Client class for the federated learning framework
 
-<a id="client.client.Client"></a>
-
-## Client Objects
+<h2 id="client.client.Client">Client Objects</h2>
 
 ```python
 class Client(fl.client.NumPyClient)
 ```
 
-<a id="client.client.Client.fit"></a>
-
-#### fit
+<h4 id="client.client.Client.fit">fit</h4>
 
 ```python
 def fit(parameters: List[ndarray],
@@ -171,9 +166,7 @@ Fit the model, write output and return parameters and metrics
 
 The parameters of the global model, the number of samples used and the metrics
 
-<a id="client.client.Client.evaluate"></a>
-
-#### evaluate
+<h4 id="client.client.Client.evaluate">evaluate</h4>
 
 ```python
 def evaluate(parameters, config)
@@ -190,9 +183,7 @@ Evaluate the model
 
 loss, number of samples and metrics
 
-<a id="client.client.Client.get_properties"></a>
-
-#### get\_properties
+<h4 id="client.client.Client.get_properties">get_properties</h4>
 
 ```python
 def get_properties(config=None) -> Dict
@@ -204,18 +195,14 @@ Return properties of the current client
 
 - `config`: Config for getting the properties
 
-<a id="client.helpers"></a>
-
-# client.helpers
+<h1 id="client.helpers">client.helpers</h1>
 
 Helper functions for the client
 Specifically, this file contains the following functions:
     - get_parameters: Returns the parameters of a model as a list of numpy arrays
     - set_parameters: Sets the parameters of a model from a list of numpy arrays
 
-<a id="client.helpers.get_parameters"></a>
-
-#### get\_parameters
+<h4 id="client.helpers.get_parameters">get_parameters</h4>
 
 ```python
 def get_parameters(net) -> List[np.ndarray]
@@ -231,9 +218,7 @@ Returns the parameters of a model as a list of numpy arrays
 
 The parameters of the model as a list of numpy arrays
 
-<a id="client.helpers.set_parameters"></a>
-
-#### set\_parameters
+<h4 id="client.helpers.set_parameters">set_parameters</h4>
 
 ```python
 def set_parameters(net, parameters: List[np.ndarray])

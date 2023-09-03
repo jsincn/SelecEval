@@ -3,7 +3,8 @@ Main file for the simulation
 """
 import flwr as fl
 import torch
-
+import pandas as pd
+pd.options.mode.chained_assignment = None # Disables warning for chained assignment
 from .datahandler.mnist import MNISTDataHandler
 from .strategy import strategy_dict
 from .validation.training import Training

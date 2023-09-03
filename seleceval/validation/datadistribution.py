@@ -41,7 +41,7 @@ class DataDistribution(Evaluator):
     def evaluate(self, current_run: dict):
         """
         Evaluates the data distribution
-        :param current_run: Dict containing details on the current run icnluding dataset, no_clients
+        :param current_run: Dict containing details on the current run including dataset, no_clients
         """
         self.output_path_train = (
             self.config.initial_config["output_dir"]

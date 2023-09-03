@@ -81,7 +81,7 @@ class Client(fl.client.NumPyClient):
             self.output.write()
             if verbose:
                 print(
-                    f"{client_name}: Timeout failure with timeout {self._calculate_timeout()} > {self.config.initial_config['timeout']}"
+                    f"{client_name}: Timeout failure with timeout {self._calculate_expected_runtime()} > {self.config.initial_config['timeout']}"
                 )
             return get_parameters(self.net), -1, {}
         start_time = time.time()

@@ -1,7 +1,12 @@
 # Algorithm Documentation: Pow-D
 
-Pow-D aims to optimize the number of clients involved in each round by focusing on the clients with the highest loss 
-on their individual validation set.
+The PowD client selection strategy proposed by Cho et. al. in 2020 is based on sampling
+the clients with the highest local loss. Based on their convergence analysis this results in
+an increased convergence rate compared to unbiased client selection. In their own testing,
+they achieved 3× higher convergence speed as well as up to 10% higher accuracy compared
+to random selection. We elected to use the computation efficient variant $\pi_{cpow-d}$
+which uses a randomly sampled subset to estimate the client loss. For this, we used the
+client’s validation set, as this is randomly sampled from a client’s assigned training samples.
 
 It is based on the paper 
 ```

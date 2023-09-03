@@ -24,7 +24,7 @@ class Evaluator(ABC):
     def evaluate(self, current_run: dict):
         """
         Runs the evaluation if necessary, e.g. conducting a forward pass on the validation sets
-        :param current_run:
+        :param current_run: Dict containing details on the current run including dataset, no_clients
         """
         pass
 
