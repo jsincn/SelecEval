@@ -90,7 +90,7 @@ class Client(fl.client.NumPyClient):
             self.trainloader,
             self.state.get("client_name"),
             epochs=self.config.initial_config["no_epochs"],
-            verbose=,
+            verbose=verbose
         )
         end_time = time.time()
         last_execution_time = end_time - start_time

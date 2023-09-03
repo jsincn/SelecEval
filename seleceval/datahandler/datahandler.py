@@ -108,7 +108,6 @@ class DataHandler(ABC):
             for j in range(len(self.get_classes())):
                 label_count = int(label_distribution[i][j] * partition_sizes[i]) + 1
                 total += label_count
-                print(label_count)
                 idx_to_keep = [i for i, c in enumerate(trainset.targets) if c == j]
                 np.random.shuffle(idx_to_keep)
                 class_subsets.append(idx_to_keep[:label_count])
@@ -125,7 +124,6 @@ class DataHandler(ABC):
             data_set_ids.append(class_subsets)
             s_set = Subset(trainset, class_subsets)
             datasets.append(s_set)
-            print(len(class_subsets))
             # np.random.shuffle(temp_set)
             # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
         data_distribution = pd.DataFrame()
@@ -145,7 +143,6 @@ class DataHandler(ABC):
         data_distribution = pd.read_csv(
             self.config.initial_config["data_distribution_file"]
         )
-        print(data_distribution)
         if len(data_distribution) < self.NUM_CLIENTS:
             raise Exception("Not enough clients in state file")
         data_set_ids = list(
@@ -153,12 +150,9 @@ class DataHandler(ABC):
                 lambda x: np.fromstring(x[1:-1], dtype=int, sep=" ")
             )
         )
-        print(data_set_ids)
         for i in range(self.NUM_CLIENTS):
-            print(len(data_set_ids[i]))
             s_set = Subset(trainset, data_set_ids[i])
             datasets.append(s_set)
-            print(len(s_set))
         return datasets
 
     def generate_transforms(self, custom_transforms=None):

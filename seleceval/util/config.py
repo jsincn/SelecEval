@@ -114,8 +114,6 @@ class Config:
             },
         }
 
-        print(schema)
-
         # Set data_config_schema
 
         v = Validator(schema, require_all=True)
@@ -124,7 +122,6 @@ class Config:
             config_dict = json.load(json_file)
             if not v.validate(config_dict):
                 raise ValueError(v.errors)
-            print(v.normalized(config_dict))
             self.initial_config = v.normalized(config_dict)
 
         self.initial_config["output_dir"] = (
