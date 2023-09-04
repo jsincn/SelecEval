@@ -1,4 +1,4 @@
-# Algorithm Documentation: Pow-D
+# Pow-D
 
 The PowD client selection strategy proposed by Cho et. al. in 2020 is based on sampling
 the clients with the highest local loss. Based on their convergence analysis this results in

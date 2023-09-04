@@ -1,4 +1,4 @@
-# Algorithm Documentation: FedCS
+# FedCS
 
 FedCS aims to optimize the number of clients involved in each round. It does so by greedily selecting the largest number of clients that can feasibly complete the round of training.
 This reduces the number of clients that participate, but fail to contribute to the global model in each round.

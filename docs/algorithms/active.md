@@ -1,4 +1,4 @@
-# Algorithm Documentation: ActiveFL
+# ActiveFL
 
 ActiveFL is an algorithm introduced in 2019 with the goal of selecting an optimized subset of
 clients to participate in federated learning based on a value function. This value

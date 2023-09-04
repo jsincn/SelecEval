@@ -1,4 +1,4 @@
-# Algorithm Documentation: CEP
+# CEP
 
 The client eligibility protocol for federated learning was introduced by Asad et al. in 2022. The core idea of this strategy is to select clients based on their performance in
 16 4 Implementation

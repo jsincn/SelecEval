@@ -1,4 +1,4 @@
-# Algorithm Documentation: Random
+# Random
 
 The simplest selection strategy is random selection. It was first introduced along with federated learning itself in 2016. It is still the most frequently used strategy due to its
 simplicity and good results. The core parameter for this strategy is c, which is the percentage of available clients to select for a particular learning round. Common values for c range
