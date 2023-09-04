@@ -1,6 +1,8 @@
 # SelecEval
 This repository contains the Code release for my bachelor thesis, "Evaluation of the impact of client selection on federated learning" at the chair of Chair of Robotics, Artificial Intelligence and Real-time Systems at the Technical University of Munich.
 
+[![Deploy Documentation](https://github.com/jsincn/SelecEval/actions/workflows/documentation.yml/badge.svg?branch=main)](https://github.com/jsincn/SelecEval/actions/workflows/documentation.yml)
+
 ## Abstract
 
 With the increasing demand for privacy-preserving machine learning, Federated Learning has emerged as a technique for decentralized training. It enables clients to train locally and share their updates with the other clients in the federation. This negates the need to transmit raw data to a centralized server while still benefitting from training on data collected by all clients. Due to practical constraints, training all clients is usually not feasible. Furthermore, clients are usually heterogeneous, with different capabilities and collected data. Numerous approaches have been developed to select clients for participation in each training round effectively. However, no clear comparison exists between the different strategies and approaches in a unified scenario. This thesis presents SelecEval, a comprehensive simulator for evaluating client selection approaches. SelecEval includes a robust simulation of client and data heterogeneity as well as extensive analytics tools to enable a detailed comparison between different approaches. It also includes reference implementations of common selection strategies and is modular, allowing quick integration of new datasets, simulation components, and strategies for comparison.
@@ -81,6 +83,9 @@ o_20230825_123456/
 ├── validation_report.html
 ├── training_performance.html
 ```
+
+## Documentation
+Documentation is available under [jsincn.github.io/SelecEval/](jsincn.github.io/SelecEval/)
 
 ## Adding new datasets
 Documentation on adding new datasets is available in the [docs/datasets.md](docs/datasets.md) file.
