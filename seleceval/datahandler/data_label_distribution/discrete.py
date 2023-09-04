@@ -26,7 +26,7 @@ class Discrete(DataLabelDistribution):
             0.0, len(self.classes) * self.config.initial_config["no_clients"]
         )
         for i in range(self.config.initial_config["no_clients"]):
-            classes = random.choices(
+            classes = random.sample(
                 range(len(self.classes)),
                 k=self.config.initial_config["data_config"][
                     "data_label_class_quantity"
@@ -40,4 +40,5 @@ class Discrete(DataLabelDistribution):
             label_distribution,
             (self.config.initial_config["no_clients"], len(self.classes)),
         )
+        print(label_distribution)
         return label_distribution
