@@ -12,7 +12,7 @@ With the increasing demand for privacy-preserving machine learning, Federated Le
 Clone this repo. 
 
 ```bash
-git clone [https://github.com/jsincn/SelecEval](https://github.com/jsincn/SelecEval.git)
+git clone https://github.com/jsincn/SelecEval.git
 cd SelecEval
 ```
 
