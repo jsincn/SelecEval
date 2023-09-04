@@ -85,7 +85,7 @@ o_20230825_123456/
 ```
 
 ## Documentation
-Documentation is available under [jsincn.github.io/SelecEval/](jsincn.github.io/SelecEval/)
+Documentation is available under [https://jsincn.github.io/SelecEval/](https://jsincn.github.io/SelecEval/)
 
 ## Adding new datasets
 Documentation on adding new datasets is available in the [docs/datasets.md](docs/datasets.md) file.
