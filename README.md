@@ -12,8 +12,8 @@ With the increasing demand for privacy-preserving machine learning, Federated Le
 Clone this repo. 
 
 ```bash
-git clone https://github.com/...
-cd durf
+git clone [https://github.com/jsincn/SelecEval](https://github.com/jsincn/SelecEval.git)
+cd SelecEval
 ```
 
 Create a new virtual environment and install dependencies.
