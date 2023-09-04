@@ -1,5 +1,5 @@
 # SelecEval
-This repository contains the Code release for my thesis,
+This repository contains the Code release for my bachelor thesis, "Evaluation of the impact of client selection on federated learning" at the chair of Chair of Robotics, Artificial Intelligence and Real-time Systems at the Technical University of Munich.
 
 ## Abstract
 
