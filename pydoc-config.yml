@@ -1,0 +1,50 @@
+loaders:
+- type: python
+  search_path: [seleceval]
+renderer:
+  type: mkdocs
+  output_directory: docs
+  content_directory_name: module_docs
+  mkdocs_config:
+    site_name: SelecEval
+    site_description: A Python package for evaluating client selection methods for federated learning
+    site_author: Jakob Steimle
+    nav:
+      - 'index.md'
+  markdown:
+    render_toc: true
+    html_headers: true
+    render_page_title: true
+  pages:
+  - title: DataHandler
+    name: datahandler
+    contents:
+      - datahandler.*
+  - title: Client
+    name: client
+    contents:
+      - client.*
+  - title: Strategy
+    name: strategy
+    contents:
+      - strategy.*
+  - title: Models
+    name: models
+    contents:
+      - models.*
+  - title: Selection
+    name: selection
+    contents:
+      - selection.*
+  - title: Strategy
+    name: strategy
+    contents:
+      - strategy.*
+  - title: Utility
+    name: util
+    contents:
+      - util.*
+  - title: Validation
+    name: validation
+    contents:
+      - validation.*
