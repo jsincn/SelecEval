@@ -10,4 +10,4 @@ As such there are two main branches included in this repository:
 For reproducing the results from the thesis, please use the ```thesis``` branch. 
 However, it may contain bugs and is not updated.
 
-The configuration files used for the experiments are included in the [examples/paper/](examples/paper) folder.
+The configuration files used for the experiments are included in the [Examples Section](examples/paper/index.md).

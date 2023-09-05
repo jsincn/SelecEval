@@ -1,4 +1,4 @@
-# Examples
+# Example Descriptions
 
 The examples folder contains a few examples for running SelecEval. The examples are provided as .json files and can be run using the following command:
 Runtime is provided as a rough estimate for a single run on a AMD Ryzen 9 3900X (24) @ 3.800GHz . 

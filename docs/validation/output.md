@@ -4,7 +4,7 @@ Once a run is completed reports will be automatically included in the output fol
 HTML files. Documentation on the individual charts that are part of the report are included in the report.
 
 The raw data is also included in the output folder. The data is stored in CSV and JSON Files.
-Methods for manual ingest of the files into pandas dataframes are included in the [evaluation/](evaluation/) folder.
+Methods for manual ingest of the files into pandas dataframes are included in the [Advanced Analytics](advanced_analytics/loading_raw_files.md) folder.
 Included here are also some example analytics scripts. These are provided as .ipynb files and require
 Jupyter Server to run.
 
