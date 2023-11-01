@@ -50,20 +50,8 @@ class CEP(ClientSelection):
         config = {}
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
-        results, failures = self.run_task_get_properties(list(all_clients.values()))
 
-        possible_clients = []
-        for client_proxy, client_props in results:
-            possible_clients.append(
-                {
-                    "proxy": client_proxy,
-                    "network_bandwidth": client_props.properties["network_bandwidth"],
-                    "client_name": client_props.properties["client_name"],
-                    "expected_execution_time": client_props.properties[
-                        "expected_execution_time"
-                    ],
-                }
-            )
+        possible_clients = self.get_client_properties(list(all_clients.values()))
 
         # Calculate CEP
         if server_round == 1:

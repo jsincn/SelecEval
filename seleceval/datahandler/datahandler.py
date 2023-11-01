@@ -2,6 +2,7 @@
 This contains the abstract data handler that defines the interface for any implemented
 data handlers and provides some universal methods
 """
+import csv
 import random
 from abc import ABC, abstractmethod
 import numpy as np
@@ -79,11 +80,10 @@ class DataHandler(ABC):
         trainloaders = []
         valloaders = []
         for ds in datasets:
-            len_val = len(ds) // int(
-                self.config.initial_config["validation_split"] * 100
-            )  # 10 % validation set
+            len_val = int(len(ds) * self.config.initial_config["validation_split"])  # 10 % validation set
             len_train = len(ds) - len_val
             lengths = [len_train, len_val]
+            print(lengths)
             ds_train, ds_val = random_split(
                 ds, lengths, torch.Generator().manual_seed(42)
             )
@@ -116,20 +116,22 @@ class DataHandler(ABC):
             # Add random samples to make sure the partition size is correct
             if total < 32:
                 class_subsets.append(
-                    random.choices(range(len(self.get_classes())), k=32 - total)
+                    random.choices(range(len(trainset)), k=32 - total)
                 )
             elif total % 32 != 0:
                 class_subsets.append(
-                    random.choices(range(len(self.get_classes())), k=32 - (total % 32))
+                    random.choices(range(len(trainset)), k=32 - (total % 32))
                 )
             class_subsets = np.concatenate(class_subsets)
             data_set_ids.append(class_subsets)
+            print(class_subsets)
             s_set = Subset(trainset, class_subsets)
             datasets.append(s_set)
             # np.random.shuffle(temp_set)
             # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
         data_distribution = pd.DataFrame()
         data_distribution["distr"] = data_set_ids
+        data_distribution["distr"] = data_distribution["distr"].apply(lambda x: "[" + " ".join(map(str, x)) + "]")
         data_distribution.to_csv(
             self.config.attributes["data_distribution_output"], index=False
         )
@@ -146,7 +148,7 @@ class DataHandler(ABC):
             self.config.initial_config["data_distribution_file"]
         )
         if len(data_distribution) < self.NUM_CLIENTS:
-            raise Exception("Not enough clients in state file")
+            raise Exception("Not enough clients in data distribution file")
         data_set_ids = list(
             data_distribution["distr"].apply(
                 lambda x: np.fromstring(x[1:-1], dtype=int, sep=" ")

@@ -34,10 +34,10 @@ class FedCS(ClientSelection):
             self.c_clients = config.initial_config["algorithm_config"]["FedCS"]["c"]
 
     def select_clients(
-        self,
-        client_manager: fl.server.ClientManager,
-        parameters: fl.common.Parameters,
-        server_round: int,
+            self,
+            client_manager: fl.server.ClientManager,
+            parameters: fl.common.Parameters,
+            server_round: int,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """
         Select clients based on the FedCS algorithm
@@ -50,7 +50,7 @@ class FedCS(ClientSelection):
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
         if self.pre_param > 0:
-            client_list = random.choices(
+            client_list = random.sample(
                 list(all_clients.values()), k=int(self.pre_param * len(all_clients))
             )
         else:
@@ -61,18 +61,8 @@ class FedCS(ClientSelection):
         # Client Selection happens here:
         clients = []
         theta = 0
-        possible_clients = []
-        for client_proxy, client_props in results:
-            possible_clients.append(
-                {
-                    "proxy": client_proxy,
-                    "network_bandwidth": client_props.properties["network_bandwidth"],
-                    "client_name": client_props.properties["client_name"],
-                    "expected_execution_time": client_props.properties[
-                        "expected_execution_time"
-                    ],
-                }
-            )
+
+        possible_clients = self.get_client_properties(client_list)
 
         while len(possible_clients) > 0:
             # print("Possible clients: " + str(list(map(lambda x: x['client_name'], possible_clients))))
@@ -85,9 +75,9 @@ class FedCS(ClientSelection):
             # print(best_client)
             # print("Theta: " + str(theta))
             theta_d = (
-                theta
-                + self._calculate_tUL_k(best_client)
-                + max(0, self._calculate_tUD_k(best_client) - theta)
+                    theta
+                    + self._calculate_tUL_k(best_client)
+                    + max(0, self._calculate_tUD_k(best_client) - theta)
             )
             # print("tULx: ", self._calculate_tUL_k(best_client))
             # print("tUDx: ", self._calculate_tUD_k(best_client))
@@ -96,8 +86,8 @@ class FedCS(ClientSelection):
             # print("T: " + str(t))
             # Select either based on the timeout or the fixed number of clients
             if t < self.timeout or (
-                self.fixed_client_no
-                and len(clients) < int(self.c_clients * len(all_clients))
+                    self.fixed_client_no
+                    and len(clients) < int(self.c_clients * len(all_clients))
             ):
                 theta = theta_d
                 clients.append(best_client)

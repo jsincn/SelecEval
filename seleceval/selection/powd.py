@@ -29,10 +29,10 @@ class PowD(ClientSelection):
         ]
 
     def select_clients(
-        self,
-        client_manager: fl.server.ClientManager,
-        parameters: fl.common.Parameters,
-        server_round: int,
+            self,
+            client_manager: fl.server.ClientManager,
+            parameters: fl.common.Parameters,
+            server_round: int,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """
         Select clients based on the Pow-D algorithm
@@ -44,19 +44,7 @@ class PowD(ClientSelection):
         config = {}
         fit_ins = FitIns(parameters, config)
         all_clients: dict[str, ClientProxy] = client_manager.all()
-        results, failures = self.run_task_get_properties(list(all_clients.values()))
-        possible_clients = []
-        total_data_size = 0
-        for client_proxy, client_props in results:
-            possible_clients.append(
-                {
-                    "proxy": client_proxy,
-                    "network_bandwidth": client_props.properties["network_bandwidth"],
-                    "client_name": client_props.properties["client_name"],
-                    "sample_size": client_props.properties["sample_size"],
-                }
-            )
-            total_data_size += client_props.properties["sample_size"]
+        possible_clients = self.get_client_properties(list(all_clients.values()), calculate_sample_size=True)
 
         clients_for_evaluation = random.choices(
             possible_clients,

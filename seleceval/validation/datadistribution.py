@@ -80,13 +80,13 @@ class DataDistribution(Evaluator):
         for c in range(self.config.initial_config["no_clients"]):
             state = states[c]
             trainloader = self.trainloaders[c]
-            self.valloaders[c]
+            valloader = self.valloaders[c]
             class_dict = self.data_handler.get_classes()
             train_list = []
             val_list = []
             for i, (_, label) in enumerate(trainloader):
                 train_list += list(label.numpy())
-            for i, (_, label) in enumerate(trainloader):
+            for i, (_, label) in enumerate(valloader):
                 val_list += list(label.numpy())
             train_classes = dict(Counter([class_dict[label] for label in train_list]))
             train_classes["client"] = state["client_name"]
