@@ -124,7 +124,6 @@ class DataHandler(ABC):
                 )
             class_subsets = np.concatenate(class_subsets)
             data_set_ids.append(class_subsets)
-            print(class_subsets)
             s_set = Subset(trainset, class_subsets)
             datasets.append(s_set)
             # np.random.shuffle(temp_set)

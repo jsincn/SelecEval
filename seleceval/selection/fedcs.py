@@ -56,8 +56,6 @@ class FedCS(ClientSelection):
         else:
             client_list = list(all_clients.values())
 
-        results, failures = self.run_task_get_properties(client_list)
-
         # Client Selection happens here:
         clients = []
         theta = 0
