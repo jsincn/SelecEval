@@ -157,6 +157,9 @@ class Config:
         if not os.path.isdir(self.initial_config["output_dir"] + "/figures"):
             os.mkdir(path=self.initial_config["output_dir"] + "/figures")
 
+        with open(self.initial_config["output_dir"] + '/config.json', 'w') as fp:
+            json.dump(self.initial_config, fp)
+
     def set_current_round(self, i: int):
         """
         Sets the current round
