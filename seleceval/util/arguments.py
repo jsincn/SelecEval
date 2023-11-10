@@ -17,7 +17,7 @@ class Arguments:
             "CONFIG_FILE",
             metavar="CONFIG_FILE",
             type=str,
-            help="Configuration for the simulation",
+            help="Configuration for the simulation"
         )
         self.parser.add_argument(
             "-e",
@@ -25,6 +25,15 @@ class Arguments:
             dest="evaluate_only",
             action="store_true",
             help="Only run evaluation",
+            required=False
+        )
+        self.parser.add_argument(
+            "--output-path", '-o',
+            dest="OUTPUT_DIRECTORY",
+            type=str,
+            help="Directory for the evaluation - only used when --evaluate-only is included",
+            required=False,
+            action="store"
         )
 
     def get_args(self):

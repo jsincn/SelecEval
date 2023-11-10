@@ -27,8 +27,9 @@ def main():
     """
     Main function for the simulation
     """
-    args = Arguments()
-    config = Config(vars(args.get_args())["CONFIG_FILE"])
+    args = vars(Arguments().get_args())
+
+    config = Config(args["CONFIG_FILE"], args["evaluate_only"], args["OUTPUT_DIRECTORY"])
 
     DEVICE = torch.device(config.initial_config["device"])
     NUM_CLIENTS = config.initial_config["no_clients"]
@@ -47,7 +48,7 @@ def main():
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)
     trainloaders, valloaders, testloader = datahandler.load_distributed_datasets()
 
-    if not vars(args.get_args())["evaluate_only"]:
+    if not args["evaluate_only"]:
         print("Running training simulation")
         run_training_simulation(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders

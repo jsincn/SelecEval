@@ -20,7 +20,7 @@ class Config:
     This class is used to parse the configuration file and validate the parameters.
     """
 
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str, evaluate_only: bool, output_directory: str):
         schema = {
             "no_rounds": {"type": "integer", "min": 1},
             "algorithm": {"type": "list", "allowed": algorithm_parameter_dict.keys()},
@@ -126,11 +126,14 @@ class Config:
                 raise ValueError(v.errors)
             self.initial_config = v.normalized(config_dict)
 
-        self.initial_config["output_dir"] = (
-            self.initial_config["output_dir"]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-        )
+        if not evaluate_only:
+            self.initial_config["output_dir"] = (
+                self.initial_config["output_dir"]
+                + "_"
+                + datetime.now().strftime("%Y%m%d_%H%M%S")
+            )
+        else:
+            self.initial_config["output_dir"] = output_directory
         self.attributes = {
             "input_state_file": self.initial_config["output_dir"] + "/input_state.csv",
             "working_state_file": self.initial_config["output_dir"]
