@@ -27,9 +27,11 @@ def main():
     """
     Main function for the simulation
     """
+    print("Starting SelecEval Simulator")
     args = vars(Arguments().get_args())
-
+    print("Loading Configuration")
     config = Config(args["CONFIG_FILE"], args["evaluate_only"], args["OUTPUT_DIRECTORY"])
+
 
     DEVICE = torch.device(config.initial_config["device"])
     NUM_CLIENTS = config.initial_config["no_clients"]
