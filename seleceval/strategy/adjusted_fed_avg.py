@@ -23,11 +23,13 @@ from ..util import Config
 class AdjustedFedAvg(fl.server.strategy.FedAvg):
     def __init__(self, net, client_selector: ClientSelection, config: Config):
         super().__init__(
-            fraction_fit=0.5,  # Sample 100% of available clients for training
-            fraction_evaluate=0.01,  # Sample 50% of available clients for evaluation
-            min_fit_clients=1,  # Never sample less than 10 clients for training
-            min_evaluate_clients=1,  # Never sample less than 5 clients for evaluation
-            min_available_clients=1,  # Wait until all 10 clients are available
+            fraction_fit=0.5,  # No longer used, as this is handled by the client selection strategy
+            fraction_evaluate=config.initial_config['c_evaluation_clients'],
+            # Percentage of clients to select for evaluation
+            min_fit_clients=1,  # No longer used, as this is handled by the client selection strategy
+            min_evaluate_clients=config.initial_config['min_evaluation_clients'],
+            # Min number of clients for evaluation
+            min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
         )
         self.client_selector = client_selector
@@ -35,7 +37,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         self.config = config
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ):
         """
         Configure the fit process
@@ -49,10 +51,10 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         )
 
     def aggregate_fit(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, fl.common.FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+            self,
+            server_round: int,
+            results: List[Tuple[ClientProxy, fl.common.FitRes]],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Aggregate model weights using weighted average and store checkpoint, update state, set current round
