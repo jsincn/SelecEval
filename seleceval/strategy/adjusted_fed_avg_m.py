@@ -23,11 +23,13 @@ from ..util import Config
 class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
     def __init__(self, net, client_selector: ClientSelection, config: Config):
         super().__init__(
-            fraction_fit=0.5,  # Sample 100% of available clients for training
-            fraction_evaluate=0.01,  # Sample 50% of available clients for evaluation
-            min_fit_clients=1,  # Never sample less than 10 clients for training
-            min_evaluate_clients=1,  # Never sample less than 5 clients for evaluation
-            min_available_clients=1,  # Wait until all 10 clients are available
+            fraction_fit=0.5,  # No longer used, as this is handled by the client selection strategy
+            fraction_evaluate=config.initial_config['c_evaluation_clients'],
+            # Percentage of clients to select for evaluation
+            min_fit_clients=1,  # No longer used, as this is handled by the client selection strategy
+            min_evaluate_clients=config.initial_config['min_evaluation_clients'],
+            # Min number of clients for evaluation
+            min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
         )
         self.client_selector = client_selector

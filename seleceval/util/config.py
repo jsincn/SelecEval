@@ -32,6 +32,8 @@ class Config:
             },
             "no_epochs": {"type": "integer", "min": 1, "default": 1},
             "no_clients": {"type": "integer", "min": 1},
+            "min_evaluation_clients": {"type": "integer", "min": 1, "default": 1},
+            "c_evaluation_clients":  {"type": "float", "min": 0, "max": 1,"default": 0.0001},
             "batch_size": {"type": "integer", "min": 1, "default": 32},
             "validation_split": {"type": "float", "min": 0, "max": 1, "default": 0.1},
             "device": {"type": "string", "allowed": ["cuda", "cpu"], "default": "cpu"},
