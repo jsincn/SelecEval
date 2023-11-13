@@ -33,7 +33,7 @@ def generate_initial_state(num_clients: int, config: Config):
     df['i_reliability'] = np.round(
         np.random.exponential(1 / config.initial_config["simulation_config"]["reliability_parameter"],
                               num_clients), 5)
-    df['performance_factor'] = np.round(
+    df['i_performance_factor'] = np.round(
         np.random.normal(config.initial_config["simulation_config"]["performance_factor_mean"],
                          config.initial_config["simulation_config"]["performance_factor_std"], num_clients), 2)
 
