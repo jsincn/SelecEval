@@ -94,7 +94,7 @@ class DataHandler(ABC):
         testloader = DataLoader(testset, batch_size=self.BATCH_SIZE)
         return testloader, trainloaders, valloaders
 
-    def distribute_data(self, label_distribution, partition_sizes, trainset):
+    def distribute_data_legacy(self, label_distribution, partition_sizes, trainset):
         """
         Distribute the data according to the label distribution and partition sizes
         :param label_distribution: np.array of shape (NUM_CLIENTS, NUM_CLASSES)
@@ -134,6 +134,30 @@ class DataHandler(ABC):
         data_distribution.to_csv(
             self.config.attributes["data_distribution_output"], index=False
         )
+        return datasets
+
+    def distribute_data(self, label_distribution, partition_sizes, trainset):
+        no_classes = len(self.get_classes())
+        client_data = []
+        rng = np.random.default_rng()
+        for j in range(no_classes):
+            class_idx = [i for i, c in enumerate(trainset.targets) if c == j]
+            label_counts = (label_distribution[:, j] * partition_sizes + np.ones(len(partition_sizes))).astype(int)
+            temp_data = [rng.choice(class_idx, label_counts[x]) for x in range(self.NUM_CLIENTS)]
+            if len(client_data) > 0:
+                client_data = list(map(lambda x, y: np.concatenate((x, y)), temp_data, client_data))
+            else:
+                client_data = temp_data
+
+        client_data = list(map(lambda x: x if len(x) % self.BATCH_SIZE == 0 else np.concatenate(
+            (x, random.choices(range(len(trainset)), k = self.BATCH_SIZE - (len(x) % self.BATCH_SIZE)))), client_data))
+        data_distribution = pd.DataFrame()
+        data_distribution["distr"] = client_data
+        data_distribution["distr"] = data_distribution["distr"].apply(lambda x: "[" + " ".join(map(str, x)) + "]")
+        data_distribution.to_csv(
+            self.config.attributes["data_distribution_output"], index=False
+        )
+        datasets = map(lambda x: Subset(trainset, x), client_data)
         return datasets
 
     def load_existing_distribution(self, trainset):
