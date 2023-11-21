@@ -19,20 +19,14 @@ class Dirichlet(DataQuantityDistribution):
         :return: Array of size (no_clients) containing the number of samples for every client
         """
         # Uses a dirichlet distribution to skew the data quantity
-        partition_sizes = np.zeros(self.config.initial_config["no_clients"])
+        parameter_1 = self.config.initial_config["data_config"]["data_quantity_skew_parameter_1"]
+        parameter_2 = self.config.initial_config["data_config"]["data_quantity_skew_parameter_2"]
+        no_clients = self.config.initial_config["no_clients"]
+        min_samples = self.config.initial_config["data_config"]["data_quantity_min_parameter"]
+        data_quantity_max_parameter = self.config.initial_config["data_config"]["data_quantity_max_parameter"]
         partition_sizes = np.random.dirichlet(
-            np.repeat(
-                self.config.initial_config["data_config"][
-                    "data_quantity_skew_parameter"
-                ],
-                self.config.initial_config["no_clients"],
-            )
-        )
-        partition_sizes = partition_sizes / partition_sizes.sum()
-        partition_sizes = partition_sizes * len(trainset)
-        partition_sizes = np.maximum(
-            partition_sizes,
-            self.config.initial_config["data_config"]["data_quantity_min_parameter"],
-        )  # Ensure minimum size
+            [parameter_1, parameter_2], no_clients)
+        partition_sizes = partition_sizes * data_quantity_max_parameter
+        partition_sizes = np.maximum(partition_sizes, min_samples * np.ones(partition_sizes.shape))
         partition_sizes = partition_sizes.astype(int)
-        return partition_sizes
+        return partition_sizes[:, 0]
