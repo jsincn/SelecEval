@@ -5,13 +5,18 @@ samples are selected with replacement from the entire training set.
 
 ### Parameters
 
-| Key                          | Description                                        | Example Value |
-|------------------------------|----------------------------------------------------|---------------|
-| data_quantity_skew_parameter | Parameter for the dirichlet distribution           | 0.5           |
-| data_quantity_min_parameter  | Minimum number of samples to assign to each client | 1             |
+| Key                            | Description                                        | Example Value |
+|--------------------------------|----------------------------------------------------|---------------|
+| data_quantity_skew_parameter_1 | Parameter 1 for the dirichlet distribution         | 0.5           |
+| data_quantity_skew_parameter_2 | Parameter 2 for the dirichlet distribution         | 5.0           |
+| data_quantity_min_parameter    | Minimum number of samples to assign to each client | 1             |
+| data_quantity_max_parameter    | Maximum number of samples to assign to each client | 1000          |
 
 
-Based on:
+### Example distributions
+![image](./plot.png)
+
+Adapted from:
 ```
 Li, Qinbin, Yiqun Diao, Quan Chen, and Bingsheng He. 2022. 
 “Federated Learning on Non-IID Data Silos: An Experimental Study.” 
