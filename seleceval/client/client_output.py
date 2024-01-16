@@ -1,5 +1,5 @@
 """
-Utility class for handling client output
+Utility class for handling client outputs
 """
 import datetime
 import fcntl
@@ -20,7 +20,7 @@ class ClientOutput:
 
     def set(self, key: Union[str, int], value: Any):
         """
-        Set output key to values
+        Set outputs key to values
         :param key: String or integer key
         :param value: Value to set
         """
@@ -28,7 +28,7 @@ class ClientOutput:
 
     def get(self, key: Union[str, int]) -> Any:
         """
-        Get output value for key
+        Get outputs value for key
         :param key: String or integer key
         :return: Value for key
         """
@@ -36,7 +36,7 @@ class ClientOutput:
 
     def write(self):
         """
-        Write output
+        Write outputs
         """
         self.output_dict["current_timestamp"] = str(datetime.datetime.now())
         with open(self.file, "a") as g:

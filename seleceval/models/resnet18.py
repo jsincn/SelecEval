@@ -8,8 +8,13 @@ import torch.nn
 import torchvision
 from torch import nn, tensor
 from torch.utils.data import DataLoader
+
+from . import proxSGD
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
+import copy
+from torch.optim.optimizer import Optimizer
+
 
 
 class Resnet18(Model):
@@ -50,8 +55,10 @@ class Resnet18(Model):
     def train(
         self,
         trainloader: DataLoader,
+        ratio: float,
         client_name: str,
         epochs: int,
+        config,
         verbose: bool = False,
     ) -> Dict:
         """
@@ -59,11 +66,18 @@ class Resnet18(Model):
         :param trainloader: Data loader for training data
         :param client_name: Name of the current client
         :param epochs: Number of epochs to train
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
         :return: Metrics of the training round
         """
+        if config.initial_config["base_strategy"] == "FedProx":
+            global_params = copy.deepcopy(self.get_net()).parameters()
+            learning_rate = config.initial_config["base_strategy_config"]["FedProx"]["lr"]
+            mu = config.initial_config["base_strategy_config"]["FedProx"]["mu"]
+        else:
+            learning_rate = config.initial_config["base_strategy_config"]["FedAvg"]["lr"]
         loss_function = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.net.parameters())
+        optimizer = proxSGD.ProxSGD(self.net.parameters(), ratio, lr=learning_rate)
         self.net.train()
         output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader)}
         for epoch in range(epochs):
@@ -73,7 +87,19 @@ class Resnet18(Model):
                 images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
                 optimizer.zero_grad()
                 out = self.net(images)
-                loss = loss_function(out, labels)
+                if config.initial_config["base_strategy"] == "FedProx":
+                    proximal_term = 0
+                    for local_weights, global_weights in zip(
+                        self.net.parameters(), global_params
+                    ):
+                        proximal_term += (local_weights - global_weights).norm(2)
+                    loss = (
+                        loss_function(out, labels)
+                        + (mu / 2) * proximal_term
+                    )
+                else:
+                    loss = loss_function(out, labels)
+                ""
                 loss.backward()
                 optimizer.step()
                 total_epoch_loss += loss.item()
@@ -96,7 +122,7 @@ class Resnet18(Model):
         Method for running a test round
         :param testloader: Data loader for test data
         :param client_name: Name of the current client
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
         :return: Metrics of the test round
         """
         mlp = MulticlassPrecision(num_classes=self.num_classes, average=None)
@@ -117,7 +143,7 @@ class Resnet18(Model):
             correct += (predicted == labels).sum().item()
             labels_full += labels.tolist()
             predicted_full += predicted.tolist()
-        # Calculate class statistics only if output was regularm otherwise return 0 array
+        # Calculate class statistics only if outputs was regularm otherwise return 0 array
         try:
             class_statistics = mlp(tensor(predicted_full), tensor(labels_full)).tolist()
         except:

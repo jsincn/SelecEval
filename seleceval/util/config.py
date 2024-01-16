@@ -7,7 +7,7 @@ import os
 from cerberus import Validator
 from datetime import datetime
 from .config_parameters import *
-
+from .config_parameters import base_strategy_parameter_dict
 from .config_parameters.feature_distribution_parameters import (
     data_feature_distribution_parameters,
     data_feature_distributions,
@@ -30,14 +30,27 @@ class Config:
                 "default": {},
                 "schema": algorithm_parameter_dict,
             },
+            "variable_epochs": {"type": "boolean", "default": False},
+            "min_no_epochs": {"type": "integer", "min": 1, "default": 1},
+            "max_no_epochs": {"type": "integer", "min": 2, "default": 4},
             "no_epochs": {"type": "integer", "min": 1, "default": 1},
             "no_clients": {"type": "integer", "min": 1},
             "min_evaluation_clients": {"type": "integer", "min": 1, "default": 1},
-            "c_evaluation_clients":  {"type": "float", "min": 0, "max": 1,"default": 0.0001},
+            "c_evaluation_clients": {
+                "type": "float",
+                "min": 0,
+                "max": 1,
+                "default": 0.0001,
+            },
             "batch_size": {"type": "integer", "min": 1, "default": 32},
             "validation_split": {"type": "float", "min": 0, "max": 1, "default": 0.1},
             "device": {"type": "string", "allowed": ["cuda", "cpu"], "default": "cpu"},
-            "num_cpu_per_client": {"type": "integer", "min": 1, "max": os.cpu_count(), "default": 2},
+            "num_cpu_per_client": {
+                "type": "integer",
+                "min": 1,
+                "max": os.cpu_count(),
+                "default": 2,
+            },
             "num_gpu_per_client": {"type": "float", "min": 0, "default": 0.1},
             "verbose": {"type": "boolean", "default": True},
             "timeout": {"type": "integer", "min": 1},
@@ -88,9 +101,14 @@ class Config:
             },
             "max_workers": {"type": "integer", "min": 1, "default": 32},
             "base_strategy": {
-                "type": "string",
-                "allowed": available_strategies,
+                "type": "list",
+                "allowed": base_strategy_parameter_dict.keys(),
                 "default": default_strategy,
+            },
+            "base_strategy_config": {
+                "type": "dict",
+                "default": {},
+                "schema": base_strategy_parameter_dict,
             },
             "data_config": {
                 "type": "dict",
@@ -143,7 +161,7 @@ class Config:
             "data_distribution_output": self.initial_config["output_dir"]
             + "/data_distribution.csv",
         }
-        # If necessary create output dir + subdirs
+        # If necessary create outputs dir + subdirs
         if not os.path.isdir(self.initial_config["output_dir"]):
             os.mkdir(path=self.initial_config["output_dir"])
         if not os.path.isdir(self.initial_config["output_dir"] + "/client_output"):
@@ -179,7 +197,7 @@ class Config:
 
     def generate_paths(self, algorithm: str, dataset: str, no_clients: int):
         """
-        Generates the paths for the output files
+        Generates the paths for the outputs files
         :param algorithm: Current algorithm simulated
         :param dataset: Current dataset used
         :param no_clients: Number of clients used

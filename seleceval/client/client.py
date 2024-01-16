@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple
 import flwr as fl
 import flwr.common
 from flwr.common import GetParametersIns
-from numpy import ndarray
+from numpy import ndarray, random
 from torch.utils.data import DataLoader
 
 from .client_output import ClientOutput
@@ -20,16 +20,18 @@ from ..util import Config
 
 class Client(fl.client.NumPyClient):
     def __init__(
-            self,
-            model: Model,
-            trainloader: DataLoader,
-            valloader: DataLoader,
-            cid: str,
-            config: Config,
+        self,
+        model: Model,
+        trainloader: DataLoader,
+        valloader: DataLoader,
+        ratio: float,
+        cid: str,
+        config: Config,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
         self.valloader = valloader
+        self.ratio = ratio
         self.cid = cid
         self.state = ClientState(cid, config.attributes["working_state_file"])
         self.output = ClientOutput(
@@ -39,10 +41,10 @@ class Client(fl.client.NumPyClient):
         self.net = self.model.get_net()
 
     def fit(
-            self, parameters: List[ndarray], config: flwr.common.FitIns
+        self, parameters: List[ndarray], config: flwr.common.FitIns
     ) -> Tuple[List[ndarray], int, Dict]:
         """
-        Fit the model, write output and return parameters and metrics
+        Fit the model, write outputs and return parameters and metrics
         :param parameters: The current parameters of the global model
         :param config: Configuration for this fit
         :return: The parameters of the global model, the number of samples used and the metrics
@@ -54,7 +56,7 @@ class Client(fl.client.NumPyClient):
         )
         if self.state.get("network_bandwidth") > 0:
             upload_time = (
-                    self.model.get_size() / self.state.get("network_bandwidth") * 8
+                self.model.get_size() / self.state.get("network_bandwidth") * 8
             )
         else:
             upload_time = -1
@@ -86,11 +88,28 @@ class Client(fl.client.NumPyClient):
             return get_parameters(self.net), -1, {}
         start_time = time.time()
         set_parameters(self.net, parameters)
+
+        if self.config.initial_config["variable_epochs"]:
+            seed_val = (
+                2024
+                + int(self.cid)
+                + int(self.config.get_current_round())
+                + int(self.config.initial_config["state_simulation_seed"])
+            )
+            random.seed(seed_val)
+            no_epochs = random.randint(
+                self.config.initial_config["min_no_epochs"], self.config.initial_config["max_no_epochs"]
+            )
+        else:
+            no_epochs = self.config.initial_config["no_epochs"]
+
         train_output = self.model.train(
             self.trainloader,
+            self.ratio,
             self.state.get("client_name"),
-            epochs=self.config.initial_config["no_epochs"],
-            verbose=verbose
+            no_epochs,
+            self.config.initial_config["mu"],
+            verbose,
         )
         end_time = time.time()
         last_execution_time = end_time - start_time

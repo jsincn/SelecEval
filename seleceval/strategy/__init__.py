@@ -5,11 +5,13 @@ Package containing the different strategies for the aggregation of the clients' 
 from .adjusted_fed_avg_m import AdjustedFedAvgM
 from .adjusted_fed_avg import AdjustedFedAvg
 from .adjusted_fed_med import AdjustedFedMedian
+from .adjusted_fed_prox import AdjustedFedProx
 
-__all__ = ["AdjustedFedAvg", "AdjustedFedMedian", "AdjustedFedAvgM", "strategy_dict"]
+__all__ = ["AdjustedFedAvg", "AdjustedFedMedian", "AdjustedFedAvgM", "strategy_dict", "FedProx"]
 
 strategy_dict = {
     "FedAvg": AdjustedFedAvg,
     "FedMedian": AdjustedFedMedian,
     "FedAvgM": AdjustedFedAvgM,
+    "FedProx": AdjustedFedProx
 }

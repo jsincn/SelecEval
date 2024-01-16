@@ -26,10 +26,10 @@ import seaborn as sns
 
 
 ```python
-file_list = [f for f in listdir("output") if isfile(join("output", f))]
+file_list = [f for f in listdir("outputs") if isfile(join("outputs", f))]
 dfs = []
 for i in range(len(file_list)):
-    fname = "output/" + file_list[i]
+    fname = "outputs/" + file_list[i]
     df_temp = pd.read_csv(fname)
     df_temp.set_index(['client'], inplace=True)
     df_temp['run'] = file_list[i].replace(".csv", "")

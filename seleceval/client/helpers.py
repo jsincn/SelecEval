@@ -5,10 +5,11 @@ Specifically, this file contains the following functions:
     - set_parameters: Sets the parameters of a model from a list of numpy arrays
 """
 
-from typing import List
+from typing import List, Dict, Tuple
 
 import numpy as np
 import torch
+from torch.optim.optimizer import Optimizer
 
 
 def get_parameters(net) -> List[np.ndarray]:
@@ -34,3 +35,5 @@ def set_parameters(net, parameters: List[np.ndarray]):
     }
 
     net.load_state_dict(state_dict, strict=True)
+
+

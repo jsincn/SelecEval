@@ -4,7 +4,8 @@ Main file for the simulation
 import flwr as fl
 import torch
 import pandas as pd
-pd.options.mode.chained_assignment = None # Disables warning for chained assignment
+
+pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 from .datahandler.mnist import MNISTDataHandler
 from .strategy import strategy_dict
 from .validation.training import Training
@@ -30,8 +31,9 @@ def main():
     print("Starting SelecEval Simulator")
     args = vars(Arguments().get_args())
     print("Loading Configuration")
-    config = Config(args["CONFIG_FILE"], args["evaluate_only"], args["OUTPUT_DIRECTORY"])
-
+    config = Config(
+        args["CONFIG_FILE"], args["evaluate_only"], args["OUTPUT_DIRECTORY"]
+    )
 
     DEVICE = torch.device(config.initial_config["device"])
     NUM_CLIENTS = config.initial_config["no_clients"]
@@ -109,14 +111,20 @@ def run_training_simulation(
     :param valloaders:
     """
     if DEVICE.type == "cuda":
-        client_resources = {"num_gpus": config.initial_config['num_gpu_per_client'], "num_cpus": config.initial_config['num_cpu_per_client']}
+        client_resources = {
+            "num_gpus": config.initial_config["num_gpu_per_client"],
+            "num_cpus": config.initial_config["num_cpu_per_client"],
+        }
     else:
-        client_resources = {"num_cpus": config.initial_config['num_cpu_per_client']}
+        client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
     for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
+        """calculate ratios for certain algorithms"""
+        total_size = sum(len(loader.dataset) for loader in trainloaders)
+        data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
         client_fn = ClientFunction(
-            Client, trainloaders, valloaders, model, config
+            Client, trainloaders, valloaders, data_ratios, model, config
         ).client_fn
         config.generate_paths(
             algorithm,
@@ -135,7 +143,7 @@ def run_training_simulation(
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
-        strategy = strategy_dict[config.initial_config["base_strategy"]](
+        strategy = strategy_dict[config.initial_config["base_strategy"][0]](
             net=model.get_net(), client_selector=client_selector, config=config
         )
 

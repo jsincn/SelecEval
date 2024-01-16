@@ -138,7 +138,7 @@ class Validation(Evaluator):
         :return: None
         """
         if len(self.output_dfs.keys()) == 0:
-            raise ValueError("No output dataframes found. Please run evaluate() first.")
+            raise ValueError("No outputs dataframes found. Please run evaluate() first.")
 
         for i in self.output_dfs.keys():
             self.output_dfs[i]["algorithm"] = i

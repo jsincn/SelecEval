@@ -15,8 +15,10 @@ class Model(ABC):
     def train(
         self,
         trainloader: DataLoader,
+        ratio: float,
         client_name: str,
         epochs: int,
+        config,
         verbose: bool = False,
     ) -> Dict:
         """
@@ -24,7 +26,7 @@ class Model(ABC):
         :param trainloader: Data loader for training data
         :param client_name: Name of the current client
         :param epochs: Number of epochs to train
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
         """
         pass
 
@@ -36,7 +38,7 @@ class Model(ABC):
         Method for running a test round
         :param testloader: Data loader for test data
         :param client_name: Name of the current client
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
         """
         pass
 

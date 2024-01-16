@@ -112,7 +112,7 @@ class DataDistribution(Evaluator):
 
     def generate_report(self):
         """
-        Generates a report on the data distribution and saves it to the output directory
+        Generates a report on the data distribution and saves it to the outputs directory
         """
         train_df = pd.read_csv(self.output_path_train)
         val_df = pd.read_csv(self.output_path_validation)

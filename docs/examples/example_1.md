@@ -29,7 +29,7 @@
   "client_state_file": "seleceval/client_states.csv",
   "client_configuration_file": "seleceval/client_configurations.csv",
   "distribute_data": true,
-  "data_distribution_file": "output/data_distribution.csv",
+  "data_distribution_file": "outputs/data_distribution.csv",
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,

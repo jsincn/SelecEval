@@ -9,12 +9,14 @@ class ClientFunction:
     Class used to create clients
     """
 
-    def __init__(self, clientclass, trainloaders, valloaders, model, config):
+    def __init__(self, clientclass, trainloaders, valloaders, data_ratios, model, config):
         self.model = model
         self.clientClass = clientclass
         self.trainloaders = trainloaders
         self.valloaders = valloaders
         self.config = config
+        self.trainlength = len(trainloaders)
+        self.data_ratios = data_ratios
 
     def client_fn(self, cid: str) -> Client:
         """
@@ -24,4 +26,5 @@ class ClientFunction:
         """
         trainloader = self.trainloaders[int(cid)]
         valloader = self.valloaders[int(cid)]
-        return self.clientClass(self.model, trainloader, valloader, cid, self.config)
+        ratio = self.data_ratios[int(cid)]
+        return self.clientClass(self.model, trainloader, valloader, ratio, cid, self.config)
