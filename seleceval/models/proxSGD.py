@@ -36,8 +36,8 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         gmf=0,
         mu=0,
         lr=0,
-        momentum=0,
-        dampening=0,
+        momentum=0.01,
+        dampening=0.01,
         weight_decay=0,
         variance=0,
     ):
@@ -75,11 +75,13 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
 
         for group in self.param_groups:
             weight_decay = group["weight_decay"]
-            print("group[weight decas] was accessed")
             momentum = group["momentum"]
             dampening = group["dampening"]
+            print(f'The value of the momentum is {momentum}')
+            print(f'The value of the dampening is {dampening}')
+            print(f'The value of the weight decay is {weight_decay}')
 
-            lr = 0
+            lr=0
             for p in group["params"]:
                 if p.grad is None:
                     continue
@@ -94,7 +96,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
                     param_state["old_init"] = torch.clone(p.data).detach()
 
                 local_lr = group["lr"]
-                lr = local_lr
+                lr=local_lr
                 # apply momentum updates
                 if momentum != 0:
                     if "momentum_buffer" not in param_state:
