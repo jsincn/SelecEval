@@ -152,7 +152,7 @@ def run_training_simulation(
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
         strategy = strategy_dict[config.initial_config["base_strategy"][0]](
-            init_parameters=init_parameters, client_selector=client_selector, config=config
+            net=model.get_net(), init_parameters=init_parameters, client_selector=client_selector, config=config
         )
 
         fl.simulation.start_simulation(

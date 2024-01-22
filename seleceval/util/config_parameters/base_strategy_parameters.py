@@ -18,16 +18,16 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
         },
     },
     "FedNova": {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.02},
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.001},
         },
     },
 }

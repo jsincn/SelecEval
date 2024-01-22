@@ -28,10 +28,6 @@
     "device": "cpu"
   },
   "max_workers": 32,
-  "base_strategy": ["FedNova"],
-  "base_strategy_config": {
-    "FedNova": {
-      "mu": 0.01
-    }
-  }
+  "base_strategy": ["FedNova"]
+
 }

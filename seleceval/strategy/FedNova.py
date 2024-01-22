@@ -18,19 +18,20 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.logger import log
 from flwr.common.typing import FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate
 from omegaconf import DictConfig
 import torch
+from flwr.common.logger import log
+from logging import WARNING
 
 
 class FedNova(FedAvg):
     """FedNova."""
 
-    def __init__(self, config, init_parameters, client_selector: ClientSelection):
+    def __init__(self, net, config, init_parameters, client_selector: ClientSelection):
         super().__init__(
             initial_parameters=init_parameters,
             fraction_fit=0.1,
@@ -59,6 +60,7 @@ class FedNova(FedAvg):
         self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
         self.gmf = 0
+        self.net = net
 
     def initialize_global_params(self):
         """intitialize global parameters if initial parameters chosen randomly from client"""
@@ -73,13 +75,20 @@ class FedNova(FedAvg):
         if not results:
             return None, {}
 
+        # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
+
+        filtered_results = []
+        # Filter results with negative sample size:
+        # This indicates an artificial failure
+        for i in results:
+            if i[1].num_examples == -1:
+                results.remove(i)
+                failures.append(i)
+
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
 
-        # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
-
-        filtered_results = []
         for client, res in results:
             try:
                 # If accessing a key in res.metrics throws a KeyError,
@@ -116,7 +125,19 @@ class FedNova(FedAvg):
         # with a momentum factor
         self.update_server_params(agg_cum_gradient)
 
-        return ndarrays_to_parameters(self.global_parameters), {}
+        torch.save(
+            self.net.state_dict(),
+            f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
+        )
+
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif server_round == 1:  # Only log this warning once
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+        return ndarrays_to_parameters(self.global_parameters), metrics_aggregated
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -159,10 +180,11 @@ class FedNova(FedAvg):
                 """layer_cum_grad = layer_cum_grad.astype("float64")"""
                 self.global_parameters[i] -= layer_cum_grad
 
+    """
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Overide default evaluate method to save model parameters."""
+        Overide default evaluate method to save model parameters.
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
@@ -195,6 +217,7 @@ class FedNova(FedAvg):
             log(INFO, "Model saved with Best Test accuracy %.3f: ", self.best_test_acc)
 
         return loss, metrics
+    """
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:

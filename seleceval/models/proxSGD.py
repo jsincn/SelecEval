@@ -65,16 +65,6 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             "variance": variance,
         }
         super(ProxSGD, self).__init__(params, defaults)
-        # Assuming 'optimizer' is your PyTorch optimizer instance
-        for group_idx, group in enumerate(self.param_groups):
-            print(f"Parameter Group {group_idx}:")
-            for param_idx, p in enumerate(group["params"]):
-                if p.requires_grad:
-                    print(f" - Param {param_idx}: shape={p.size()}, dtype={p.dtype}")
-                else:
-                    print(
-                        f" - Param {param_idx}: shape={p.size()}, dtype={p.dtype} (requires_grad=False)"
-                    )
 
     def __setstate__(self, state):
         """Set the optimizer state."""
@@ -82,11 +72,6 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
 
     def step(self, closure=None):  # pylint: disable=too-many-branches
         """Perform a single optimization step."""
-        lr = 0.01
-        for group_idx, group in enumerate(self.param_groups):
-            print(f"Group {group_idx}:")
-            for param_idx, p in enumerate(group["params"]):
-                print(f" - Param {param_idx}: requires_grad = {p.requires_grad}")
 
         for group in self.param_groups:
             weight_decay = group["weight_decay"]
@@ -94,8 +79,8 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             momentum = group["momentum"]
             dampening = group["dampening"]
 
+            lr = 0
             for p in group["params"]:
-                print(p.grad)
                 if p.grad is None:
                     continue
                 d_p = p.grad.data
@@ -109,7 +94,6 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
                     param_state["old_init"] = torch.clone(p.data).detach()
 
                 local_lr = group["lr"]
-                print("set local lr in proxSGD")
                 lr = local_lr
                 # apply momentum updates
                 if momentum != 0:
@@ -175,9 +159,6 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             for p in group["params"]:
                 param_state = self.state[p]
                 param_tensor = torch.tensor(init_params[i])
-                print("printing param tensor shape and p.data shape")
-                print(param_tensor.shape)
-                print(p.data.shape)
                 p.data.copy_(param_tensor)
                 param_state["old_init"] = param_tensor
                 i += 1

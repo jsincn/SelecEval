@@ -17,7 +17,7 @@ from ..util import Config
 
 
 class AdjustedFedProx(fl.server.strategy.FedProx):
-    def __init__(self, net, client_selector: ClientSelection, config: Config, mu: float):
+    def __init__(self, net, init_parameters, client_selector: ClientSelection, config: Config):
         super().__init__(
             fraction_evaluate=config.initial_config['c_evaluation_clients'],
             # Percentage of clients to select for evaluation
@@ -26,7 +26,7 @@ class AdjustedFedProx(fl.server.strategy.FedProx):
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
-            proximal_mu=mu
+            proximal_mu=config.initial_config["base_strategy_config"]["FedProx"]["mu"]
         )
         self.client_selector = client_selector
         self.net = net

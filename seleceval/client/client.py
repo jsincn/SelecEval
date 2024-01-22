@@ -47,17 +47,25 @@ class Client(fl.client.NumPyClient):
             self.state, config.get_current_round(), config.attributes["output_path"]
         )
         self.net = self.model.get_net()
-
+        self.optimizer = 0
         """create optimizer based on config, optimizer is to be given to model"""
         tensor_list = [
             torch.from_numpy(ndarray.astype(np.float32)).requires_grad_(True)
             for ndarray in self.get_parameters(self.net)
         ]
-        for name, param in self.net.named_parameters():
-            print(f"{name}: shape={param.shape}, dtype={param.dtype}")
         if not tensor_list:
             print("parameter aka tensor list empty")
 
+    def fit(
+        self, parameters: List[ndarray], config: flwr.common.FitIns
+    ) -> Tuple[List[ndarray], int, Dict]:
+        """
+        Fit the model, write outputs and return parameters and metrics
+        :param parameters: The current parameters of the global model
+        :param config: Configuration for this fit
+        :return: The parameters of the global model, the number of samples used and the metrics
+        """
+        self.net = self.model.get_net()
         if self.config.initial_config["base_strategy"][0] == "FedNova":
             self.optimizer = proxSGD.ProxSGD(
                 self.net.parameters(),
@@ -69,26 +77,14 @@ class Client(fl.client.NumPyClient):
             learning_rate = self.config.initial_config["base_strategy_config"][
                 "FedProx"
             ]["lr"]
-            mu = self.config.initial_config["base_strategy_config"]["FedProx"]["mu"]
-            self.optimizer = proxSGD.ProxSGD(
-                tensor_list, self.ratio, mu=mu, lr=learning_rate
-            )
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
         elif self.config.initial_config["base_strategy"][0] == "FedAvg":
             print("FedAvg as base strategy")
             learning_rate = self.config.initial_config["base_strategy_config"][
                 "FedAvg"
             ]["lr"]
-            self.optimizer = proxSGD.ProxSGD(tensor_list, self.ratio, lr=learning_rate)
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
 
-    def fit(
-        self, parameters: List[ndarray], config: flwr.common.FitIns
-    ) -> Tuple[List[ndarray], int, Dict]:
-        """
-        Fit the model, write outputs and return parameters and metrics
-        :param parameters: The current parameters of the global model
-        :param config: Configuration for this fit
-        :return: The parameters of the global model, the number of samples used and the metrics
-        """
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
         execution_time = self.state.get("expected_execution_time") * self.state.get(
@@ -127,10 +123,8 @@ class Client(fl.client.NumPyClient):
                 )
             return get_parameters(self.net), -1, {}
         start_time = time.time()
-        for name, param in self.net.named_parameters():
-            print(f"{name}: shape={param.shape}, dtype={param.dtype} , this is before set_parameters in client.fit()")
-        self.set_parameters(parameters)
-
+        set_parameters(self.net, parameters, self.optimizer)
+        """self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.01)"""
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
                 2024
@@ -181,7 +175,7 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-        self.set_parameters(parameters)
+        set_parameters(self.net, parameters)
         loss, accuracy, out_dict = self.model.test(
             self.valloader,
             self.state.get("client_name"),
