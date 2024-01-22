@@ -4,18 +4,26 @@ Client class for the federated learning framework
 import time
 from random import random
 from typing import Dict, List, Tuple
-
 import flwr as fl
-import flwr.common
-from flwr.common import GetParametersIns
+import torch
+from flwr.common import GetParametersIns, ndarrays_to_parameters
 from numpy import ndarray, random
 from torch.utils.data import DataLoader
-
+import numpy as np
 from .client_output import ClientOutput
 from .client_state import ClientState
 from .helpers import get_parameters, set_parameters
+from ..models import proxSGD
 from ..models.model import Model
 from ..util import Config
+from torch.optim.optimizer import Optimizer
+from torch import nn, tensor
+from flwr.common.typing import NDArrays
+
+
+from torch.utils.data import DataLoader
+from seleceval.util.config import Config
+import flwr.common
 
 
 class Client(fl.client.NumPyClient):
@@ -33,12 +41,44 @@ class Client(fl.client.NumPyClient):
         self.valloader = valloader
         self.ratio = ratio
         self.cid = cid
+        self.config = config
         self.state = ClientState(cid, config.attributes["working_state_file"])
         self.output = ClientOutput(
             self.state, config.get_current_round(), config.attributes["output_path"]
         )
-        self.config = config
         self.net = self.model.get_net()
+
+        """create optimizer based on config, optimizer is to be given to model"""
+        tensor_list = [
+            torch.from_numpy(ndarray.astype(np.float32)).requires_grad_(True)
+            for ndarray in self.get_parameters(self.net)
+        ]
+        for name, param in self.net.named_parameters():
+            print(f"{name}: shape={param.shape}, dtype={param.dtype}")
+        if not tensor_list:
+            print("parameter aka tensor list empty")
+
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            self.optimizer = proxSGD.ProxSGD(
+                self.net.parameters(),
+                self.ratio,
+                mu=self.config.initial_config["base_strategy_config"]["FedNova"]["mu"],
+                lr=self.config.initial_config["base_strategy_config"]["FedNova"]["lr"],
+            )
+        elif self.config.initial_config["base_strategy"][0] == "FedProx":
+            learning_rate = self.config.initial_config["base_strategy_config"][
+                "FedProx"
+            ]["lr"]
+            mu = self.config.initial_config["base_strategy_config"]["FedProx"]["mu"]
+            self.optimizer = proxSGD.ProxSGD(
+                tensor_list, self.ratio, mu=mu, lr=learning_rate
+            )
+        elif self.config.initial_config["base_strategy"][0] == "FedAvg":
+            print("FedAvg as base strategy")
+            learning_rate = self.config.initial_config["base_strategy_config"][
+                "FedAvg"
+            ]["lr"]
+            self.optimizer = proxSGD.ProxSGD(tensor_list, self.ratio, lr=learning_rate)
 
     def fit(
         self, parameters: List[ndarray], config: flwr.common.FitIns
@@ -60,7 +100,7 @@ class Client(fl.client.NumPyClient):
             )
         else:
             upload_time = -1
-        if random() < self.state.get("i_reliability"):
+        if random.random() < self.state.get("i_reliability"):
             self.output.set("train_output", {})
             self.output.set("execution_time", execution_time)
             self.output.set("upload_time", upload_time)
@@ -87,7 +127,9 @@ class Client(fl.client.NumPyClient):
                 )
             return get_parameters(self.net), -1, {}
         start_time = time.time()
-        set_parameters(self.net, parameters)
+        for name, param in self.net.named_parameters():
+            print(f"{name}: shape={param.shape}, dtype={param.dtype} , this is before set_parameters in client.fit()")
+        self.set_parameters(parameters)
 
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
@@ -98,20 +140,29 @@ class Client(fl.client.NumPyClient):
             )
             random.seed(seed_val)
             no_epochs = random.randint(
-                self.config.initial_config["min_no_epochs"], self.config.initial_config["max_no_epochs"]
+                self.config.initial_config["min_no_epochs"],
+                self.config.initial_config["max_no_epochs"],
             )
         else:
             no_epochs = self.config.initial_config["no_epochs"]
 
+        """train the model"""
         train_output = self.model.train(
+            self.config,
+            self.optimizer,
             self.trainloader,
             self.ratio,
             self.state.get("client_name"),
             no_epochs,
-            self.config.initial_config["mu"],
             verbose,
         )
         end_time = time.time()
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            grad_scaling_factor: Dict[
+                str, float
+            ] = self.optimizer.get_gradient_scaling()
+            train_output.update(grad_scaling_factor)
+
         last_execution_time = end_time - start_time
         self.output.set("train_output", train_output)
         self.output.set("actual_execution_time", last_execution_time)
@@ -130,7 +181,7 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-        set_parameters(self.net, parameters)
+        self.set_parameters(parameters)
         loss, accuracy, out_dict = self.model.test(
             self.valloader,
             self.state.get("client_name"),
@@ -148,6 +199,10 @@ class Client(fl.client.NumPyClient):
 
     def get_parameters(self, config: GetParametersIns) -> List[ndarray]:
         return get_parameters(self.net)
+
+    def set_parameters(self, parameters: NDArrays) -> None:
+        """Change the parameters of the model using the given ones."""
+        self.optimizer.set_model_params(parameters)
 
     def get_properties(self, config=None) -> Dict:
         """

@@ -4,6 +4,8 @@ Main file for the simulation
 import flwr as fl
 import torch
 import pandas as pd
+from flwr.common import ndarrays_to_parameters
+from .models.model import Model
 
 pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 from .datahandler.mnist import MNISTDataHandler
@@ -14,6 +16,7 @@ from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
 from .models.resnet18 import Resnet18
 from .selection import algorithm_dict
+from collections import OrderedDict
 from .simulation.state import (
     generate_initial_state,
     get_initial_state,
@@ -120,6 +123,11 @@ def run_training_simulation(
     for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
+        ndarrays = [
+            layer_param.cpu().numpy()
+            for _, layer_param in model.net.state_dict().items()
+        ]
+        init_parameters = ndarrays_to_parameters(ndarrays)
         """calculate ratios for certain algorithms"""
         total_size = sum(len(loader.dataset) for loader in trainloaders)
         data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
@@ -144,7 +152,7 @@ def run_training_simulation(
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
         strategy = strategy_dict[config.initial_config["base_strategy"][0]](
-            net=model.get_net(), client_selector=client_selector, config=config
+            init_parameters=init_parameters, client_selector=client_selector, config=config
         )
 
         fl.simulation.start_simulation(

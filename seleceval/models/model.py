@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Dict
 
 from torch.utils.data import DataLoader
+from torch.optim.optimizer import Optimizer
 
 
 class Model(ABC):
@@ -14,11 +15,12 @@ class Model(ABC):
     @abstractmethod
     def train(
         self,
+        config,
+        optimizer: Optimizer,
         trainloader: DataLoader,
         ratio: float,
         client_name: str,
         epochs: int,
-        config,
         verbose: bool = False,
     ) -> Dict:
         """

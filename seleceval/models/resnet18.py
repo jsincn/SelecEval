@@ -8,13 +8,14 @@ import torch.nn
 import torchvision
 from torch import nn, tensor
 from torch.utils.data import DataLoader
+from seleceval.util.config import Config
 
 from . import proxSGD
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
 import copy
+import flwr.common
 from torch.optim.optimizer import Optimizer
-
 
 
 class Resnet18(Model):
@@ -54,11 +55,12 @@ class Resnet18(Model):
 
     def train(
         self,
+        config: Config,
+        optimizer: Optimizer,
         trainloader: DataLoader,
         ratio: float,
         client_name: str,
         epochs: int,
-        config,
         verbose: bool = False,
     ) -> Dict:
         """
@@ -71,15 +73,11 @@ class Resnet18(Model):
         """
         if config.initial_config["base_strategy"] == "FedProx":
             global_params = copy.deepcopy(self.get_net()).parameters()
-            learning_rate = config.initial_config["base_strategy_config"]["FedProx"]["lr"]
-            mu = config.initial_config["base_strategy_config"]["FedProx"]["mu"]
-        else:
-            learning_rate = config.initial_config["base_strategy_config"]["FedAvg"]["lr"]
+
         loss_function = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(self.net.parameters())
-        optimizer = proxSGD.ProxSGD(self.net.parameters(), ratio, lr=learning_rate)
+        """optimizer = torch.optim.Adam(self.net.parameters())"""
         self.net.train()
-        output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader)}
+        output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader), "tau": float, "weight": float, "local_norm": int}
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -93,13 +91,10 @@ class Resnet18(Model):
                         self.net.parameters(), global_params
                     ):
                         proximal_term += (local_weights - global_weights).norm(2)
-                    loss = (
-                        loss_function(out, labels)
-                        + (mu / 2) * proximal_term
-                    )
+                    loss = (loss_function(out, labels) +
+                            (config.initial_config["base_strategy_config"]["FedProx"]["mu"] / 2) * proximal_term)
                 else:
                     loss = loss_function(out, labels)
-                ""
                 loss.backward()
                 optimizer.step()
                 total_epoch_loss += loss.item()

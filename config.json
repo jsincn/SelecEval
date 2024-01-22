@@ -1,11 +1,11 @@
 {
   "no_rounds": 2,
   "algorithm": [
-    "CEP"
+    "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "CEP": {
+    "random": {
       "c": 0.1
     }
 },
@@ -28,5 +28,10 @@
     "device": "cpu"
   },
   "max_workers": 32,
-  "base_strategy": ["FedProx"]
+  "base_strategy": ["FedNova"],
+  "base_strategy_config": {
+    "FedNova": {
+      "mu": 0.01
+    }
+  }
 }

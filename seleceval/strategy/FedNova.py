@@ -1,7 +1,13 @@
 from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
-
+import torch.nn
+import torchvision
+from torch import nn, tensor
+from torch.utils.data import DataLoader
 import numpy as np
+from flwr.server import ClientManager
+
+from seleceval.selection import ClientSelection
 from seleceval.util import config
 from flwr.common import (
     Metrics,
@@ -18,27 +24,44 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate
 from omegaconf import DictConfig
+import torch
 
 
 class FedNova(FedAvg):
     """FedNova."""
 
-    def __init__(self, config, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config, init_parameters, client_selector: ClientSelection):
+        super().__init__(
+            initial_parameters=init_parameters,
+            fraction_fit=0.1,
+            fraction_evaluate=config.initial_config["c_evaluation_clients"],
+            # Percentage of clients to select for evaluation
+            min_fit_clients=1,  # No longer used, as this is handled by the client selection strategy
+            min_evaluate_clients=config.initial_config["min_evaluation_clients"],
+            # Min number of clients for evaluation
+            min_available_clients=1,  # Not relevant in simulation
+            evaluate_metrics_aggregation_fn=weighted_average,
+        )
 
         # Maintain a momentum buffer for the weight updates across rounds of training
         self.global_momentum_buffer: List[NDArray] = []
+        print("now checking if initial parameters exist")
         if self.initial_parameters is not None:
             self.global_parameters: List[NDArray] = parameters_to_ndarrays(
                 self.initial_parameters
             )
-
-        self.config = config.initial_config["base_strategy_config"]
+            print("global parameters now set:")
+        self.config = config
+        self.client_selector = client_selector
         self.lr = config.initial_config["base_strategy_config"]["FedNova"]["lr"]
 
         # momentum parameter for the server/strategy side momentum buffer
-        self.gmf = exp_config.optimizer.gmf
+        self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
+        self.gmf = 0
+
+    def initialize_global_params(self):
+        """intitialize global parameters if initial parameters chosen randomly from client"""
 
     def aggregate_fit(
         self,
@@ -55,6 +78,19 @@ class FedNova(FedAvg):
             return None, {}
 
         # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
+
+        filtered_results = []
+        for client, res in results:
+            try:
+                # If accessing a key in res.metrics throws a KeyError,
+                # this item will be skipped
+                _ = res.metrics["tau"]
+                filtered_results.append((client, res))
+            except KeyError:
+                # Handle the KeyError, e.g., by skipping or logging
+                pass  # or log the error
+        results = filtered_results
+
         local_tau = [res.metrics["tau"] for _, res in results]
         tau_eff = np.sum(local_tau)
 
@@ -82,8 +118,24 @@ class FedNova(FedAvg):
 
         return ndarrays_to_parameters(self.global_parameters), {}
 
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ):
+        """
+        Configure the fit process
+        :param server_round: Current server round
+        :param parameters: Current model parameters
+        :param client_manager: Client manager
+        :return: List of clients to train
+        """
+        return self.client_selector.select_clients(
+            client_manager, parameters, server_round
+        )
+
     def update_server_params(self, cum_grad: NDArrays):
         """Update the global server parameters by aggregating client gradients."""
+        arrays = self.global_parameters
+        self.global_parameters = [array.astype(np.float64) for array in arrays]
         for i, layer_cum_grad in enumerate(cum_grad):
             if self.gmf != 0:
                 # check if it's the first round of aggregation, if so, initialize the
@@ -104,6 +156,7 @@ class FedNova(FedAvg):
             else:
                 # weight updated eqn: x_new = x_old - gradient
                 # the layer_cum_grad already has all the learning rate multiple
+                """layer_cum_grad = layer_cum_grad.astype("float64")"""
                 self.global_parameters[i] -= layer_cum_grad
 
     def evaluate(

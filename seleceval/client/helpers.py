@@ -33,7 +33,14 @@ def set_parameters(net, parameters: List[np.ndarray]):
         k: torch.Tensor(v) if v.shape != torch.Size([]) else torch.Tensor([0])
         for k, v in params_dict
     }
+    # Print keys from the model's current state_dict
+    print("Keys in net.state_dict():")
+    for key in net.state_dict().keys():
+        print(key)
+
+    # Print keys from the generated state_dict
+    print("\nKeys in generated state_dict:")
+    for key in state_dict.keys():
+        print(key)
 
     net.load_state_dict(state_dict, strict=True)
-
-
