@@ -30,7 +30,7 @@ class Config:
                 "default": {},
                 "schema": algorithm_parameter_dict,
             },
-            "variable_epochs": {"type": "boolean", "default": False},
+            "variable_epochs": {"type": "boolean", "default": True},
             "min_no_epochs": {"type": "integer", "min": 1, "default": 1},
             "max_no_epochs": {"type": "integer", "min": 2, "default": 4},
             "no_epochs": {"type": "integer", "min": 1, "default": 1},
@@ -95,7 +95,7 @@ class Config:
                     "state_simulation_seed": {
                         "type": "integer",
                         "min": 0,
-                        "default": 12367123871238713871,
+                        "default": 1236712387,
                     },
                 },
             },

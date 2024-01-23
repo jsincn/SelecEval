@@ -35,12 +35,21 @@ def set_parameters(net, parameters: List[np.ndarray], optimizer: Optional = None
     }
     net.load_state_dict(state_dict, strict=True)
 
-    # Update the optimizer's state with 'old_init' for each parameter
     if optimizer is not None:
         for group in optimizer.param_groups:
             for p in group["params"]:
-                # Ensure we have the 'param_state' for this parameter in the optimizer
-                param_state = optimizer.state[p]
-                # Save the current parameter data as 'old_init' in the optimizer's state
                 if p in optimizer.state:
+                    param_state = optimizer.state[p]
+                    # Update optimizer's 'param_state["params"]'
+                    param_state["param_state"]["params"] = list(net.parameters())
+                    param_state["old_init"] = p.data.clone()
+
+
+def update_optimizer_state_init_parameters(optimizer: Optimizer):
+    if optimizer is not None:
+        for group in optimizer.param_groups:
+            for p in group["params"]:
+                if p in optimizer.state:
+                    param_state = optimizer.state[p]
+
                     param_state["old_init"] = p.data.clone()
