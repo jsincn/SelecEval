@@ -123,10 +123,19 @@ def run_training_simulation(
     for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
+        print(
+            "Length of net parameter list right after model instantiation ",
+            len(list(model.net.parameters())),
+        )
         ndarrays = [
-            layer_param.cpu().numpy()
-            for _, layer_param in model.net.state_dict().items()
+            param.clone()
+            .detach()
+            .cpu()
+            .numpy()  # Clone, then detach and move to CPU before converting
+            for param in model.net.parameters()
+            if param.requires_grad  # Generally redundant for parameters(), but included for clarity
         ]
+
         init_parameters = ndarrays_to_parameters(ndarrays)
         """calculate ratios for certain algorithms"""
         total_size = sum(len(loader.dataset) for loader in trainloaders)
@@ -152,7 +161,10 @@ def run_training_simulation(
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
         strategy = strategy_dict[config.initial_config["base_strategy"][0]](
-            net=model.get_net(), init_parameters=init_parameters, client_selector=client_selector, config=config
+            net=model.get_net(),
+            init_parameters=init_parameters,
+            client_selector=client_selector,
+            config=config,
         )
 
         fl.simulation.start_simulation(

@@ -46,10 +46,16 @@ class Resnet18(Model):
 
         return size
 
+    def get_device(self):
+        return self.device
+
+    def get_num_classes(self):
+        return self.num_classes
     def __init__(self, device, num_classes: int):
         super().__init__(device)
         resnet = torchvision.models.resnet18()
         # Load model and data
+        self.device = device
         self.net = resnet.to(self.DEVICE)
         self.num_classes = num_classes
 

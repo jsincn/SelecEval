@@ -36,7 +36,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         gmf=0,
         mu=0,
         lr=0,
-        momentum=0.01,
+        momentum=0.9,
         dampening=0.01,
         weight_decay=0,
         variance=0,
@@ -72,23 +72,19 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
 
     def step(self, closure=None):  # pylint: disable=too-many-branches
         """Perform a single optimization step."""
-
         for group in self.param_groups:
             weight_decay = group["weight_decay"]
             momentum = group["momentum"]
             dampening = group["dampening"]
-            print(f'The value of the momentum is {momentum}')
-            print(f'The value of the dampening is {dampening}')
-            print(f'The value of the weight decay is {weight_decay}')
 
-            lr=0
+            lr = 0
+            i = 0
             for p in group["params"]:
                 if p.grad is None:
                     continue
                 d_p = p.grad.data
-
                 if weight_decay != 0:
-                    d_p.add_(p.data, alpha=weight_decay)
+                    d_p.add_(p.data, alpha=weight_decay)  # Why is it p.data here?
 
                 param_state = self.state[p]
 
@@ -96,7 +92,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
                     param_state["old_init"] = torch.clone(p.data).detach()
 
                 local_lr = group["lr"]
-                lr=local_lr
+                lr = local_lr
                 # apply momentum updates
                 if momentum != 0:
                     if "momentum_buffer" not in param_state:
@@ -133,7 +129,9 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             self.local_normalizing_vec += 1
 
         if self.momentum == 0 and etamu == 0:
-            self.local_normalizing_vec += 1
+            self.local_normalizing_vec += (
+                1  # is this line necessary since +1 already in line 124?
+            )
 
         self.local_steps += 1
 
@@ -143,7 +141,9 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         Returns: A dictionary containing weight, tau, and local_norm.
         """
         if self.mu != 0:
-            local_tau = torch.tensor(self.local_steps * self.ratio)
+            local_tau = torch.tensor(
+                self.local_steps * self.ratio
+            )  # Shouldn't this always be ratio*normalizing_vec?
         else:
             local_tau = torch.tensor(self.local_normalizing_vec * self.ratio)
         local_stats = {

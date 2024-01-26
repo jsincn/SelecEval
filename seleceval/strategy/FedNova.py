@@ -31,7 +31,13 @@ from logging import WARNING
 class FedNova(FedAvg):
     """FedNova."""
 
-    def __init__(self, net, config, init_parameters, client_selector: ClientSelection):
+    def __init__(
+        self,
+        net,
+        config,
+        client_selector: ClientSelection,
+        init_parameters: Optional[Parameters] = None,
+    ):
         super().__init__(
             initial_parameters=init_parameters,
             fraction_fit=0.1,
@@ -42,8 +48,8 @@ class FedNova(FedAvg):
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
+            fit_metrics_aggregation_fn=weighted_average,
         )
-
         # Maintain a momentum buffer for the weight updates across rounds of training
         self.global_momentum_buffer: List[NDArray] = []
         print("now checking if initial parameters exist")
@@ -51,7 +57,10 @@ class FedNova(FedAvg):
             self.global_parameters: List[NDArray] = parameters_to_ndarrays(
                 self.initial_parameters
             )
-            print("global parameters now set:")
+            print(
+                "global parameters now set with initial parameters, shape:",
+                len(self.global_parameters),
+            )
         self.config = config
         self.client_selector = client_selector
         self.lr = config.initial_config["base_strategy_config"]["FedNova"]["lr"]
@@ -59,7 +68,6 @@ class FedNova(FedAvg):
         # momentum parameter for the server/strategy side momentum buffer
         self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
-        self.gmf = 0
         self.net = net
 
     def initialize_global_params(self):
@@ -74,16 +82,13 @@ class FedNova(FedAvg):
         """Aggregate the results from the clients."""
         if not results:
             return None, {}
-
         # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
 
         filtered_results = []
         # Filter results with negative sample size:
         # This indicates an artificial failure
-        for i in results:
-            if i[1].num_examples == -1:
-                results.remove(i)
-                failures.append(i)
+        failures = [i for i in results if i[1].num_examples == -1]
+        results = [i for i in results if i[1].num_examples != -1]
 
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
@@ -96,7 +101,7 @@ class FedNova(FedAvg):
                 _ = res.metrics["tau"]
                 filtered_results.append((client, res))
             except KeyError:
-                # Handle the KeyError, e.g., by skipping or logging
+                print("KeyError in FedNova filtering for clients with tau")
                 pass  # or log the error
         results = filtered_results
 
@@ -120,19 +125,22 @@ class FedNova(FedAvg):
         # Aggregate all client parameters with a weighted average using the scale
         # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
-
+        print("Saving aggregated_gradients...")
+        if agg_cum_gradient is not None:
+            print(f"Saving round {server_round} aggregated gradients...")
         # In case of Server or Hybrid Momentum, we decay the aggregated gradients
         # with a momentum factor
+        print("Updating server parameters...")
         self.update_server_params(agg_cum_gradient)
-
+        print("updating finished succuessfully")
         torch.save(
             self.net.state_dict(),
             f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
         )
-
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            print("length of res.metrics and 8th element of results", len(fit_metrics), results[8])
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
@@ -156,7 +164,16 @@ class FedNova(FedAvg):
     def update_server_params(self, cum_grad: NDArrays):
         """Update the global server parameters by aggregating client gradients."""
         arrays = self.global_parameters
-        self.global_parameters = [array.astype(np.float64) for array in arrays]
+        print("global parameters dtype:", arrays[0].dtype)
+        print("layer_cum_grad_dtype:", cum_grad[0].dtype)
+        print("lenght of global parameters list:", len(self.global_parameters))
+        print(f"Shape of global parameter:", self.global_parameters[0].shape)
+        print(f"Length of layer_cum_grad:", len(cum_grad))
+        print(f"Shape of layer_cum_grad:", cum_grad[0].shape)
+        for i, layer_cum_grad in enumerate(cum_grad):
+            if not (layer_cum_grad.shape == self.global_parameters[i].shape):
+                print("layers not of same size at index ", i)
+        """self.global_parameters = [array.astype(np.float64) for array in arrays]"""
         for i, layer_cum_grad in enumerate(cum_grad):
             if self.gmf != 0:
                 # check if it's the first round of aggregation, if so, initialize the
@@ -178,9 +195,10 @@ class FedNova(FedAvg):
                 # weight updated eqn: x_new = x_old - gradient
                 # the layer_cum_grad already has all the learning rate multiple
                 """layer_cum_grad = layer_cum_grad.astype("float64")"""
-                self.global_parameters[i] -= layer_cum_grad
+                print("BBBBBBBBB NOW SUBTRACTINGBBBBBBBBBBB")
+                self.global_parameters[i] -= cum_grad[i]
 
-    """
+"""
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
@@ -205,7 +223,10 @@ class FedNova(FedAvg):
             if server_round == 0:
                 return None
 
-            np.savez(
+        return [loss, metrics]
+
+     
+           np.savez(
                 f"{self.exp_config.checkpoint_path}bestModel_"
                 f"{self.exp_config.exp_name}_{self.exp_config.strategy}_"
                 f"varEpochs_{self.exp_config.var_local_epochs}.npz",
@@ -213,11 +234,9 @@ class FedNova(FedAvg):
                 [loss, self.best_test_acc],
                 self.global_momentum_buffer,
             )
-
             log(INFO, "Model saved with Best Test accuracy %.3f: ", self.best_test_acc)
-
-        return loss, metrics
     """
+
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -236,6 +255,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
+    print(accuracies)  # Check for any nested sequences or non-numeric values
+    print(examples)  # Ensure all elements are numbers and not lists or tuples
 
     # Aggregate and return custom metric (weighted average)
     return {"accuracy": np.sum(accuracies) / np.sum(examples)}

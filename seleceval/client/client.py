@@ -6,7 +6,7 @@ from random import random
 from typing import Dict, List, Tuple
 import flwr as fl
 import torch
-from flwr.common import GetParametersIns, ndarrays_to_parameters
+from flwr.common import GetParametersIns, ndarrays_to_parameters, ndarray_to_bytes
 from numpy import ndarray, random
 from torch.utils.data import DataLoader
 import numpy as np
@@ -22,7 +22,7 @@ from ..models.model import Model
 from ..util import Config
 from torch.optim.optimizer import Optimizer
 from torch import nn, tensor
-from flwr.common.typing import NDArrays
+from flwr.common.typing import NDArrays, Scalar
 
 
 from torch.utils.data import DataLoader
@@ -51,13 +51,41 @@ class Client(fl.client.NumPyClient):
             self.state, config.get_current_round(), config.attributes["output_path"]
         )
         self.net = self.model.get_net()
-        self.optimizer = 0
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            params = list(self.net.parameters())
+            print(
+                "length of net params before optimizer initialization in client_init",
+                len(params),
+            )
+            ndarrays = [
+                layer_param.cpu().numpy()
+                for _, layer_param in self.net.state_dict().items()
+            ]
+            print("before optimizer instantiation in client, length of ndarrays if converted from state dict")
+            self.optimizer = proxSGD.ProxSGD(
+                params,
+                self.ratio,
+                mu=self.config.initial_config["base_strategy_config"]["FedNova"]["mu"],
+                lr=self.config.initial_config["base_strategy_config"]["FedNova"]["lr"],
+            )
+        elif self.config.initial_config["base_strategy"][0] == "FedProx":
+            learning_rate = self.config.initial_config["base_strategy_config"][
+                "FedProx"
+            ]["lr"]
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
+        elif self.config.initial_config["base_strategy"][0] == "FedAvg":
+            print("FedAvg as base strategy")
+            learning_rate = self.config.initial_config["base_strategy_config"][
+                "FedAvg"
+            ]["lr"]
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
+
         """create optimizer based on config, optimizer is to be given to model"""
         tensor_list = [
             torch.from_numpy(ndarray.astype(np.float32)).requires_grad_(True)
             for ndarray in self.get_parameters(self.net)
         ]
-        if not tensor_list:
+        if tensor_list[0] is None:
             print("parameter aka tensor list empty")
 
     def fit(
@@ -69,8 +97,6 @@ class Client(fl.client.NumPyClient):
         :param config: Configuration for this fit
         :return: The parameters of the global model, the number of samples used and the metrics
         """
-        self.net = self.model.get_net()
-
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
         execution_time = self.state.get("expected_execution_time") * self.state.get(
@@ -109,28 +135,9 @@ class Client(fl.client.NumPyClient):
                 )
             return get_parameters(self.net), -1, {}
         start_time = time.time()
-        set_parameters(self.net, parameters)
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
-            self.optimizer = proxSGD.ProxSGD(
-                self.net.parameters(),
-                self.ratio,
-                mu=self.config.initial_config["base_strategy_config"]["FedNova"]["mu"],
-                lr=self.config.initial_config["base_strategy_config"]["FedNova"]["lr"],
-            )
-            update_optimizer_state_init_parameters(self.optimizer)
-        elif self.config.initial_config["base_strategy"][0] == "FedProx":
-            learning_rate = self.config.initial_config["base_strategy_config"][
-                "FedProx"
-            ]["lr"]
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
-        elif self.config.initial_config["base_strategy"][0] == "FedAvg":
-            print("FedAvg as base strategy")
-            learning_rate = self.config.initial_config["base_strategy_config"][
-                "FedAvg"
-            ]["lr"]
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
 
-        """self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.01)"""
+        self.set_parameters2(parameters)
+        """update_optimizer_state_init_parameters(self.optimizer)"""
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
                 2024
@@ -176,7 +183,7 @@ class Client(fl.client.NumPyClient):
         self.output.set("total_time", total_time)
         self.output.set("status", "success")
         self.output.write()
-        return get_parameters(self.net), len(self.trainloader), train_output
+        return self.get_parametersFedNova({}), len(self.trainloader), train_output
 
     def evaluate(self, parameters, config):
         """
@@ -204,7 +211,16 @@ class Client(fl.client.NumPyClient):
     def get_parameters(self, config: GetParametersIns) -> List[ndarray]:
         return get_parameters(self.net)
 
-    def set_parameters(self, parameters: NDArrays) -> None:
+    def get_parametersFedNova(self, config: Dict[str, Scalar]) -> NDArrays:
+        """Return the cummulated gradients saved in the optimizer's state dictionary."""
+        params = [
+            val["cum_grad"].cpu().numpy()
+            for _, val in self.optimizer.state_dict()["state"].items()
+        ]
+        print("Lengths of cummulated gradients that the client returns: ", len(params))
+        return params
+
+    def set_parameters2(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
         self.optimizer.set_model_params(parameters)
 
