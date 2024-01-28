@@ -153,7 +153,7 @@ class Resnet18(Model):
         accuracy = correct / total
         if verbose:
             print(
-                f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set"
+                f"{client_name}: has reached accuracy {round(accuracy, 4) * 100}% on the validation set"
             )
         further_results = {
             "correct": correct,

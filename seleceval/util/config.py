@@ -30,7 +30,7 @@ class Config:
                 "default": {},
                 "schema": algorithm_parameter_dict,
             },
-            "variable_epochs": {"type": "boolean", "default": True},
+            "variable_epochs": {"type": "boolean", "default": False},
             "min_no_epochs": {"type": "integer", "min": 1, "default": 1},
             "max_no_epochs": {"type": "integer", "min": 2, "default": 4},
             "no_epochs": {"type": "integer", "min": 1, "default": 1},
@@ -177,7 +177,7 @@ class Config:
         if not os.path.isdir(self.initial_config["output_dir"] + "/figures"):
             os.mkdir(path=self.initial_config["output_dir"] + "/figures")
 
-        with open(self.initial_config["output_dir"] + '/config.json', 'w') as fp:
+        with open(self.initial_config["output_dir"] + "/config.json", "w") as fp:
             json.dump(self.initial_config, fp)
 
     def set_current_round(self, i: int):

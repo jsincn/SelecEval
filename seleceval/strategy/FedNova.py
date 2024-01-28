@@ -1,3 +1,4 @@
+import os
 from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
 import torch.nn
@@ -6,6 +7,7 @@ from torch import nn, tensor
 from torch.utils.data import DataLoader
 import numpy as np
 from flwr.server import ClientManager
+from ..models import proxSGD
 
 from seleceval.selection import ClientSelection
 from seleceval.util import config
@@ -57,18 +59,16 @@ class FedNova(FedAvg):
             self.global_parameters: List[NDArray] = parameters_to_ndarrays(
                 self.initial_parameters
             )
-            print(
-                "global parameters now set with initial parameters, shape:",
-                len(self.global_parameters),
-            )
+            print("Global parameters are now set in strategy")
         self.config = config
         self.client_selector = client_selector
         self.lr = config.initial_config["base_strategy_config"]["FedNova"]["lr"]
+        self.net = net
+        self.optimizer = proxSGD.ProxSGD(self.net.parameters())
 
         # momentum parameter for the server/strategy side momentum buffer
         self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
-        self.net = net
 
     def initialize_global_params(self):
         """intitialize global parameters if initial parameters chosen randomly from client"""
@@ -133,6 +133,9 @@ class FedNova(FedAvg):
         print("Updating server parameters...")
         self.update_server_params(agg_cum_gradient)
         print("updating finished succuessfully")
+
+        self.optimizer.set_model_params(self.global_parameters)
+
         torch.save(
             self.net.state_dict(),
             f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
@@ -140,7 +143,7 @@ class FedNova(FedAvg):
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            print("length of res.metrics and 8th element of results", len(fit_metrics), results[8])
+            print("length of res.metrics", len(fit_metrics))
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
@@ -195,14 +198,12 @@ class FedNova(FedAvg):
                 # weight updated eqn: x_new = x_old - gradient
                 # the layer_cum_grad already has all the learning rate multiple
                 """layer_cum_grad = layer_cum_grad.astype("float64")"""
-                print("BBBBBBBBB NOW SUBTRACTINGBBBBBBBBBBB")
                 self.global_parameters[i] -= cum_grad[i]
 
-"""
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        Overide default evaluate method to save model parameters.
+        """Overide default evaluate method to save model parameters."""
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
@@ -223,20 +224,22 @@ class FedNova(FedAvg):
             if server_round == 0:
                 return None
 
-        return [loss, metrics]
+            file_path = os.path.join(
+                self.config.initial_config["output_dir"],
+                f"bestModel_testexperiment_{self.config.initial_config['base_strategy']}_varEpochs_{self.config.initial_config['variable_epochs']}.npz",
+            )
 
-     
-           np.savez(
-                f"{self.exp_config.checkpoint_path}bestModel_"
-                f"{self.exp_config.exp_name}_{self.exp_config.strategy}_"
-                f"varEpochs_{self.exp_config.var_local_epochs}.npz",
+            np.savez(
+                file_path,
                 self.global_parameters,
                 [loss, self.best_test_acc],
                 self.global_momentum_buffer,
             )
-            log(INFO, "Model saved with Best Test accuracy %.3f: ", self.best_test_acc)
-    """
 
+            log(INFO, "Model saved with Best Test accuracy %.3f: ", self.best_test_acc)
+            # Save the model
+
+        return loss, metrics
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -253,7 +256,17 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         The weighted average metric.
     """
     # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    if isinstance(metrics[0][1]["accuracy"], list):
+        print("accuracies are not float but list: ", print(metrics[0][1]))
+
+        accuracies = [num_examples * m["accuracy"][-1] for num_examples, m in metrics]
+    elif isinstance(metrics[0][1]["accuracy"], float):
+        accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+        print("accuracies are float")
+
+    else:
+        raise TypeError("Accuracies in metric are neither list nor float type")
+
     examples = [num_examples for num_examples, _ in metrics]
     print(accuracies)  # Check for any nested sequences or non-numeric values
     print(examples)  # Ensure all elements are numbers and not lists or tuples

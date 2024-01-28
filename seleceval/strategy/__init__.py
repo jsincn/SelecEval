@@ -7,6 +7,7 @@ from .adjusted_fed_avg import AdjustedFedAvg
 from .adjusted_fed_med import AdjustedFedMedian
 from .adjusted_fed_prox import AdjustedFedProx
 from .FedNova import FedNova
+from .FedDisco import FedDisco
 
 __all__ = ["AdjustedFedAvg", "AdjustedFedMedian", "AdjustedFedAvgM", "strategy_dict", "AdjustedFedProx", "FedNova"]
 
@@ -15,5 +16,6 @@ strategy_dict = {
     "FedMedian": AdjustedFedMedian,
     "FedAvgM": AdjustedFedAvgM,
     "FedProx": AdjustedFedProx,
-    "FedNova": FedNova
+    "FedNova": FedNova,
+    "FedDisco": FedDisco
 }

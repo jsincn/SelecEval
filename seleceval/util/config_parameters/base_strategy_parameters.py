@@ -1,7 +1,7 @@
 """
 This file contains the available strategies and the default strategy.
 """
-available_strategies = ["FedAvgM", "FedAvg", "FedMedian", "FedProx", "FedNova"]
+available_strategies = ["FedAvgM", "FedAvg", "FedMedian", "FedProx", "FedNova", "FedDisco"]
 
 default_strategy = "FedAvg"
 
@@ -10,7 +10,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
         },
     },
     "FedProx": {
@@ -25,9 +25,18 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.05},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.00},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
+        },
+    },
+    "FedDisco": {
+        "type": "dict",
+        "default": {},
+        "schema": {
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
         },
     },
 }

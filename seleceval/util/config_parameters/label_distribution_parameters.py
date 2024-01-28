@@ -8,4 +8,4 @@ data_label_distribution_parameters = {
     "data_label_distribution_parameter": {"type": "float", "min": 0, "default": 0.5},
 }
 
-default_label_distribution = "Uniform"
+default_label_distribution = "Dirichlet"

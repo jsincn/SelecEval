@@ -143,7 +143,8 @@ class Validation(Evaluator):
         for i in self.output_dfs.keys():
             self.output_dfs[i]["algorithm"] = i
         df = pd.concat(self.output_dfs.values(), ignore_index=True)
-
+        if df["acc"].dropna().empty:
+            raise ValueError("df accuracy is empty")
         # Generate plots
         self._generate_mean_accuracy(df)
         self._generate_mean_quantile_loss(df)

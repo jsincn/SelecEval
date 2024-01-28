@@ -26,11 +26,9 @@ class ClientFunction:
         :param cid: The client id
         :return: Instance of the client class
         """
-        model_class = type(self.model)
-        new_model = model_class(self.model.get_device(), self.model.get_num_classes())
         trainloader = self.trainloaders[int(cid)]
         valloader = self.valloaders[int(cid)]
         ratio = self.data_ratios[int(cid)]
         return self.clientClass(
-            new_model, trainloader, valloader, ratio, cid, self.config
+            self.model, trainloader, valloader, ratio, cid, self.config
         )

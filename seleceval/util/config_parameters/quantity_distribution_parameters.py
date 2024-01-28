@@ -17,4 +17,4 @@ data_quantity_distribution_parameters = {
     "data_quantity_max_parameter": {"type": "integer", "min": 1, "default": 2000}
 }
 
-default_quantity_distribution = "Uniform"
+default_quantity_distribution = "Dirichlet"

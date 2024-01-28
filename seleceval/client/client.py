@@ -53,15 +53,10 @@ class Client(fl.client.NumPyClient):
         self.net = self.model.get_net()
         if self.config.initial_config["base_strategy"][0] == "FedNova":
             params = list(self.net.parameters())
-            print(
-                "length of net params before optimizer initialization in client_init",
-                len(params),
-            )
             ndarrays = [
                 layer_param.cpu().numpy()
                 for _, layer_param in self.net.state_dict().items()
             ]
-            print("before optimizer instantiation in client, length of ndarrays if converted from state dict")
             self.optimizer = proxSGD.ProxSGD(
                 params,
                 self.ratio,
@@ -73,12 +68,16 @@ class Client(fl.client.NumPyClient):
                 "FedProx"
             ]["lr"]
             self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
-        elif self.config.initial_config["base_strategy"][0] == "FedAvg":
-            print("FedAvg as base strategy")
+        else:
+            print(f"{self.config.initial_config['base_strategy'][0]} as base strategy")
             learning_rate = self.config.initial_config["base_strategy_config"][
-                "FedAvg"
+                f"{self.config.initial_config['base_strategy'][0]}"
             ]["lr"]
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
+            self.optimizer = torch.optim.Adam(
+                list(self.net.parameters()), lr=learning_rate
+            )
+
+
 
         """create optimizer based on config, optimizer is to be given to model"""
         tensor_list = [
@@ -135,8 +134,22 @@ class Client(fl.client.NumPyClient):
                 )
             return get_parameters(self.net), -1, {}
         start_time = time.time()
-
-        self.set_parameters2(parameters)
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            if len(parameters) > 62:
+                print("parameters given to client fit longer than 63")
+                params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
+                state_dict = {
+                    k: torch.Tensor(v)
+                    if v.shape != torch.Size([])
+                    else torch.Tensor([0])
+                    for k, v in params_dict
+                }
+                self.model.get_net().load_state_dict(state_dict, strict=True)
+                self.set_parameters2(list(self.model.get_net().parameters()))
+            else:
+                self.set_parameters2(parameters)
+        else:
+            set_parameters(self.net, parameters)
         """update_optimizer_state_init_parameters(self.optimizer)"""
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
@@ -183,7 +196,11 @@ class Client(fl.client.NumPyClient):
         self.output.set("total_time", total_time)
         self.output.set("status", "success")
         self.output.write()
-        return self.get_parametersFedNova({}), len(self.trainloader), train_output
+
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            return self.get_parametersFedNova({}), len(self.trainloader), train_output
+        else:
+            return get_parameters(self.net), len(self.trainloader), train_output
 
     def evaluate(self, parameters, config):
         """
@@ -192,7 +209,23 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-        set_parameters(self.net, parameters)
+        if self.config.initial_config["base_strategy"][0] == "FedNova":
+            if len(parameters) > 62:
+                print("parameters given to client fit longer than 63")
+                params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
+                state_dict = {
+                    k: torch.Tensor(v)
+                    if v.shape != torch.Size([])
+                    else torch.Tensor([0])
+                    for k, v in params_dict
+                }
+                self.model.get_net().load_state_dict(state_dict, strict=True)
+                self.set_parameters2(list(self.model.get_net().parameters()))
+            else:
+                self.set_parameters2(parameters)
+        else:
+            set_parameters(self.net, parameters)
+
         loss, accuracy, out_dict = self.model.test(
             self.valloader,
             self.state.get("client_name"),

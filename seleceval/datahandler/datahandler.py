@@ -16,7 +16,6 @@ from .data_feature_distribution import *
 from .data_quantity_distribution import *
 from ..util import Config
 
-
 class DataHandler(ABC):
     """
     DataHandler is an abstract class that defines the interface for any implemented data handlers
@@ -26,6 +25,7 @@ class DataHandler(ABC):
         self.NUM_CLIENTS = config.initial_config["no_clients"]
         self.BATCH_SIZE = config.initial_config["batch_size"]
         self.config = config
+        self.label_distribution = 0
         if config.initial_config['verbose']:
             print("Loading dataset")
 
@@ -68,6 +68,7 @@ class DataHandler(ABC):
             ]
             label_distribution = c(self.config, self.get_classes())
             label_distribution = label_distribution.get_label_distribution()
+            self.label_distribution = label_distribution
             # Distribute data
             datasets = self.distribute_data(
                 label_distribution, partition_sizes, trainset
@@ -199,3 +200,7 @@ class DataHandler(ABC):
         if data_feature_distribution_dict[skew] is not None:
             trans += [data_feature_distribution_dict[skew](self.config)]
         return transforms.Compose(trans)
+
+    def get_attribute_label_distribution(self):
+        return self.label_distribution
+

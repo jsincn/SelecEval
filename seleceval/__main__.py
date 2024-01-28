@@ -25,6 +25,7 @@ from .simulation.state import (
 from .util import Arguments, Config
 from .validation.datadistribution import DataDistribution
 from .validation.validation import Validation
+from .simulation.state import add_discrepancy_level
 
 
 def main():
@@ -120,26 +121,16 @@ def run_training_simulation(
         }
     else:
         client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
+
+    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
     for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-        print(
-            "Length of net parameter list right after model instantiation ",
-            len(list(model.net.parameters())),
-        )
-        ndarrays = [
-            param.clone()
-            .detach()
-            .cpu()
-            .numpy()  # Clone, then detach and move to CPU before converting
-            for param in model.net.parameters()
-            if param.requires_grad  # Generally redundant for parameters(), but included for clarity
-        ]
 
-        init_parameters = ndarrays_to_parameters(ndarrays)
         """calculate ratios for certain algorithms"""
         total_size = sum(len(loader.dataset) for loader in trainloaders)
         data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
+
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, data_ratios, model, config
         ).client_fn
@@ -160,12 +151,29 @@ def run_training_simulation(
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
-        strategy = strategy_dict[config.initial_config["base_strategy"][0]](
-            net=model.get_net(),
-            init_parameters=init_parameters,
-            client_selector=client_selector,
-            config=config,
-        )
+        if config.initial_config["base_strategy"][0] == "FedNova":
+            ndarrays = [
+                param.clone()
+                .detach()
+                .cpu()
+                .numpy()  # Clone, then detach and move to CPU before converting
+                for param in model.net.parameters()
+                if param.requires_grad  # Generally redundant for parameters(), but included for clarity
+            ]
+
+            init_parameters = ndarrays_to_parameters(ndarrays)
+            strategy = strategy_dict[config.initial_config["base_strategy"][0]](
+                net=model.get_net(),
+                init_parameters=init_parameters,
+                client_selector=client_selector,
+                config=config,
+            )
+        else:
+            strategy = strategy_dict[config.initial_config["base_strategy"][0]](
+                net=model.get_net(),
+                client_selector=client_selector,
+                config=config,
+            )
 
         fl.simulation.start_simulation(
             client_fn=client_fn,

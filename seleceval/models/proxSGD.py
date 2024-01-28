@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 
 import numpy as np
 import torch.nn
@@ -32,7 +32,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=too-many-arguments
         self,
         params,
-        ratio: float,
+        ratio: Optional[float] = 0,
         gmf=0,
         mu=0,
         lr=0,

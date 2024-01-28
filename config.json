@@ -27,7 +27,8 @@
     "enable_data_distribution": true,
     "device": "cpu"
   },
+  "c_evaluation_clients":  0.03,
   "max_workers": 32,
-  "base_strategy": ["FedNova"]
+  "base_strategy": ["FedDisco"]
 
 }
