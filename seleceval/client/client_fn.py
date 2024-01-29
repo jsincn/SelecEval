@@ -10,7 +10,7 @@ class ClientFunction:
     """
 
     def __init__(
-        self, clientclass, trainloaders, valloaders, data_ratios, model, config
+        self, clientclass, trainloaders, valloaders, model, config, active_strategy
     ):
         self.model = model
         self.clientClass = clientclass
@@ -18,7 +18,7 @@ class ClientFunction:
         self.valloaders = valloaders
         self.config = config
         self.trainlength = len(trainloaders)
-        self.data_ratios = data_ratios
+        self.active_strategy = active_strategy
 
     def client_fn(self, cid: str) -> Client:
         """
@@ -28,7 +28,6 @@ class ClientFunction:
         """
         trainloader = self.trainloaders[int(cid)]
         valloader = self.valloaders[int(cid)]
-        ratio = self.data_ratios[int(cid)]
         return self.clientClass(
-            self.model, trainloader, valloader, ratio, cid, self.config
+            self.model, trainloader, valloader, cid, self.config, self.active_strategy
         )

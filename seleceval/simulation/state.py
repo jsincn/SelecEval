@@ -127,8 +127,10 @@ def add_discrepancy_level(csv_path, datahandler: DataHandler):
     label_distribution = datahandler.get_attribute_label_distribution()
     _, num_classes = label_distribution.shape
     uniform_dist = np.array([1 / num_classes] * num_classes)
-
-    discrepancy_levels = [np.linalg.norm(label_distribution_row - uniform_dist) for label_distribution_row in label_distribution ]
+    discrepancy_levels = [
+        np.linalg.norm(label_distribution_row - uniform_dist)
+        for label_distribution_row in label_distribution
+    ]
 
     # Add discrepancy level to the original DataFrame
     df["discrepancy_level"] = discrepancy_levels
@@ -139,3 +141,13 @@ def add_discrepancy_level(csv_path, datahandler: DataHandler):
 def get_discrepancy_level(csv_path):
     df = pd.read_csv(csv_path)
     return df["discrepancy_level"]
+
+
+def add_data_ratios(csv_path, trainloaders):
+    df = pd.read_csv(csv_path)
+
+    """calculate ratios"""
+    total_size = sum(len(loader.dataset) for loader in trainloaders)
+    data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
+    df["data_ratio"] = data_ratios
+    df.to_csv(csv_path, index=False)

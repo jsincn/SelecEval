@@ -54,6 +54,7 @@ class Config:
             "num_gpu_per_client": {"type": "float", "min": 0, "default": 0.1},
             "verbose": {"type": "boolean", "default": True},
             "timeout": {"type": "integer", "min": 1},
+            "create_synthetic_client_failures": {"type": "boolean", "default": True},
             "generate_clients": {"type": "boolean", "default": True},
             "client_state_file": {"type": "string"},
             "distribute_data": {"type": "boolean", "default": True},
@@ -98,6 +99,14 @@ class Config:
                         "default": 1236712387,
                     },
                 },
+            },
+            "compare_client_selection_algorithms": {
+                "type": "boolean",
+                "default": False,
+            },
+            "compare_base_strategies": {
+                "type": "boolean",
+                "default": True,
             },
             "max_workers": {"type": "integer", "min": 1, "default": 32},
             "base_strategy": {
@@ -195,10 +204,13 @@ class Config:
         """
         return self.current_round
 
-    def generate_paths(self, algorithm: str, dataset: str, no_clients: int):
+    def generate_paths(
+        self, algorithm: str, base_strategy: str, dataset: str, no_clients: int
+    ):
         """
         Generates the paths for the outputs files
         :param algorithm: Current algorithm simulated
+        :param base_strategy: Current base_strategy simulated
         :param dataset: Current dataset used
         :param no_clients: Number of clients used
         :return: None
@@ -208,6 +220,8 @@ class Config:
             + "/client_output/"
             + "client_output_"
             + algorithm
+            + "_"
+            + base_strategy
             + "_"
             + dataset
             + "_"
@@ -220,6 +234,8 @@ class Config:
             + "model_output_"
             + algorithm
             + "_"
+            + base_strategy
+            + "_"
             + dataset
             + "_"
             + str(no_clients)
@@ -230,6 +246,8 @@ class Config:
             + "/state/"
             + "state_"
             + algorithm
+            + "_"
+            + base_strategy
             + "_"
             + dataset
             + "_"

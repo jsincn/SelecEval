@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union, Dict, Optional
 from logging import WARNING
-
+import pandas as pd
 import flwr as fl
 import numpy as np
 import torch
@@ -38,6 +38,7 @@ class FedDisco(fl.server.strategy.FedAvg):
         self.client_selector = client_selector
         self.net = net
         self.config = config
+        self.data_ratios = pd.read_csv(config.attributes["input_state_file"])["data_ratio"]
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -91,13 +92,13 @@ class FedDisco(fl.server.strategy.FedAvg):
         )
 
         # Hyperparameter 1 and 2
-        a = 10
+        a = 0.3
         b = 0
         # assign weights
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
-                max(0, fit_res.num_examples - a * discrepany_vals[int(client_proxy.cid)] + b),
+                max(1, (self.data_ratios[int(client_proxy.cid)] - a * discrepany_vals[int(client_proxy.cid)] + b)*10000),
             )
             for client_proxy, fit_res in results
         ]

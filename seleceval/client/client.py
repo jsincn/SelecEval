@@ -6,22 +6,17 @@ from random import random
 from typing import Dict, List, Tuple
 import flwr as fl
 import torch
-from flwr.common import GetParametersIns, ndarrays_to_parameters, ndarray_to_bytes
+from flwr.common import GetParametersIns
 from numpy import ndarray, random
-from torch.utils.data import DataLoader
 import numpy as np
 from .client_output import ClientOutput
 from .client_state import ClientState
 from .helpers import (
     get_parameters,
     set_parameters,
-    update_optimizer_state_init_parameters,
 )
 from ..models import proxSGD
 from ..models.model import Model
-from ..util import Config
-from torch.optim.optimizer import Optimizer
-from torch import nn, tensor
 from flwr.common.typing import NDArrays, Scalar
 
 
@@ -36,48 +31,53 @@ class Client(fl.client.NumPyClient):
         model: Model,
         trainloader: DataLoader,
         valloader: DataLoader,
-        ratio: float,
         cid: str,
         config: Config,
+        active_strategy: str,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
         self.valloader = valloader
-        self.ratio = ratio
         self.cid = cid
         self.config = config
+        self.active_strategy = active_strategy
         self.state = ClientState(cid, config.attributes["working_state_file"])
+        self.ratio = self.state.get("data_ratio")
         self.output = ClientOutput(
             self.state, config.get_current_round(), config.attributes["output_path"]
         )
         self.net = self.model.get_net()
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
+        if self.active_strategy == "FedNova":
             params = list(self.net.parameters())
-            ndarrays = [
-                layer_param.cpu().numpy()
-                for _, layer_param in self.net.state_dict().items()
-            ]
             self.optimizer = proxSGD.ProxSGD(
                 params,
                 self.ratio,
                 mu=self.config.initial_config["base_strategy_config"]["FedNova"]["mu"],
                 lr=self.config.initial_config["base_strategy_config"]["FedNova"]["lr"],
+                momentum=self.config.initial_config["base_strategy_config"]["FedNova"][
+                    "momentum"
+                ],
             )
-        elif self.config.initial_config["base_strategy"][0] == "FedProx":
+        elif self.active_strategy == "FedProx":
             learning_rate = self.config.initial_config["base_strategy_config"][
                 "FedProx"
             ]["lr"]
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=learning_rate)
-        else:
-            print(f"{self.config.initial_config['base_strategy'][0]} as base strategy")
-            learning_rate = self.config.initial_config["base_strategy_config"][
-                f"{self.config.initial_config['base_strategy'][0]}"
-            ]["lr"]
-            self.optimizer = torch.optim.Adam(
-                list(self.net.parameters()), lr=learning_rate
+            momentum = self.config.initial_config["base_strategy_config"]["FedProx"][
+                "momentum"
+            ]
+            self.optimizer = torch.optim.SGD(
+                self.net.parameters(), lr=learning_rate, momentum=momentum
             )
-
-
+        else:
+            learning_rate = self.config.initial_config["base_strategy_config"][
+                f"{active_strategy}"
+            ]["lr"]
+            momentum = self.config.initial_config["base_strategy_config"][
+                f"{active_strategy}"
+            ]["momentum"]
+            self.optimizer = torch.optim.SGD(
+                list(self.net.parameters()), lr=learning_rate, momentum=momentum
+            )
 
         """create optimizer based on config, optimizer is to be given to model"""
         tensor_list = [
@@ -98,43 +98,47 @@ class Client(fl.client.NumPyClient):
         """
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
-        execution_time = self.state.get("expected_execution_time") * self.state.get(
-            "i_performance_factor"
-        )
-        if self.state.get("network_bandwidth") > 0:
-            upload_time = (
-                self.model.get_size() / self.state.get("network_bandwidth") * 8
+
+        if self.config.initial_config["create_synthetic_client_failures"]:
+            execution_time = self.state.get("expected_execution_time") * self.state.get(
+                "i_performance_factor"
             )
-        else:
-            upload_time = -1
-        if random.random() < self.state.get("i_reliability"):
-            self.output.set("train_output", {})
-            self.output.set("execution_time", execution_time)
-            self.output.set("upload_time", upload_time)
-            self.output.set("total_time", self.config.initial_config["timeout"])
-            self.output.set("status", "fail")
-            self.output.set("reason", "reliability failure")
-            self.output.write()
-            if verbose:
-                print(
-                    f"{client_name}: Reliability failure with reliability {self.state.get('i_reliability')}"
+            if self.state.get("network_bandwidth") > 0:
+                upload_time = (
+                    self.model.get_size() / self.state.get("network_bandwidth") * 8
                 )
-            return get_parameters(self.net), -1, {}
-        if self._calculate_timeout():
-            self.output.set("train_output", {})
-            self.output.set("execution_time", execution_time)
-            self.output.set("upload_time", upload_time)
-            self.output.set("total_time", self.config.initial_config["timeout"])
-            self.output.set("status", "fail")
-            self.output.set("reason", "timeout failure")
-            self.output.write()
-            if verbose:
-                print(
-                    f"{client_name}: Timeout failure with timeout {self._calculate_expected_runtime()} > {self.config.initial_config['timeout']}"
-                )
-            return get_parameters(self.net), -1, {}
+            else:
+                upload_time = -1
+
+            if random.random() < self.state.get("i_reliability"):
+                self.output.set("train_output", {})
+                self.output.set("execution_time", execution_time)
+                self.output.set("upload_time", upload_time)
+                self.output.set("total_time", self.config.initial_config["timeout"])
+                self.output.set("status", "fail")
+                self.output.set("reason", "reliability failure")
+                self.output.write()
+                if verbose:
+                    print(
+                        f"{client_name}: Reliability failure with reliability {self.state.get('i_reliability')}"
+                    )
+                return get_parameters(self.net), -1, {}
+            if self._calculate_timeout():
+                self.output.set("train_output", {})
+                self.output.set("execution_time", execution_time)
+                self.output.set("upload_time", upload_time)
+                self.output.set("total_time", self.config.initial_config["timeout"])
+                self.output.set("status", "fail")
+                self.output.set("reason", "timeout failure")
+                self.output.write()
+                if verbose:
+                    print(
+                        f"{client_name}: Timeout failure with timeout {self._calculate_expected_runtime()} > {self.config.initial_config['timeout']}"
+                    )
+                return get_parameters(self.net), -1, {}
         start_time = time.time()
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
+
+        if self.active_strategy == "FedNova":
             if len(parameters) > 62:
                 print("parameters given to client fit longer than 63")
                 params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
@@ -150,7 +154,6 @@ class Client(fl.client.NumPyClient):
                 self.set_parameters2(parameters)
         else:
             set_parameters(self.net, parameters)
-        """update_optimizer_state_init_parameters(self.optimizer)"""
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
                 2024
@@ -181,7 +184,7 @@ class Client(fl.client.NumPyClient):
             verbose,
         )
         end_time = time.time()
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
+        if self.active_strategy == "FedNova":
             grad_scaling_factor: Dict[
                 str, float
             ] = self.optimizer.get_gradient_scaling()
@@ -197,7 +200,7 @@ class Client(fl.client.NumPyClient):
         self.output.set("status", "success")
         self.output.write()
 
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
+        if self.active_strategy == "FedNova":
             return self.get_parametersFedNova({}), len(self.trainloader), train_output
         else:
             return get_parameters(self.net), len(self.trainloader), train_output
@@ -209,7 +212,7 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-        if self.config.initial_config["base_strategy"][0] == "FedNova":
+        if self.active_strategy == "FedNova":
             if len(parameters) > 62:
                 print("parameters given to client fit longer than 63")
                 params_dict = zip(self.model.get_net().state_dict().keys(), parameters)

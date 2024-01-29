@@ -47,12 +47,9 @@ class ClientOutput:
                 self.output_dict.get("train_output", {}).get("tau") is float
                 or self.output_dict.get("train_output", {}).get("tau") is np.float32
             ):
-                print("float class object recognized")
                 keys_to_remove = ["tau", "weight", "local_norm"]
                 for key in keys_to_remove:
                     self.output_dict.get("train_output", {}).pop(key, None)
-            else:
-                print("no float class object recognized")
 
             g.write(json.dumps(self.output_dict) + "\n")
             fcntl.flock(g, fcntl.LOCK_UN)

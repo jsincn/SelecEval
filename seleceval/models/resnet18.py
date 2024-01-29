@@ -81,7 +81,6 @@ class Resnet18(Model):
             global_params = copy.deepcopy(self.get_net()).parameters()
 
         loss_function = torch.nn.CrossEntropyLoss()
-        """optimizer = torch.optim.Adam(self.net.parameters(), lr=0.001)"""
         self.net.train()
         output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader), "tau": float, "weight": float, "local_norm": int}
         for epoch in range(epochs):

@@ -25,7 +25,8 @@ from .simulation.state import (
 from .util import Arguments, Config
 from .validation.datadistribution import DataDistribution
 from .validation.validation import Validation
-from .simulation.state import add_discrepancy_level
+from .validation.validation_bs import ValidationBS
+from .simulation.state import add_discrepancy_level, add_data_ratios
 
 
 def main():
@@ -88,21 +89,52 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
     # Evaluation generation
     if config.initial_config["validation_config"]["enable_validation"]:
         val = Validation(config, trainloaders, valloaders, datahandler)
-        for algorithm in config.initial_config["algorithm"]:
-            print("Generating validation data for ", algorithm)
-            current_run = {
-                "algorithm": algorithm,
-                "dataset": config.initial_config["dataset"],
-                "no_clients": config.initial_config["no_clients"],
-            }
-            val.evaluate(current_run)
-        val.generate_report()
 
-    train = Training(config, trainloaders, valloaders, datahandler)
-    train.generate_report()
+        if config.initial_config["compare_client_selection_algorithms"]:
+            run_evaluation_cs(config, datahandler, trainloaders, valloaders)
+
+        elif config.initial_config["compare_base_strategies"]:
+            run_evaluation_bs(config, datahandler, trainloaders, valloaders)
+        else:
+            print(
+                "Neither compare_client_selection_algorithms nor compare_base_strategies set to true."
+            )
+            return
 
 
 def run_training_simulation(
+    DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+):
+    """
+    Runs the training simulation
+    :param DEVICE: Device to run the simulation on
+    :param NUM_CLIENTS: Number of clients
+    :param config: Config object
+    :param datahandler: Datahandler object
+    :param trainloaders: Trainloaders
+    :param valloaders:
+    """
+
+    add_data_ratios(config.attributes["input_state_file"], trainloaders)
+    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
+
+    if config.initial_config["compare_client_selection_algorithms"]:
+        run_training_simulation_cs(
+            DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+        )
+
+    elif config.initial_config["compare_base_strategies"]:
+        run_training_simulation_bs(
+            DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+        )
+    else:
+        print(
+            "Neither compare_client_selection_algorithms nor compare_base_strategies are set to true."
+        )
+        return
+
+
+def run_training_simulation_cs(
     DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
 ):
     """
@@ -121,18 +153,15 @@ def run_training_simulation(
         }
     else:
         client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
-
+    add_data_ratios(config.attributes["input_state_file"], trainloaders)
     add_discrepancy_level(config.attributes["input_state_file"], datahandler)
-    for algorithm in config.initial_config["algorithm"]:
+
+    for algorithm in config.intial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
-        """calculate ratios for certain algorithms"""
-        total_size = sum(len(loader.dataset) for loader in trainloaders)
-        data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
-
         client_fn = ClientFunction(
-            Client, trainloaders, valloaders, data_ratios, model, config
+            Client, trainloaders, valloaders, model, config
         ).client_fn
         config.generate_paths(
             algorithm,
@@ -147,7 +176,7 @@ def run_training_simulation(
             "dataset with",
             config.initial_config["no_clients"],
             "clients and",
-            config.initial_config["base_strategy"],
+            config.initial_config["base_strategy"][0],
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
@@ -185,6 +214,127 @@ def run_training_simulation(
             client_resources=client_resources,
             ray_init_args={"include_dashboard": True},
         )
+
+
+def run_training_simulation_bs(
+    DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+):
+    """
+    Runs the training simulation
+    :param DEVICE: Device to run the simulation on
+    :param NUM_CLIENTS: Number of clients
+    :param config: Config object
+    :param datahandler: Datahandler object
+    :param trainloaders: Trainloaders
+    :param valloaders:
+    """
+    if DEVICE.type == "cuda":
+        client_resources = {
+            "num_gpus": config.initial_config["num_gpu_per_client"],
+            "num_cpus": config.initial_config["num_cpu_per_client"],
+        }
+    else:
+        client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
+    add_data_ratios(config.attributes["input_state_file"], trainloaders)
+    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
+
+    algorithm = config.initial_config["algorithm"][0]
+    for base_strategy in config.initial_config["base_strategy"]:
+        start_working_state(config)
+        model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
+
+        client_fn = ClientFunction(
+            Client, trainloaders, valloaders, model, config, base_strategy
+        ).client_fn
+        config.generate_paths(
+            algorithm,
+            base_strategy,
+            config.initial_config["dataset"],
+            config.initial_config["no_clients"],
+        )
+        print(
+            "Simulating with",
+            algorithm,
+            "algorithm using",
+            config.initial_config["dataset"],
+            "dataset with",
+            config.initial_config["no_clients"],
+            "clients and",
+            base_strategy,
+        )
+        client_selector = algorithm_dict[algorithm](config, model.get_size())
+
+        if base_strategy == "FedNova":
+            ndarrays = [
+                param.clone()
+                .detach()
+                .cpu()
+                .numpy()  # Clone, then detach and move to CPU before converting
+                for param in model.net.parameters()
+                if param.requires_grad  # Generally redundant for parameters(), but included for clarity
+            ]
+
+            init_parameters = ndarrays_to_parameters(ndarrays)
+            strategy = strategy_dict[base_strategy](
+                net=model.get_net(),
+                init_parameters=init_parameters,
+                client_selector=client_selector,
+                config=config,
+            )
+        else:
+            strategy = strategy_dict[base_strategy](
+                net=model.get_net(),
+                client_selector=client_selector,
+                config=config,
+            )
+
+        fl.simulation.start_simulation(
+            client_fn=client_fn,
+            num_clients=NUM_CLIENTS,
+            config=fl.server.ServerConfig(
+                num_rounds=config.initial_config["no_rounds"]
+            ),
+            strategy=strategy,
+            client_resources=client_resources,
+            ray_init_args={"include_dashboard": True},
+        )
+
+
+def run_evaluation_cs(config, datahandler, trainloaders, valloaders):
+    # Evaluation generation
+    if config.initial_config["validation_config"]["enable_validation"]:
+        val = Validation(config, trainloaders, valloaders, datahandler)
+        for algorithm in config.initial_config["algorithm"]:
+            print("Generating validation data for ", algorithm)
+            current_run = {
+                "algorithm": algorithm,
+                "dataset": config.initial_config["dataset"],
+                "no_clients": config.initial_config["no_clients"],
+            }
+            val.evaluate(current_run)
+        val.generate_report()
+
+    train = Training(config, trainloaders, valloaders, datahandler)
+    train.generate_report()
+
+
+def run_evaluation_bs(config, datahandler, trainloaders, valloaders):
+    # Evaluation generation
+    if config.initial_config["validation_config"]["enable_validation"]:
+        val = ValidationBS(config, trainloaders, valloaders, datahandler)
+        for base_strategy in config.initial_config["base_strategy"]:
+            print("Generating validation data for ", base_strategy)
+            current_run = {
+                "algorithm": config.initial_config["algorithm"][0],
+                "base_strategy": base_strategy,
+                "dataset": config.initial_config["dataset"],
+                "no_clients": config.initial_config["no_clients"],
+            }
+            val.evaluate(current_run)
+        val.generate_report()
+
+    train = Training(config, trainloaders, valloaders, datahandler)
+    train.generate_report()
 
 
 if __name__ == "__main__":
