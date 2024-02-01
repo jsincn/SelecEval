@@ -98,7 +98,8 @@ class Client(fl.client.NumPyClient):
         """
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
-
+        execution_time = -1
+        upload_time = -1
         if self.config.initial_config["create_synthetic_client_failures"]:
             execution_time = self.state.get("expected_execution_time") * self.state.get(
                 "i_performance_factor"
@@ -198,6 +199,7 @@ class Client(fl.client.NumPyClient):
         total_time = upload_time + execution_time
         self.output.set("total_time", total_time)
         self.output.set("status", "success")
+        self.output.set("reason", "success")
         self.output.write()
 
         if self.active_strategy == "FedNova":
@@ -258,7 +260,7 @@ class Client(fl.client.NumPyClient):
 
     def set_parameters2(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
-        self.optimizer.set_model_params(parameters)
+        self.optimizer.set_model_params(parameters) #only used for FedNova --> proxSGD
 
     def get_properties(self, config=None) -> Dict:
         """

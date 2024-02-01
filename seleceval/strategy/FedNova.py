@@ -176,7 +176,6 @@ class FedNova(FedAvg):
         for i, layer_cum_grad in enumerate(cum_grad):
             if not (layer_cum_grad.shape == self.global_parameters[i].shape):
                 print("layers not of same size at index ", i)
-        """self.global_parameters = [array.astype(np.float64) for array in arrays]"""
         for i, layer_cum_grad in enumerate(cum_grad):
             if self.gmf != 0:
                 # check if it's the first round of aggregation, if so, initialize the

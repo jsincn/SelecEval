@@ -11,6 +11,7 @@ pd.options.mode.chained_assignment = None  # Disables warning for chained assign
 from .datahandler.mnist import MNISTDataHandler
 from .strategy import strategy_dict
 from .validation.training import Training
+from .validation.training_bs import Training_BS
 from .client.client import Client
 from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
@@ -308,6 +309,7 @@ def run_evaluation_cs(config, datahandler, trainloaders, valloaders):
             print("Generating validation data for ", algorithm)
             current_run = {
                 "algorithm": algorithm,
+                "base_strategy": config.initial_config["base_strategy"][0],
                 "dataset": config.initial_config["dataset"],
                 "no_clients": config.initial_config["no_clients"],
             }
@@ -333,9 +335,11 @@ def run_evaluation_bs(config, datahandler, trainloaders, valloaders):
             val.evaluate(current_run)
         val.generate_report()
 
-    train = Training(config, trainloaders, valloaders, datahandler)
+    train = Training_BS(config, trainloaders, valloaders, datahandler)
     train.generate_report()
 
 
 if __name__ == "__main__":
     main()
+
+
