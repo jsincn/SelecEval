@@ -16,7 +16,7 @@
   "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
-  "device": "cpu",
+  "device": "cuda",
   "timeout": 120,
   "generate_clients": true,
   "create_synthetic_client_failures": false,
