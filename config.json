@@ -6,7 +6,7 @@
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 0.05
+      "c": 0.03
     }
 },
   "data_config" :  {
@@ -30,7 +30,7 @@
     "enable_data_distribution": true,
     "device": "cuda"
   },
-  "c_evaluation_clients":  0.03,
+  "c_evaluation_clients":  0.003,
   "max_workers": 32,
   "base_strategy": ["FedDisco", "FedNova", "FedAvg"]
 
