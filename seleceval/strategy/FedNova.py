@@ -2,15 +2,11 @@ import os
 from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
 import torch.nn
-import torchvision
-from torch import nn, tensor
-from torch.utils.data import DataLoader
 import numpy as np
 from flwr.server import ClientManager
 from ..models import proxSGD
 
 from seleceval.selection import ClientSelection
-from seleceval.util import config
 from flwr.common import (
     Metrics,
     NDArray,
@@ -24,7 +20,6 @@ from flwr.common.typing import FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate
-from omegaconf import DictConfig
 import torch
 from flwr.common.logger import log
 from logging import WARNING

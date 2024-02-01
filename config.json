@@ -1,19 +1,19 @@
 {
-  "no_rounds": 3,
+  "no_rounds": 10,
   "algorithm": [
     "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 0.2
+      "c": 0.1
     }
 },
   "data_config" :  {
         "data_quantity_base_parameter": 0.03
   },
   "no_epochs": 1,
-  "no_clients": 50,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cpu",
