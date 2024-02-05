@@ -1,5 +1,5 @@
 {
-  "no_rounds": 10,
+  "no_rounds": 25,
   "algorithm": [
     "random"
   ],
@@ -10,13 +10,13 @@
     }
 },
   "data_config" :  {
-        "data_quantity_base_parameter": 0.02
+        "data_quantity_base_parameter": 0.01
   },
-  "no_epochs": 1,
-  "no_clients": 100,
+  "no_epochs": 3,
+  "no_clients": 200,
   "batch_size": 32,
   "verbose": true,
-  "device": "cpu",
+  "device": "cuda",
   "timeout": 120,
   "generate_clients": true,
   "create_synthetic_client_failures": false,
@@ -28,10 +28,10 @@
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
-    "device": "cpu"
+    "device": "cuda"
   },
-  "c_evaluation_clients":  0.02,
+  "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedNova"]
+  "base_strategy": ["FedNova", "FedAvg", "FedProx"]
 
 }
