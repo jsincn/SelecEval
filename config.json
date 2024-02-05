@@ -36,4 +36,4 @@
   "max_workers": 32,
   "base_strategy": ["FedNova", "FedAvg", "FedProx"]
 
-},
+}
