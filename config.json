@@ -10,7 +10,9 @@
     }
 },
   "data_config" :  {
-        "data_quantity_base_parameter": 0.01
+        "data_quantity_base_parameter": 0.01,
+        "data_label_distribution_skew": "Dirichlet",
+        "data_quantity_skew": "Dirichlet"
   },
   "no_epochs": 3,
   "no_clients": 200,
@@ -34,4 +36,4 @@
   "max_workers": 32,
   "base_strategy": ["FedNova", "FedAvg", "FedProx"]
 
-}
+},
