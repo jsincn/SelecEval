@@ -78,13 +78,12 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             dampening = group["dampening"]
 
             lr = 0
-            i = 0
             for p in group["params"]:
                 if p.grad is None:
                     continue
                 d_p = p.grad.data
                 if weight_decay != 0:
-                    d_p.add_(p.data, alpha=weight_decay)  # Why is it p.data here?
+                    d_p.add_(p.data, alpha=weight_decay)
 
                 param_state = self.state[p]
 
@@ -129,9 +128,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             self.local_normalizing_vec += 1
 
         if self.momentum == 0 and etamu == 0:
-            self.local_normalizing_vec += (
-                1  # is this line necessary since +1 already in line 124?
-            )
+            self.local_normalizing_vec += 1
 
         self.local_steps += 1
 

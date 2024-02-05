@@ -92,9 +92,9 @@ class Client(fl.client.NumPyClient):
     ) -> Tuple[List[ndarray], int, Dict]:
         """
         Fit the model, write outputs and return parameters and metrics
-        :param parameters: The current parameters of the global model
+        :param parameters: The current parameters of the global model, also including buffers in most cases
         :param config: Configuration for this fit
-        :return: The parameters of the global model, the number of samples used and the metrics
+        :return: The parameters of the local model, the number of samples used and the metrics
         """
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
@@ -255,12 +255,13 @@ class Client(fl.client.NumPyClient):
             val["cum_grad"].cpu().numpy()
             for _, val in self.optimizer.state_dict()["state"].items()
         ]
-        print("Lengths of cummulated gradients that the client returns: ", len(params))
+        for buf in self.net.buffers():
+            params.append(buf.cpu().numpy())
         return params
 
     def set_parameters2(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
-        self.optimizer.set_model_params(parameters) #only used for FedNova --> proxSGD
+        self.optimizer.set_model_params(parameters)  # only used for FedNova --> proxSGD
 
     def get_properties(self, config=None) -> Dict:
         """

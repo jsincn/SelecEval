@@ -28,7 +28,7 @@ from .validation.datadistribution import DataDistribution
 from .validation.validation import Validation
 from .validation.validation_bs import ValidationBS
 from .simulation.state import add_discrepancy_level, add_data_ratios
-
+from .client.helpers import get_parameters, set_parameters
 
 def main():
     """
@@ -243,7 +243,10 @@ def run_training_simulation_bs(
     for base_strategy in config.initial_config["base_strategy"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-
+        print("MAIN: number of buffers in ResNet18: ", len(list(model.net.buffers())))
+        print("MAIN: number of parameters in ResNet18: ", len(list(model.net.parameters())))
+        print("MAIN: number of relevant values for FL in Resnet18: ", len(list(get_parameters(model.net))
+        ))
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, model, config, base_strategy
         ).client_fn

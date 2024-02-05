@@ -45,7 +45,6 @@ class FedNova(FedAvg):
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
-            fit_metrics_aggregation_fn=weighted_average,
         )
         # Maintain a momentum buffer for the weight updates across rounds of training
         self.global_momentum_buffer: List[NDArray] = []
@@ -60,7 +59,6 @@ class FedNova(FedAvg):
         self.lr = config.initial_config["base_strategy_config"]["FedNova"]["lr"]
         self.net = net
         self.optimizer = proxSGD.ProxSGD(self.net.parameters())
-
         # momentum parameter for the server/strategy side momentum buffer
         self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
@@ -78,7 +76,6 @@ class FedNova(FedAvg):
         if not results:
             return None, {}
         # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
-
         filtered_results = []
         # Filter results with negative sample size:
         # This indicates an artificial failure
@@ -104,9 +101,11 @@ class FedNova(FedAvg):
         tau_eff = np.sum(local_tau)
 
         aggregate_parameters = []
-
+        aggregate_buffers = []
         for _client, res in results:
-            params = parameters_to_ndarrays(res.parameters)
+            vals = parameters_to_ndarrays(res.parameters)
+            params = vals[:62]
+            buffers = vals[62:]
             # compute the scale by which to weight each client's gradient
             # res.metrics["local_norm"] contains total number of local update steps
             # for each client
@@ -116,18 +115,26 @@ class FedNova(FedAvg):
             scale *= float(res.metrics["weight"])
 
             aggregate_parameters.append((params, scale))
-
+            aggregate_buffers.append((buffers, float(res.metrics["weight"])))
         # Aggregate all client parameters with a weighted average using the scale
         # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
+        agg_cum_buffers = aggregate(aggregate_buffers)
         print("Saving aggregated_gradients...")
         if agg_cum_gradient is not None:
             print(f"Saving round {server_round} aggregated gradients...")
+        print("Saving aggregated_buffers...")
+        if agg_cum_buffers is not None:
+            print(f"Saving round {server_round} aggregated buffers...")
         # In case of Server or Hybrid Momentum, we decay the aggregated gradients
         # with a momentum factor
         print("Updating server parameters...")
+
         self.update_server_params(agg_cum_gradient)
         print("updating finished succuessfully")
+
+        for i, buf in enumerate(self.net.buffers()):
+                buf.copy_(torch.tensor(agg_cum_buffers[i], device=buf.device))
 
         self.optimizer.set_model_params(self.global_parameters)
 
@@ -165,9 +172,9 @@ class FedNova(FedAvg):
         print("global parameters dtype:", arrays[0].dtype)
         print("layer_cum_grad_dtype:", cum_grad[0].dtype)
         print("lenght of global parameters list:", len(self.global_parameters))
-        print(f"Shape of global parameter:", self.global_parameters[0].shape)
+        print(f"Shape of global parameter:", self.global_parameters[13].shape)
         print(f"Length of layer_cum_grad:", len(cum_grad))
-        print(f"Shape of layer_cum_grad:", cum_grad[0].shape)
+        print(f"Shape of layer_cum_grad:", cum_grad[13].shape)
         for i, layer_cum_grad in enumerate(cum_grad):
             if not (layer_cum_grad.shape == self.global_parameters[i].shape):
                 print("layers not of same size at index ", i)

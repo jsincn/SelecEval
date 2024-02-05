@@ -20,7 +20,7 @@ from ..util import Config
 
 class Training_BS(Evaluator):
     """
-    Class for training performance evaluation
+    Class for training performance evaluation using base strategies
     """
 
     def __init__(
