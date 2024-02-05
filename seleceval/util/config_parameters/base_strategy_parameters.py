@@ -11,7 +11,7 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
         },
     },
     "FedProx": {
@@ -38,9 +38,9 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.7},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
 
         },
     },
