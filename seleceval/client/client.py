@@ -58,16 +58,6 @@ class Client(fl.client.NumPyClient):
                     "momentum"
                 ],
             )
-        elif self.active_strategy == "FedProx":
-            learning_rate = self.config.initial_config["base_strategy_config"][
-                "FedProx"
-            ]["lr"]
-            momentum = self.config.initial_config["base_strategy_config"]["FedProx"][
-                "momentum"
-            ]
-            self.optimizer = torch.optim.SGD(
-                self.net.parameters(), lr=learning_rate, momentum=momentum
-            )
         else:
             learning_rate = self.config.initial_config["base_strategy_config"][
                 f"{active_strategy}"
@@ -76,7 +66,7 @@ class Client(fl.client.NumPyClient):
                 f"{active_strategy}"
             ]["momentum"]
             self.optimizer = torch.optim.SGD(
-                list(self.net.parameters()), lr=learning_rate, momentum=momentum
+                self.net.parameters(), lr=learning_rate, momentum=momentum
             )
 
         """create optimizer based on config, optimizer is to be given to model"""

@@ -149,5 +149,9 @@ def add_data_ratios(csv_path, trainloaders):
     """calculate ratios"""
     total_size = sum(len(loader.dataset) for loader in trainloaders)
     data_ratios = [len(loader.dataset) / total_size for loader in trainloaders]
-    df["data_ratio"] = data_ratios
-    df.to_csv(csv_path, index=False)
+    if len(df) == len(data_ratios):
+        df["data_ratio"] = data_ratios
+        df.to_csv(csv_path, index=False)
+    else:
+        print("Error: The number of rows in the CSV does not match the number of DataLoaders.")
+

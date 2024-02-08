@@ -42,7 +42,6 @@ class ClientOutput:
         self.output_dict["current_timestamp"] = str(datetime.datetime.now())
         with open(self.file, "a") as g:
             fcntl.flock(g, fcntl.LOCK_EX)
-            # Iterate over the keys you're interested in
             if (
                 self.output_dict.get("train_output", {}).get("tau") is float
                 or self.output_dict.get("train_output", {}).get("tau") is np.float32

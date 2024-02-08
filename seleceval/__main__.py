@@ -116,9 +116,6 @@ def run_training_simulation(
     :param valloaders:
     """
 
-    add_data_ratios(config.attributes["input_state_file"], trainloaders)
-    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
-
     if config.initial_config["compare_client_selection_algorithms"]:
         run_training_simulation_cs(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
