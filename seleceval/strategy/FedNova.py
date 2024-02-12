@@ -24,6 +24,8 @@ import torch
 from flwr.common.logger import log
 from logging import WARNING
 
+from ..simulation.state import run_state_update
+
 
 class FedNova(FedAvg):
     """FedNova."""
@@ -73,6 +75,9 @@ class FedNova(FedAvg):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ):
         """Aggregate the results from the clients."""
+
+        run_state_update(self.config, server_round)
+        self.config.set_current_round(server_round)
         if not results:
             return None, {}
         # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
@@ -102,6 +107,7 @@ class FedNova(FedAvg):
 
         aggregate_parameters = []
         aggregate_buffers = []
+
         for _client, res in results:
             vals = parameters_to_ndarrays(res.parameters)
             params = vals[:62]
@@ -129,12 +135,16 @@ class FedNova(FedAvg):
         # In case of Server or Hybrid Momentum, we decay the aggregated gradients
         # with a momentum factor
         print("Updating server parameters...")
-
+        try:
+            x = agg_cum_gradient[0]
+        except:
+            print("No results to aggregate in this round")
+            return ndarrays_to_parameters(self.global_parameters), {}
         self.update_server_params(agg_cum_gradient)
         print("updating finished succuessfully")
 
         for i, buf in enumerate(self.net.buffers()):
-                buf.copy_(torch.tensor(agg_cum_buffers[i], device=buf.device))
+            buf.copy_(torch.tensor(agg_cum_buffers[i], device=buf.device))
 
         self.optimizer.set_model_params(self.global_parameters)
 

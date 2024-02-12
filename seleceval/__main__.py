@@ -5,6 +5,8 @@ import flwr as fl
 import torch
 import pandas as pd
 from flwr.common import ndarrays_to_parameters
+
+from seleceval.strategy.common import get_init_parameters
 from .models.model import Model
 
 pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
@@ -29,6 +31,7 @@ from .validation.validation import Validation
 from .validation.validation_bs import ValidationBS
 from .simulation.state import add_discrepancy_level, add_data_ratios
 from .client.helpers import get_parameters, set_parameters
+
 
 def main():
     """
@@ -178,20 +181,10 @@ def run_training_simulation_cs(
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
-        if config.initial_config["base_strategy"][0] == "FedNova":
-            ndarrays = [
-                param.clone()
-                .detach()
-                .cpu()
-                .numpy()  # Clone, then detach and move to CPU before converting
-                for param in model.net.parameters()
-                if param.requires_grad  # Generally redundant for parameters(), but included for clarity
-            ]
-
-            init_parameters = ndarrays_to_parameters(ndarrays)
+        if config.initial_config["base_strategy"][0] in ["FedNova", "FedAvgM"]:
             strategy = strategy_dict[config.initial_config["base_strategy"][0]](
                 net=model.get_net(),
-                init_parameters=init_parameters,
+                init_parameters=get_init_parameters(model.get_net(), config.initial_config["base_strategy"][0]),
                 client_selector=client_selector,
                 config=config,
             )
@@ -241,9 +234,14 @@ def run_training_simulation_bs(
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
         print("MAIN: number of buffers in ResNet18: ", len(list(model.net.buffers())))
-        print("MAIN: number of parameters in ResNet18: ", len(list(model.net.parameters())))
-        print("MAIN: number of relevant values for FL in Resnet18: ", len(list(get_parameters(model.net))
-        ))
+        print(
+            "MAIN: number of parameters in ResNet18: ",
+            len(list(model.net.parameters())),
+        )
+        print(
+            "MAIN: number of relevant values for FL in Resnet18: ",
+            len(list(get_parameters(model.net))),
+        )
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, model, config, base_strategy
         ).client_fn
@@ -264,21 +262,10 @@ def run_training_simulation_bs(
             base_strategy,
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
-
-        if base_strategy == "FedNova":
-            ndarrays = [
-                param.clone()
-                .detach()
-                .cpu()
-                .numpy()  # Clone, then detach and move to CPU before converting
-                for param in model.net.parameters()
-                if param.requires_grad  # Generally redundant for parameters(), but included for clarity
-            ]
-
-            init_parameters = ndarrays_to_parameters(ndarrays)
+        if base_strategy in ["FedNova", "FedAvgM"]:
             strategy = strategy_dict[base_strategy](
                 net=model.get_net(),
-                init_parameters=init_parameters,
+                init_parameters=get_init_parameters(model.get_net(), base_strategy),
                 client_selector=client_selector,
                 config=config,
             )
@@ -341,5 +328,3 @@ def run_evaluation_bs(config, datahandler, trainloaders, valloaders):
 
 if __name__ == "__main__":
     main()
-
-

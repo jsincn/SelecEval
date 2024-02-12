@@ -10,7 +10,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
@@ -18,30 +18,39 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.005},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
         },
     },
     "FedNova": {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.9},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.005},
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
         },
     },
     "FedDisco": {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.00},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.9},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.005},
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
 
         },
     },
+    "FedAvgM": {
+        "type": "dict",
+                "default": {},
+                "schema": {
+                    "lr": {"type": "float", "min": 0, "max": 1, "default": 0.02},
+                    "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.9},
+                    "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
+                }
+    }
 }

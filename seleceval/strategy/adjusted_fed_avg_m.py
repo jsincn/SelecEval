@@ -21,7 +21,7 @@ from ..util import Config
 
 
 class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
-    def __init__(self, net, client_selector: ClientSelection, config: Config):
+    def __init__(self, net, init_parameters, client_selector: ClientSelection, config: Config):
         super().__init__(
             fraction_fit=0.5,  # No longer used, as this is handled by the client selection strategy
             fraction_evaluate=config.initial_config['c_evaluation_clients'],
@@ -31,6 +31,8 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
+            server_momentum=config.initial_config["base_strategy_config"]["FedAvgM"]["gmf"],
+            initial_parameters=init_parameters
         )
         self.client_selector = client_selector
         self.net = net
