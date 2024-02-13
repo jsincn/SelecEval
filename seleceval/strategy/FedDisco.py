@@ -92,13 +92,13 @@ class FedDisco(fl.server.strategy.FedAvg):
         )
 
         # Hyperparameter 1 and 2
-        a = 0.3
-        b = 0
+        a = 0.4
+        b = 0.1
         # assign weights
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
-                max(1, (self.data_ratios[int(client_proxy.cid)] - a * discrepany_vals[int(client_proxy.cid)] + b)*10000),
+                max(1, (self.data_ratios[int(client_proxy.cid)] - a * discrepany_vals[int(client_proxy.cid)] + b)*10000)
             )
             for client_proxy, fit_res in results
         ]
