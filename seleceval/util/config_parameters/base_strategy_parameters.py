@@ -28,7 +28,7 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.5},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
         },
@@ -38,7 +38,7 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
+            "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.5},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
 
