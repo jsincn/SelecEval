@@ -92,8 +92,8 @@ class FedDisco(fl.server.strategy.FedAvg):
         )
 
         # Hyperparameter 1 and 2
-        a = 0.4
-        b = 0.1
+        a = 0.25
+        b = 0.05
         # assign weights
         weights_results = [
             (
