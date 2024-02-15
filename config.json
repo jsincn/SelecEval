@@ -14,6 +14,7 @@
         "data_label_distribution_skew": "Dirichlet",
         "data_quantity_skew": "Dirichlet"
   },
+
   "no_epochs": 2,
   "no_clients": 1000,
   "batch_size": 32,
