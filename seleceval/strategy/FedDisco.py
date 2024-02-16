@@ -92,8 +92,8 @@ class FedDisco(fl.server.strategy.FedAvg):
         )
 
         # Hyperparameter 1 and 2
-        a = 0.25
-        b = 0.05
+        a = self.config.initial_config["base_strategy_config"]["FedDisco"]["a"]
+        b = self.config.initial_config["base_strategy_config"]["FedDisco"]["b"]
         # assign weights
         weights_results = [
             (
