@@ -37,7 +37,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         mu=0,
         lr=0,
         momentum=0.0,
-        dampening=0.01,
+        dampening=0.0,
         weight_decay=0,
         variance=0,
     ):

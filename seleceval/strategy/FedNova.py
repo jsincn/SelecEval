@@ -119,7 +119,6 @@ class FedNova(FedAvg):
             # Below corresponds to Eqn-6: Section 4.1
             scale = tau_eff / float(res.metrics["local_norm"])
             scale *= float(res.metrics["weight"])
-
             aggregate_parameters.append((params, scale))
             aggregate_buffers.append((buffers, float(res.metrics["weight"])))
         # Aggregate all client parameters with a weighted average using the scale
@@ -179,7 +178,7 @@ class FedNova(FedAvg):
     def update_server_params(self, cum_grad: NDArrays):
         """Update the global server parameters by aggregating client gradients."""
         arrays = self.global_parameters
-        print("global parameters dtype:", arrays[0].dtype)
+        """print("global parameters dtype:", arrays[0].dtype)
         print("layer_cum_grad_dtype:", cum_grad[0].dtype)
         print("lenght of global parameters list:", len(self.global_parameters))
         print(f"Shape of global parameter:", self.global_parameters[13].shape)
@@ -187,7 +186,7 @@ class FedNova(FedAvg):
         print(f"Shape of layer_cum_grad:", cum_grad[13].shape)
         for i, layer_cum_grad in enumerate(cum_grad):
             if not (layer_cum_grad.shape == self.global_parameters[i].shape):
-                print("layers not of same size at index ", i)
+                print("layers not of same size at index ", i)"""
         for i, layer_cum_grad in enumerate(cum_grad):
             if self.gmf != 0:
                 # check if it's the first round of aggregation, if so, initialize the

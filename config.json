@@ -35,6 +35,6 @@
   },
   "c_evaluation_clients":  0.003,
   "max_workers": 32,
-  "base_strategy": ["FedNova", "FedDisco", "FedAvg"]
+  "base_strategy": ["FedDisco", "FedAvg"]
 
 }
