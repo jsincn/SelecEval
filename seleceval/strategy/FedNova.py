@@ -102,7 +102,15 @@ class FedNova(FedAvg):
                 pass  # or log the error
         results = filtered_results
 
-        local_tau = [res.metrics["tau"] for _, res in results]
+        """
+        Since client sampling is possible, the weight (data ratio) needs be 
+        adjusted to the size of the round training data set
+        """
+        round_training_data_size = 0
+        for client_proxy, res in results:
+            round_training_data_size += res.metrics["weight"]
+
+        local_tau = [res.metrics["tau"]/round_training_data_size for _, res in results]
         tau_eff = np.sum(local_tau)
 
         aggregate_parameters = []
@@ -117,10 +125,11 @@ class FedNova(FedAvg):
             # for each client
             # res.metrics["weight"] contains the ratio of client dataset size
             # Below corresponds to Eqn-6: Section 4.1
-            scale = tau_eff / float(res.metrics["local_norm"])
+            scale = float(res.metrics["local_norm"])
             scale *= float(res.metrics["weight"])
-            aggregate_parameters.append((params, scale))
-            aggregate_buffers.append((buffers, float(res.metrics["weight"])))
+            params_scaled = [param*(tau_eff/res.metrics["local_norm"]) for param in params]
+            aggregate_parameters.append((params_scaled, int(scale*100000)))
+            aggregate_buffers.append((buffers, int(res.metrics["weight"]*100000)))
         # Aggregate all client parameters with a weighted average using the scale
         # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
