@@ -1,5 +1,5 @@
 {
-  "no_rounds": 50,
+  "no_rounds": 30,
   "algorithm": [
     "CEP"
   ],
@@ -15,7 +15,7 @@
         "data_quantity_skew": "Dirichlet"
   },
 
-  "no_epochs": 2,
+  "no_epochs": 1,
   "no_clients": 1000,
   "batch_size": 32,
   "verbose": true,
@@ -35,6 +35,6 @@
   },
   "c_evaluation_clients":  0.003,
   "max_workers": 32,
-  "base_strategy": ["FedAvg", "FedNova", "FedDisco"]
+  "base_strategy": ["FedNova", "FedDisco", "FedAvg"]
 
 }
