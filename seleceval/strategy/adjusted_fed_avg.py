@@ -24,10 +24,10 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
     def __init__(self, net, client_selector: ClientSelection, config: Config):
         super().__init__(
             fraction_fit=0.5,  # No longer used, as this is handled by the client selection strategy
-            fraction_evaluate=config.initial_config['c_evaluation_clients'],
+            fraction_evaluate=config.initial_config["c_evaluation_clients"],
             # Percentage of clients to select for evaluation
             min_fit_clients=1,  # No longer used, as this is handled by the client selection strategy
-            min_evaluate_clients=config.initial_config['min_evaluation_clients'],
+            min_evaluate_clients=config.initial_config["min_evaluation_clients"],
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
@@ -37,7 +37,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         self.config = config
 
     def configure_fit(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ):
         """
         Configure the fit process
@@ -51,10 +51,10 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         )
 
     def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, fl.common.FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, fl.common.FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Aggregate model weights using weighted average and store checkpoint, update state, set current round
@@ -69,10 +69,13 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
 
         # Filter results with negative sample size:
         # This indicates an artificial failure
+        filtered_results = [i for i in results if i[1].num_examples != -1]
+        failures = [i for i in results if i[1].num_examples == -1]
+        results = filtered_results
+        """TEST FOR IMPACT OF WEIGHTS ON AGGREGATION"""
         for i in results:
-            if i[1].num_examples == -1:
-                results.remove(i)
-                failures.append(i)
+            i[1].num_examples = 1
+        """THIS IS THE END OF THE TEST CODE, TO BE DELETED FOR ANY REAL EXPERIMENT"""
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
