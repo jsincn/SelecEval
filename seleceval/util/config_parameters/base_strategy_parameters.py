@@ -11,16 +11,16 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
     "FedProx": {
         "type": "dict",
         "default": {},
         "schema": {
-            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
+            "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
     "FedNova": {
@@ -30,7 +30,7 @@ base_strategy_parameter_dict = {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
     "FedDisco": {
@@ -39,7 +39,7 @@ base_strategy_parameter_dict = {
         "schema": {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
-            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9},
+            "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "a": {"type": "float", "min": 0, "max": 2, "default": 2},
             "b": {"type": "float", "min": 0, "max": 1, "default": 0.1}
 
@@ -51,7 +51,7 @@ base_strategy_parameter_dict = {
                 "schema": {
                     "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
                     "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.5},
-                    "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9}
+                    "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
                 }
     }
 }
