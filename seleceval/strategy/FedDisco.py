@@ -102,14 +102,11 @@ class FedDisco(fl.server.strategy.FedAvg):
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
-                max(1, (self.data_ratios[int(client_proxy.cid)]/round_training_data_size - a * discrepany_vals[int(client_proxy.cid)] + b)*10000)
+                max(1, (self.data_ratios[int(client_proxy.cid)]/round_training_data_size - a * discrepany_vals[int(client_proxy.cid)] + b)*100000)
             )
             for client_proxy, fit_res in results
         ]
-
-
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:

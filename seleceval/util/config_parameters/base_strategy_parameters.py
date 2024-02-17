@@ -40,7 +40,7 @@ base_strategy_parameter_dict = {
             "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.9},
-            "a": {"type": "float", "min": 0, "max": 1, "default": 0.3},
+            "a": {"type": "float", "min": 0, "max": 1, "default": 2},
             "b": {"type": "float", "min": 0, "max": 1, "default": 0.1}
 
         },

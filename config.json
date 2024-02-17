@@ -1,5 +1,5 @@
 {
-  "no_rounds": 40,
+  "no_rounds": 20,
   "algorithm": [
     "CEP"
   ],
@@ -35,6 +35,6 @@
   },
   "c_evaluation_clients":  0.003,
   "max_workers": 32,
-  "base_strategy": ["FedDisco", "FedAvg", "FedNova"]
+  "base_strategy": ["FedDisco", "FedAvg"]
 
 }

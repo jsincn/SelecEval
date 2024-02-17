@@ -128,8 +128,8 @@ class FedNova(FedAvg):
             scale = float(res.metrics["local_norm"])
             scale *= float(res.metrics["weight"])
             params_scaled = [param*(tau_eff/res.metrics["local_norm"]) for param in params]
-            aggregate_parameters.append((params_scaled, int(scale*100000)))
-            aggregate_buffers.append((buffers, int(res.metrics["weight"]*100000)))
+            aggregate_parameters.append((params_scaled, int(scale*1000000)))
+            aggregate_buffers.append((buffers, int(res.metrics["weight"]*1000000)))
         # Aggregate all client parameters with a weighted average using the scale
         # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
