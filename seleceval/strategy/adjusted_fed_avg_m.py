@@ -120,5 +120,5 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
                 self.net.state_dict(),
                 f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
             )
-
+        aggregated_parameters = ndarrays_to_parameters(aggregated_parameters)
         return aggregated_parameters, aggregated_metrics

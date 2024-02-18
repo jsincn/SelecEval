@@ -245,7 +245,7 @@ def run_training_simulation_bs(
             "MAIN: number of relevant values for FL in Resnet18: ",
             len(list(get_parameters(model.net))),
         )
-        parameter_names = set(name for name, _ in model.get_net().named_parameters())
+        """parameter_names = set(name for name, _ in model.get_net().named_parameters())
         buffer_names = set(name for name, _ in model.get_net().named_buffers())
         parameter_indices = []
         buffer_indices = []
@@ -262,7 +262,7 @@ def run_training_simulation_bs(
                 f"Index: {idx}, Name: {name}, Is Parameter: {is_param}, Is Buffer: {is_buffer}"
             )
         print("Parameter Indices: ", parameter_indices)
-        print("Buffer Indices: ", buffer_indices)
+        print("Buffer Indices: ", buffer_indices)"""
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, model, config, base_strategy
         ).client_fn
