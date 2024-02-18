@@ -15,7 +15,7 @@
         "data_quantity_skew": "Dirichlet"
   },
 
-  "no_epochs": 2,
+  "no_epochs": 3,
   "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
@@ -35,6 +35,6 @@
   },
   "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedDisco", "FedAvg", "FedAvgM"]
+  "base_strategy": ["FedDisco", "FedAvg", "FedAvgM", "FedNova"]
 
 }
