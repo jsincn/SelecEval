@@ -10,7 +10,7 @@ from typing import List, Tuple, Union, Dict, Optional
 import flwr as fl
 import numpy as np
 import torch
-from flwr.common import FitRes, Scalar, Parameters
+from flwr.common import FitRes, Scalar, Parameters, parameters_to_ndarrays, ndarrays_to_parameters
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -18,6 +18,8 @@ from ..selection.client_selection import ClientSelection
 from ..simulation.state import run_state_update
 from ..strategy.common import weighted_average
 from ..util import Config
+from flwr.server.strategy.aggregate import aggregate
+
 
 
 class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
@@ -84,22 +86,32 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
         results = results_to_keep
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
+        """This is not very pretty code but it serves the purpose of not aggregating the buffers with momentum and is a 
+        workaround for now"""
+        buf_indices = [3, 4, 5, 9, 10, 11, 15, 16, 17, 21, 22, 23, 27, 28, 29, 33, 34, 35, 39, 40, 41, 45, 46, 47, 51, 52, 53, 57, 58, 59, 63,
+                      64, 65, 69, 70, 71, 75, 76, 77, 81, 82, 83, 87, 88, 89, 93, 94, 95, 99, 100, 101, 105, 106, 107, 111, 112, 113, 117, 118, 119]
+        buffers = []
+        for _, fit_res in results:
+            client_params = parameters_to_ndarrays(fit_res.parameters)
+            client_buffers = [client_params[i] for i in buf_indices]
+            buffers.append((client_buffers, fit_res.num_examples))
 
-        # Call aggregate_fit from base class (FedAvgM) to aggregate parameters and metrics
+        agg_buffers = aggregate(buffers)
+        #Call aggregate_fit from base class (FedAvgM) to aggregate parameters and metrics
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
+        aggregated_parameters = parameters_to_ndarrays(aggregated_parameters)
+        x = 0
+        for i in buf_indices:
+            aggregated_parameters[i] = agg_buffers[x]
+            x += 1
         print("Saving aggregated_parameters...")
         if aggregated_parameters is not None:
             print(f"Saving round {server_round} aggregated_parameters...")
 
-            # Convert `Parameters` to `List[np.ndarray]`
-            aggregated_ndarrays: List[np.ndarray] = fl.common.parameters_to_ndarrays(
-                aggregated_parameters
-            )
-
             # Convert `List[np.ndarray]` to PyTorch`state_dict`
-            params_dict = zip(self.net.state_dict().keys(), aggregated_ndarrays)
+            params_dict = zip(self.net.state_dict().keys(), aggregated_parameters)
             state_dict = {k: torch.tensor(v) for k, v in params_dict}
             self.net.load_state_dict(state_dict, strict=True)
 

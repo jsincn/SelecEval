@@ -19,6 +19,7 @@ from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
 from .models.resnet18 import Resnet18
 from .selection import algorithm_dict
+from typing import Dict, List
 from collections import OrderedDict
 from .simulation.state import (
     generate_initial_state,
@@ -184,7 +185,9 @@ def run_training_simulation_cs(
         if config.initial_config["base_strategy"][0] in ["FedNova", "FedAvgM"]:
             strategy = strategy_dict[config.initial_config["base_strategy"][0]](
                 net=model.get_net(),
-                init_parameters=get_init_parameters(model.get_net(), config.initial_config["base_strategy"][0]),
+                init_parameters=get_init_parameters(
+                    model.get_net(), config.initial_config["base_strategy"][0]
+                ),
                 client_selector=client_selector,
                 config=config,
             )
@@ -242,6 +245,24 @@ def run_training_simulation_bs(
             "MAIN: number of relevant values for FL in Resnet18: ",
             len(list(get_parameters(model.net))),
         )
+        parameter_names = set(name for name, _ in model.get_net().named_parameters())
+        buffer_names = set(name for name, _ in model.get_net().named_buffers())
+        parameter_indices = []
+        buffer_indices = []
+        # Enumerate over the state_dict items and check if each item's name indicates a parameter or buffer
+        for idx, (name, tensor) in enumerate(model.get_net().state_dict().items()):
+            is_param = name in parameter_names
+            is_buffer = name in buffer_names
+            if is_param:
+                parameter_indices.append(idx)
+            elif is_buffer:
+                buffer_indices.append(idx)
+
+            print(
+                f"Index: {idx}, Name: {name}, Is Parameter: {is_param}, Is Buffer: {is_buffer}"
+            )
+        print("Parameter Indices: ", parameter_indices)
+        print("Buffer Indices: ", buffer_indices)
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, model, config, base_strategy
         ).client_fn
