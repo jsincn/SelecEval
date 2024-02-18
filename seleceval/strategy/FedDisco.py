@@ -38,7 +38,9 @@ class FedDisco(fl.server.strategy.FedAvg):
         self.client_selector = client_selector
         self.net = net
         self.config = config
-        self.data_ratios = pd.read_csv(config.attributes["input_state_file"])["data_ratio"]
+        self.data_ratios = pd.read_csv(config.attributes["input_state_file"])[
+            "data_ratio"
+        ]
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -73,10 +75,13 @@ class FedDisco(fl.server.strategy.FedAvg):
 
         # Filter results with negative sample size:
         # This indicates an artificial failure
+        results_to_keep = []
         for i in results:
             if i[1].num_examples == -1:
-                results.remove(i)
                 failures.append(i)
+            else:
+                results_to_keep.append(i)
+        results = results_to_keep
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
@@ -102,7 +107,16 @@ class FedDisco(fl.server.strategy.FedAvg):
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
-                max(1, (self.data_ratios[int(client_proxy.cid)]/round_training_data_size - a * discrepany_vals[int(client_proxy.cid)] + b)*100000)
+                max(
+                    1,
+                    (
+                        self.data_ratios[int(client_proxy.cid)]
+                        / round_training_data_size
+                        - a * discrepany_vals[int(client_proxy.cid)]
+                        + b
+                    )
+                    * 100000,
+                ),
             )
             for client_proxy, fit_res in results
         ]

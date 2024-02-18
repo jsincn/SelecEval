@@ -21,18 +21,22 @@ from ..util import Config
 
 
 class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
-    def __init__(self, net, init_parameters, client_selector: ClientSelection, config: Config):
+    def __init__(
+        self, net, init_parameters, client_selector: ClientSelection, config: Config
+    ):
         super().__init__(
             fraction_fit=0.5,  # No longer used, as this is handled by the client selection strategy
-            fraction_evaluate=config.initial_config['c_evaluation_clients'],
+            fraction_evaluate=config.initial_config["c_evaluation_clients"],
             # Percentage of clients to select for evaluation
             min_fit_clients=1,  # No longer used, as this is handled by the client selection strategy
-            min_evaluate_clients=config.initial_config['min_evaluation_clients'],
+            min_evaluate_clients=config.initial_config["min_evaluation_clients"],
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
-            server_momentum=config.initial_config["base_strategy_config"]["FedAvgM"]["gmf"],
-            initial_parameters=init_parameters
+            server_momentum=config.initial_config["base_strategy_config"]["FedAvgM"][
+                "gmf"
+            ],
+            initial_parameters=init_parameters,
         )
         self.client_selector = client_selector
         self.net = net
@@ -71,14 +75,17 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
 
         # Filter results with negative sample size:
         # This indicates an artificial failure
+        results_to_keep = []
         for i in results:
             if i[1].num_examples == -1:
-                results.remove(i)
                 failures.append(i)
+            else:
+                results_to_keep.append(i)
+        results = results_to_keep
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
-        # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
+        # Call aggregate_fit from base class (FedAvgM) to aggregate parameters and metrics
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
