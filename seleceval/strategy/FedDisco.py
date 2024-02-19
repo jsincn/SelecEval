@@ -189,13 +189,12 @@ class FedDisco(fl.server.strategy.FedAvg):
             )
             for client_proxy, fit_res in results
         ]
-        aggregated_parameters = parameters_to_ndarrays(weights_results)
+        aggregated_parameters = aggregate(weights_results)
+
         x = 0
         for i in buf_indices:
             aggregated_parameters[i] = agg_buffers[x]
             x += 1
-
-        aggregated_parameters = ndarrays_to_parameters(aggregate(weights_results))
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
@@ -208,13 +207,8 @@ class FedDisco(fl.server.strategy.FedAvg):
         if aggregated_parameters is not None:
             print(f"Saving round {server_round} aggregated_parameters...")
 
-            # Convert `Parameters` to `List[np.ndarray]`
-            aggregated_ndarrays: List[np.ndarray] = fl.common.parameters_to_ndarrays(
-                aggregated_parameters
-            )
-
             # Convert `List[np.ndarray]` to PyTorch`state_dict`
-            params_dict = zip(self.net.state_dict().keys(), aggregated_ndarrays)
+            params_dict = zip(self.net.state_dict().keys(), aggregated_parameters)
             state_dict = {k: torch.tensor(v) for k, v in params_dict}
             self.net.load_state_dict(state_dict, strict=True)
 
@@ -224,4 +218,5 @@ class FedDisco(fl.server.strategy.FedAvg):
                 f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
             )
 
+        aggregated_parameters = ndarrays_to_parameters(aggregated_parameters)
         return aggregated_parameters, metrics_aggregated
