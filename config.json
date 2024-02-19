@@ -1,5 +1,5 @@
 {
-  "no_rounds": 30,
+  "no_rounds": 25,
   "algorithm": [
     "random"
   ],
@@ -33,7 +33,7 @@
     "enable_data_distribution": true,
     "device": "cuda"
   },
-  "c_evaluation_clients":  0.002,
+  "c_evaluation_clients":  0.02,
   "max_workers": 32,
   "base_strategy": ["FedDisco","FedAvg"]
 
