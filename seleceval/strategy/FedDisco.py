@@ -85,8 +85,6 @@ class FedDisco(fl.server.strategy.FedAvg):
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
-        # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
-        """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted
@@ -95,6 +93,77 @@ class FedDisco(fl.server.strategy.FedAvg):
         discrepany_vals = get_discrepancy_level(
             self.config.attributes["working_state_file"]
         )
+
+        """Current Workaround to aggregate buffers only based on number of samples"""
+        buf_indices = [
+            3,
+            4,
+            5,
+            9,
+            10,
+            11,
+            15,
+            16,
+            17,
+            21,
+            22,
+            23,
+            27,
+            28,
+            29,
+            33,
+            34,
+            35,
+            39,
+            40,
+            41,
+            45,
+            46,
+            47,
+            51,
+            52,
+            53,
+            57,
+            58,
+            59,
+            63,
+            64,
+            65,
+            69,
+            70,
+            71,
+            75,
+            76,
+            77,
+            81,
+            82,
+            83,
+            87,
+            88,
+            89,
+            93,
+            94,
+            95,
+            99,
+            100,
+            101,
+            105,
+            106,
+            107,
+            111,
+            112,
+            113,
+            117,
+            118,
+            119,
+        ]
+        buffers = []
+        for _, fit_res in results:
+            client_params = parameters_to_ndarrays(fit_res.parameters)
+            client_buffers = [client_params[i] for i in buf_indices]
+            buffers.append((client_buffers, fit_res.num_examples))
+
+        agg_buffers = aggregate(buffers)
 
         # Hyperparameter 1 and 2
         a = self.config.initial_config["base_strategy_config"]["FedDisco"]["a"]
@@ -120,7 +189,13 @@ class FedDisco(fl.server.strategy.FedAvg):
             )
             for client_proxy, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        aggregated_parameters = parameters_to_ndarrays(weights_results)
+        x = 0
+        for i in buf_indices:
+            aggregated_parameters[i] = agg_buffers[x]
+            x += 1
+
+        aggregated_parameters = ndarrays_to_parameters(aggregate(weights_results))
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
@@ -130,7 +205,6 @@ class FedDisco(fl.server.strategy.FedAvg):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         print("Saving aggregated_parameters...")
-        aggregated_parameters = parameters_aggregated
         if aggregated_parameters is not None:
             print(f"Saving round {server_round} aggregated_parameters...")
 

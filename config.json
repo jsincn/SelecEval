@@ -1,12 +1,12 @@
 {
-  "no_rounds": 30,
+  "no_rounds": 50,
   "algorithm": [
-    "CEP"
+    "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "CEP": {
-      "c": 0.2
+    "random": {
+      "c": 0.1
     }
 },
   "data_config" :  {
@@ -15,8 +15,8 @@
         "data_quantity_skew": "Dirichlet"
   },
 
-  "no_epochs": 3,
-  "no_clients": 100,
+  "no_epochs": 2,
+  "no_clients": 500,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
@@ -33,8 +33,8 @@
     "enable_data_distribution": true,
     "device": "cuda"
   },
-  "c_evaluation_clients":  0.01,
+  "c_evaluation_clients":  0.002,
   "max_workers": 32,
-  "base_strategy": ["FedAvgM", "FedAvg"]
+  "base_strategy": ["FedDisco","FedAvgM","FedProx","FedAvg"]
 
 }
