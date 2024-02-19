@@ -170,9 +170,11 @@ class FedDisco(fl.server.strategy.FedAvg):
         b = self.config.initial_config["base_strategy_config"]["FedDisco"]["b"]
 
         round_training_data_size = 0
+        no_clients = len(results)
         for client_proxy, fit_res in results:
             round_training_data_size += self.data_ratios[int(client_proxy.cid)]
         # assign weights
+
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
@@ -181,12 +183,12 @@ class FedDisco(fl.server.strategy.FedAvg):
                     (
                         self.data_ratios[int(client_proxy.cid)]
                         / round_training_data_size
-                        - a * discrepany_vals[int(client_proxy.cid)]
-                        + b
+                        - a * 10/no_clients
+                        / round_training_data_size) * discrepany_vals[int(client_proxy.cid)]
+                        + b * 10/no_clients
                     )
                     * 100000,
-                ),
-            )
+                )
             for client_proxy, fit_res in results
         ]
         aggregated_parameters = aggregate(weights_results)
