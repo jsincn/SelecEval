@@ -121,7 +121,12 @@ def run_state_update(config: Config, server_round: int):
     )
 
 
-def add_discrepancy_level(csv_path, datahandler: DataHandler):
+def add_discrepancy_level(csv_path, datahandler: DataHandler, distribute_data: bool = False,
+                          generate_clients: bool = False):
+    if  (not distribute_data and generate_clients) or (distribute_data and not generate_clients):
+        raise ValueError("Both distribute_data and generate_clients must be True or False")
+    elif (not distribute_data) and (not generate_clients):
+        return
     # Read the CSV file into a Pandas DataFrame
     df = pd.read_csv(csv_path)
     label_distribution = datahandler.get_attribute_label_distribution()

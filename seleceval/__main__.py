@@ -229,8 +229,10 @@ def run_training_simulation_bs(
         }
     else:
         client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
+
     add_data_ratios(config.attributes["input_state_file"], trainloaders)
-    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
+    add_discrepancy_level(config.attributes["input_state_file"], datahandler, config.initial_config["distribute_data"],
+                          config.initial_config["generate_clients"])
 
     algorithm = config.initial_config["algorithm"][0]
     for base_strategy in config.initial_config["base_strategy"]:

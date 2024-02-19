@@ -171,6 +171,7 @@ class DataHandler(ABC):
         data_distribution = pd.read_csv(
             self.config.initial_config["data_distribution_file"]
         )
+        data_distribution.to_csv(self.config.attributes["data_distribution_output"], index=False)
         if len(data_distribution) < self.NUM_CLIENTS:
             raise Exception("Not enough clients in data distribution file")
         data_set_ids = list(
