@@ -1,11 +1,11 @@
 {
   "no_rounds": 50,
   "algorithm": [
-    "ActiveFL"
+    "PowD"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "ActiveFL": {
+    "PowD": {
       "c": 0.1
     }
 },
@@ -35,6 +35,6 @@
   },
   "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedAvg","FedAvgM","FedDisco","FedProx"]
+  "base_strategy": ["FedAvg", "FedAvgM", "FedDisco", "FedProx"]
 
 }

@@ -123,7 +123,7 @@ def run_state_update(config: Config, server_round: int):
 
 def add_discrepancy_level(csv_path, datahandler: DataHandler, distribute_data: bool = False,
                           generate_clients: bool = False):
-    if  (not distribute_data and generate_clients) or (distribute_data and not generate_clients):
+    if (not distribute_data and generate_clients) or (distribute_data and not generate_clients):
         raise ValueError("Both distribute_data and generate_clients must be True or False")
     elif (not distribute_data) and (not generate_clients):
         return
