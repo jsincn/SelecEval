@@ -1,11 +1,11 @@
 {
   "no_rounds": 50,
   "algorithm": [
-    "CEP"
+    "ActiveFL"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "CEP": {
+    "ActiveFL": {
       "c": 0.1
     }
 },

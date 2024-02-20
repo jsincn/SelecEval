@@ -158,7 +158,7 @@ class DataHandler(ABC):
         data_distribution.to_csv(
             self.config.attributes["data_distribution_output"], index=False
         )
-        datasets = map(lambda x: Subset(trainset, x), client_data)
+        datasets = list(map(lambda x: Subset(trainset, x), client_data))
         return datasets
 
     def load_existing_distribution(self, trainset):
