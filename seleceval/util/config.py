@@ -30,7 +30,7 @@ class Config:
                 "default": {},
                 "schema": algorithm_parameter_dict,
             },
-            "variable_epochs": {"type": "boolean", "default": True},
+            "variable_epochs": {"type": "boolean", "default": False},
             "min_no_epochs": {"type": "integer", "min": 1, "default": 1},
             "max_no_epochs": {"type": "integer", "min": 2, "default": 5},
             "no_epochs": {"type": "integer", "min": 1, "default": 1},
