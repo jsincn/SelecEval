@@ -1,11 +1,11 @@
 {
   "no_rounds": 30,
   "algorithm": [
-    "cep"
+    "CEP"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "cep": {
+    "CEP": {
       "c": 0.01
     }
 },
