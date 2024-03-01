@@ -110,7 +110,9 @@ class FedNova(FedAvg):
         for client_proxy, res in results:
             round_training_data_size += res.metrics["weight"]
 
-        local_tau_times_real_ratio = [res.metrics["tau"]/round_training_data_size for _, res in results]
+        local_tau_times_real_ratio = [
+            res.metrics["tau"] / round_training_data_size for _, res in results
+        ]
         tau_eff = np.sum(local_tau_times_real_ratio)
 
         aggregate_parameters = []
@@ -124,15 +126,16 @@ class FedNova(FedAvg):
             # res.metrics["local_norm"] contains total number of local update steps
             # for each client
             # res.metrics["weight"] contains the ratio of client dataset size
-            # Below corresponds to Eqn-6: Section 4.1
-            scale = float(res.metrics["local_norm"])
-            scale *= (float(res.metrics["weight"])/round_training_data_size)
-            params_scaled = [(param/res.metrics["local_norm"]) for param in params]
-            aggregate_parameters.append((params_scaled, int(scale*1000000)))
-            aggregate_buffers.append((buffers, int(res.metrics["weight"]*1000000)))
+            # Below corresponds to Eqn-6: Section 4.1 (update: does not necessarily correspond)
+            """scale = float(res.metrics["local_norm"])"""
+            scale = float(res.metrics["weight"]) / round_training_data_size
+            params_scaled = [(param / res.metrics["local_norm"]) for param in params]
+            aggregate_parameters.append((params_scaled, int(scale * 1000000)))
+            aggregate_buffers.append((buffers, int(res.metrics["weight"] * 1000000)))
         # Aggregate all client parameters with a weighted average using the scale
         # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
+        agg_cum_gradient = [x * tau_eff for x in agg_cum_gradient]
         agg_cum_buffers = aggregate(aggregate_buffers)
         print("Saving aggregated_gradients...")
         if agg_cum_gradient is not None:
