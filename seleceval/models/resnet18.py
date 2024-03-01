@@ -17,7 +17,6 @@ import copy
 import flwr.common
 from torch.optim.optimizer import Optimizer
 
-
 class Resnet18(Model):
     """
     Resnet18 model for federated learning
@@ -83,6 +82,8 @@ class Resnet18(Model):
         loss_function = torch.nn.CrossEntropyLoss()
         self.net.train()
         output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader), "tau": float, "weight": float, "local_norm": int}
+        if(config.initial_config["base_strategy"] == "FedNova"):
+            optimizer.reset_steps()
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0

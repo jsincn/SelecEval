@@ -166,3 +166,8 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         """Set the learning rate to the given value."""
         for param_group in self.param_groups:
             param_group["lr"] = lr
+
+    def reset_steps(self):
+        self.local_normalizing_vec = 0
+        self.local_steps = 0
+        self.local_counter = 0
