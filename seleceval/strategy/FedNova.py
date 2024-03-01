@@ -106,14 +106,14 @@ class FedNova(FedAvg):
         Since client sampling is possible, the weight (data ratio) needs be 
         adjusted to the size of the round training data set
         """
-        round_training_data_size = 0
+        round_training_data_size = 0.0
         for client_proxy, res in results:
             round_training_data_size += res.metrics["weight"]
 
-        local_tau_times_real_ratio = [
-            res.metrics["tau"] / round_training_data_size for _, res in results
+        local_tau = [
+            res.metrics["tau"]*res.metrics["weight"] / round_training_data_size for _, res in results
         ]
-        tau_eff = np.sum(local_tau_times_real_ratio)
+        tau_eff = np.sum(local_tau)
 
         aggregate_parameters = []
         aggregate_buffers = []
@@ -128,8 +128,11 @@ class FedNova(FedAvg):
             # res.metrics["weight"] contains the ratio of client dataset size
             # Below corresponds to Eqn-6: Section 4.1 (update: does not necessarily correspond)
             """scale = float(res.metrics["local_norm"])"""
-            scale = float(res.metrics["weight"]) / round_training_data_size
-            params_scaled = [(param / res.metrics["local_norm"]) for param in params]
+            #local norm corresponds to epochs in vanilla sgd case,
+            # division by round_training_data_size stems from partial participation,
+            #formula changed to not need Batch size or number of batches for local tau (=a_i in vanilla case)
+            scale = float(res.metrics["weight"]) / round_training_data_size #division not neces but included for clarity
+            params_scaled = [(param / (res.metrics["local_norm"]*(res.metrics["weight"]/round_training_data_size))) for param in params]
             aggregate_parameters.append((params_scaled, int(scale * 1000000)))
             aggregate_buffers.append((buffers, int(res.metrics["weight"] * 1000000)))
         # Aggregate all client parameters with a weighted average using the scale
