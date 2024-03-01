@@ -1,5 +1,5 @@
 {
-  "no_rounds": 30,
+  "no_rounds": 70,
   "algorithm": [
     "CEP"
   ],
@@ -19,7 +19,7 @@
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 5000,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
