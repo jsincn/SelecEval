@@ -19,7 +19,7 @@
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 100,
+  "no_clients": 5000,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
