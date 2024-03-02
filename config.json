@@ -11,8 +11,8 @@
 },
   "data_config" :  {
         "data_quantity_base_parameter": 0.0625,
-        "data_label_distribution_skew": "Dirichlet",
-        "data_quantity_skew": "Uniform",
+        "data_label_distribution_skew": "Uniform",
+        "data_quantity_skew": "Dirichlet",
         "data_label_distribution_parameter": 0.1,
         "data_quantity_skew_parameter_1": 0.1,
         "data_quantity_skew_parameter_2": 0.1
