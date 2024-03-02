@@ -111,7 +111,7 @@ class FedNova(FedAvg):
             round_training_data_size += res.metrics["weight"]
 
         local_tau = [
-            res.metrics["tau"]/round_training_data_size for _, res in results
+            res.metrics["tau"] / round_training_data_size for _, res in results
         ]
         tau_eff = np.sum(local_tau)
 
@@ -127,16 +127,27 @@ class FedNova(FedAvg):
             # for each client
             # res.metrics["weight"] contains the ratio of client dataset size
             # Below corresponds to Eqn-6: Section 4.1 (update: does not necessarily correspond)
-            scale = tau_eff/float(res.metrics["local_norm"])
+            scale = tau_eff / float(res.metrics["local_norm"])
             # division by round_training_data_size stems from partial participation,
-            scale *= float(res.metrics["weight"]) / round_training_data_size #division not neces but included for clarity
-            #params_scaled = [(param / (res.metrics["local_norm"])) for param in params]
+            scale *= (
+                float(res.metrics["weight"]) / round_training_data_size
+            )
+            params = [param * scale for param in params]
             aggregate_parameters.append((params, int(scale * 1000000)))
-            aggregate_buffers.append((buffers, int(res.metrics["weight"] * 1000000)))
-        # Aggregate all client parameters with a weighted average using the scale
-        # calculated above
-        agg_cum_gradient = aggregate(aggregate_parameters)
-        #agg_cum_gradient = [x * tau_eff for x in agg_cum_gradient]
+            aggregate_buffers.append((buffers, int(res.metrics["weight"]/round_training_data_size * 10000000)))
+
+
+        # Aggregate all client buffers with a weighted average and all parameters by just summing up
+        sum_of_weights = [np.zeros_like(layer) for layer in aggregate_parameters[0][0]]
+
+        # Sum up all parameters
+        for weights, _ in aggregate_parameters:
+            sum_of_weights = [
+                sum_layer + weight_layer
+                for sum_layer, weight_layer in zip(sum_of_weights, weights)
+            ]
+
+        agg_cum_gradient = sum_of_weights
         agg_cum_buffers = aggregate(aggregate_buffers)
         print("Saving aggregated_gradients...")
         if agg_cum_gradient is not None:
@@ -190,7 +201,6 @@ class FedNova(FedAvg):
 
     def update_server_params(self, cum_grad: NDArrays):
         """Update the global server parameters by aggregating client gradients."""
-        arrays = self.global_parameters
         """print("global parameters dtype:", arrays[0].dtype)
         print("layer_cum_grad_dtype:", cum_grad[0].dtype)
         print("lenght of global parameters list:", len(self.global_parameters))
@@ -220,7 +230,6 @@ class FedNova(FedAvg):
             else:
                 # weight updated eqn: x_new = x_old - gradient
                 # the layer_cum_grad already has all the learning rate multiple
-                """layer_cum_grad = layer_cum_grad.astype("float64")"""
                 self.global_parameters[i] -= cum_grad[i]
 
     def evaluate(
