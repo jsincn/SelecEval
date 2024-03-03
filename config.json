@@ -1,5 +1,5 @@
 {
-  "no_rounds": 70,
+  "no_rounds": 60,
   "algorithm": [
     "random"
   ],
@@ -10,19 +10,19 @@
     }
 },
   "data_config" :  {
-        "data_quantity_base_parameter": 0.0625,
+        "data_quantity_base_parameter": 0.1,
         "data_label_distribution_skew": "Dirichlet",
         "data_quantity_skew": "Dirichlet",
         "data_label_distribution_parameter": 0.1,
-        "data_quantity_skew_parameter_1": 0.1,
-        "data_quantity_skew_parameter_2": 0.1
+        "data_quantity_skew_parameter_1": 0.3,
+        "data_quantity_skew_parameter_2": 0.3
   },
 
   "no_epochs": 2,
   "variable_epochs": true,
   "max_no_epochs": 5,
   "min_no_epochs": 2,
-  "no_clients": 16,
+  "no_clients": 10,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
