@@ -6,11 +6,11 @@
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 0.3
+      "c": 0.1
     }
 },
   "data_config" :  {
-        "data_quantity_base_parameter": 0.2,
+        "data_quantity_base_parameter": 0.1,
         "data_label_distribution_skew": "Dirichlet",
         "data_quantity_skew": "Dirichlet",
         "data_label_distribution_parameter": 0.1,
@@ -20,9 +20,9 @@
 
   "no_epochs": 2,
   "variable_epochs": true,
-  "max_no_epochs": 8,
+  "max_no_epochs": 5,
   "min_no_epochs": 2,
-  "no_clients": 50,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
