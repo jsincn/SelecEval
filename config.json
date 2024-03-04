@@ -1,5 +1,5 @@
 {
-  "no_rounds": 70,
+  "no_rounds": 30,
   "algorithm": [
     "random"
   ],
@@ -22,7 +22,7 @@
   "variable_epochs": true,
   "max_no_epochs": 5,
   "min_no_epochs": 2,
-  "no_clients": 20,
+  "no_clients": 50,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
