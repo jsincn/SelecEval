@@ -1,5 +1,5 @@
 {
-  "no_rounds": 25,
+  "no_rounds": 40,
   "algorithm": [
     "random"
   ],
@@ -19,7 +19,7 @@
   },
 
   "no_epochs": 2,
-  "variable_epochs": true,
+  "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 2,
   "no_clients": 16,
@@ -41,6 +41,6 @@
   },
   "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedNova", "FedAvg"]
+  "base_strategy": ["FedNova", "FedProx"]
 
 }
