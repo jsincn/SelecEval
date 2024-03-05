@@ -6,7 +6,7 @@
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 1
+      "c": 0.25
     }
 },
   "data_config" :  {
@@ -22,7 +22,7 @@
   "variable_epochs": true,
   "max_no_epochs": 5,
   "min_no_epochs": 2,
-  "no_clients": 16,
+  "no_clients": 20,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
@@ -41,6 +41,6 @@
   },
   "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedProx", "FedNova"]
+  "base_strategy": ["FedAvg", "FedNova"]
 
 }
