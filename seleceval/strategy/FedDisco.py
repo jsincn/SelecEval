@@ -186,7 +186,7 @@ class FedDisco(fl.server.strategy.FedAvg):
                         - a * 10/no_clients * discrepany_vals[int(client_proxy.cid)]
                         + b * 10/no_clients
                     )
-                    * 100000,
+                    * 100000000,
                 )
             )
             for client_proxy, fit_res in results
