@@ -1,13 +1,14 @@
 {
   "no_rounds": 70,
   "algorithm": [
-    "PowD"
+    "FedCS"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "PowD": {
+    "FedCS": {
       "c": 0.01,
-      "pre_sampling": 0.03
+      "pre_sampling": 0.02,
+      "fixed_client_no": false
     }
 },
   "data_config" :  {
