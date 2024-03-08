@@ -8,7 +8,7 @@
     "FedCS": {
       "c": 0.01,
       "pre_sampling": 0.1,
-      "fixed_client_no": false
+      "fixed_client_no": true
     }
 },
   "data_config" :  {
