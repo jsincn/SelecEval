@@ -1,12 +1,13 @@
 {
   "no_rounds": 50,
   "algorithm": [
-    "ActiveFL"
+    "PowD"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
-    "ActiveFL": {
-      "c": 0.01
+    "PowD": {
+      "c": 0.01,
+      "pre_sampling": 0.03
     }
 },
   "data_config" :  {
