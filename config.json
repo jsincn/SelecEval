@@ -1,12 +1,12 @@
 {
-  "no_rounds": 70,
+  "no_rounds": 50,
   "algorithm": [
     "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 1
+      "c": 0.1
     }
 },
   "data_config" :  {
@@ -22,7 +22,7 @@
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 2,
-  "no_clients": 16,
+  "no_clients": 500,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
