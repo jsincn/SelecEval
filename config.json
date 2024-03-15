@@ -20,8 +20,8 @@
 
   "no_epochs": 2,
   "variable_epochs": true,
-  "max_no_epochs": 1,
-  "min_no_epochs": 5,
+  "max_no_epochs": 5,
+  "min_no_epochs": 1,
   "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
