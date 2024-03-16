@@ -1,34 +1,34 @@
 {
-  "no_rounds": 30,
+  "no_rounds": 70,
   "algorithm": [
     "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 0.01
+      "c": 0.1
     }
 },
   "data_config" :  {
         "data_quantity_base_parameter": 0.01,
         "data_label_distribution_skew": "Dirichlet",
         "data_quantity_skew": "Dirichlet",
-        "data_label_distribution_parameter": 0.3,
-        "data_quantity_skew_parameter_1": 0.3,
-        "data_quantity_skew_parameter_2": 0.3
+        "data_label_distribution_parameter": 0.5,
+        "data_quantity_skew_parameter_1": 0.5,
+        "data_quantity_skew_parameter_2": 0.5
   },
 
   "no_epochs": 2,
-  "variable_epochs": false,
+  "variable_epochs": true,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 500,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
   "timeout": 120,
   "generate_clients": true,
-  "create_synthetic_client_failures": true,
+  "create_synthetic_client_failures": false,
   "output_dir": "outputs/o",
   "client_state_file": "seleceval/client_states.csv",
   "client_configuration_file": "seleceval/client_configurations.csv",
@@ -41,6 +41,6 @@
   },
   "c_evaluation_clients":  0.002,
   "max_workers": 32,
-  "base_strategy": ["FedAvg", "FedProx"]
+  "base_strategy": ["FedAvg", "FedDisco", "FedProx", "FedAvgM", "FedNova"]
 
 }
