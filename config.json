@@ -1,5 +1,5 @@
 {
-  "no_rounds": 70,
+  "no_rounds": 30,
   "algorithm": [
     "random"
   ],
@@ -13,34 +13,34 @@
         "data_quantity_base_parameter": 0.01,
         "data_label_distribution_skew": "Dirichlet",
         "data_quantity_skew": "Dirichlet",
-        "data_label_distribution_parameter": 0.5,
-        "data_quantity_skew_parameter_1": 0.5,
-        "data_quantity_skew_parameter_2": 0.5
+        "data_label_distribution_parameter": 0.3,
+        "data_quantity_skew_parameter_1": 0.3,
+        "data_quantity_skew_parameter_2": 0.3
   },
 
   "no_epochs": 2,
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 5000,
+  "no_clients": 500,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
   "timeout": 120,
-  "generate_clients": false,
+  "generate_clients": true,
   "create_synthetic_client_failures": true,
   "output_dir": "outputs/o",
   "client_state_file": "seleceval/client_states.csv",
   "client_configuration_file": "seleceval/client_configurations.csv",
-  "distribute_data": false,
+  "distribute_data": true,
   "data_distribution_file": "seleceval/data_distribution.csv",
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
     "device": "cuda"
   },
-  "c_evaluation_clients":  0.001,
+  "c_evaluation_clients":  0.002,
   "max_workers": 32,
-  "base_strategy": ["FedAvg","FedDisco", "FedProx", "FedAvgM","FedNova"]
+  "base_strategy": ["FedAvg", "FedProx"]
 
 }
