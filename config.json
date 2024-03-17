@@ -1,5 +1,5 @@
 {
-  "no_rounds": 50,
+  "no_rounds": 70,
   "algorithm": [
     "random"
   ],
@@ -18,21 +18,21 @@
         "data_quantity_skew_parameter_2": 0.5
   },
 
-  "no_epochs": 2,
+  "no_epochs": 1,
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 500,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
   "timeout": 120,
-  "generate_clients": true,
-  "create_synthetic_client_failures": true,
+  "generate_clients": false,
+  "create_synthetic_client_failures": false,
   "output_dir": "outputs/o",
   "client_state_file": "seleceval/client_states.csv",
   "client_configuration_file": "seleceval/client_configurations.csv",
-  "distribute_data": true,
+  "distribute_data": false,
   "data_distribution_file": "seleceval/data_distribution.csv",
   "validation_config": {
     "enable_validation": true,
