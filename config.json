@@ -18,7 +18,7 @@
         "data_quantity_skew_parameter_2": 0.5
   },
 
-  "no_epochs": 1,
+  "no_epochs": 3,
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
