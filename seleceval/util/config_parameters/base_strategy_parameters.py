@@ -10,7 +10,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
@@ -19,7 +19,7 @@ base_strategy_parameter_dict = {
         "default": {},
         "schema": {
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.01},
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
@@ -27,7 +27,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
@@ -37,7 +37,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "mu": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0},
             "a": {"type": "float", "min": 0, "max": 100, "default": 0.25},
@@ -49,7 +49,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
                 "default": {},
                 "schema": {
-                    "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+                    "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
                     "gmf": {"type": "float", "min": 0, "max": 1, "default": 0.7},
                     "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
                 }
