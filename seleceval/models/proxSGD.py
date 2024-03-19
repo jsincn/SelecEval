@@ -171,3 +171,10 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         self.local_normalizing_vec = 0
         self.local_steps = 0
         self.local_counter = 0
+
+        for group in self.param_groups:
+            for p in group["params"]:
+                param_state = self.state[p]
+                if "momentum_buffer" in param_state:
+                    # Reset the momentum buffer for this parameter
+                    param_state["momentum_buffer"] = torch.zeros_like(p.data)
