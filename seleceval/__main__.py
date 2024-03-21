@@ -163,7 +163,7 @@ def run_training_simulation_cs(
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
         client_fn = ClientFunction(
-            Client, trainloaders, valloaders, model, config, algorithm
+            Client, trainloaders, valloaders, model, config, config.initial_config["base_strategy"][0]
         ).client_fn
         config.generate_paths(
             algorithm,
