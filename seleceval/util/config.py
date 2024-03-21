@@ -102,11 +102,11 @@ class Config:
             },
             "compare_client_selection_algorithms": {
                 "type": "boolean",
-                "default": False,
+                "default": True,
             },
             "compare_base_strategies": {
                 "type": "boolean",
-                "default": True,
+                "default": False,
             },
             "max_workers": {"type": "integer", "min": 1, "default": 32},
             "base_strategy": {
