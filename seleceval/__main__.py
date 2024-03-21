@@ -158,7 +158,7 @@ def run_training_simulation_cs(
     add_data_ratios(config.attributes["input_state_file"], trainloaders)
     add_discrepancy_level(config.attributes["input_state_file"], datahandler)
 
-    for algorithm in config.intial_config["algorithm"]:
+    for algorithm in config.initial_config["algorithm"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
