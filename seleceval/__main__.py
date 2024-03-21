@@ -167,7 +167,7 @@ def run_training_simulation_cs(
         ).client_fn
         config.generate_paths(
             algorithm,
-            config.initial_config["base_strategy"],
+            config.initial_config["base_strategy"][0],
             config.initial_config["dataset"],
             config.initial_config["no_clients"],
         )
