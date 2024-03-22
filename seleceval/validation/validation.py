@@ -76,6 +76,8 @@ class Validation(Evaluator):
             + "validation_"
             + current_run["algorithm"]
             + "_"
+            + current_run["base_strategy"]
+            + "_"
             + current_run["dataset"]
             + "_"
             + str(current_run["no_clients"])
@@ -86,6 +88,8 @@ class Validation(Evaluator):
             + "/model_output/"
             + "model_output_"
             + current_run["algorithm"]
+            + "_"
+            + current_run["base_strategy"]
             + "_"
             + current_run["dataset"]
             + "_"
@@ -138,7 +142,9 @@ class Validation(Evaluator):
         :return: None
         """
         if len(self.output_dfs.keys()) == 0:
-            raise ValueError("No outputs dataframes found. Please run evaluate() first.")
+            raise ValueError(
+                "No outputs dataframes found. Please run evaluate() first."
+            )
 
         for i in self.output_dfs.keys():
             self.output_dfs[i]["algorithm"] = i
