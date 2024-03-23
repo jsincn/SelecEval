@@ -166,7 +166,7 @@ class Config:
         self.attributes = {
             "input_state_file": self.initial_config["output_dir"] + "/input_state.csv",
             "working_state_file": self.initial_config["output_dir"]
-            + "/working_state.csv",
+            + "/client_states.csv",
             "data_distribution_output": self.initial_config["output_dir"]
             + "/data_distribution.csv",
         }
