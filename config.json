@@ -56,6 +56,6 @@
   },
   "c_evaluation_clients":  0.002,
   "max_workers": 32,
-  "base_strategy": ["FedNova"]
+  "base_strategy": ["FedAvg"]
 
 }
