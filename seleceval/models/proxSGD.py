@@ -138,9 +138,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         Returns: A dictionary containing weight, tau, and local_norm.
         """
         if self.mu != 0:
-            local_tau = torch.tensor(
-                self.local_steps * self.ratio
-            )  # Shouldn't this always be ratio*normalizing_vec?
+            local_tau = torch.tensor(self.local_steps * self.ratio)
         else:
             local_tau = torch.tensor(self.local_normalizing_vec * self.ratio)
         local_stats = {
@@ -155,7 +153,9 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         """Set the optimizer model parameters to the given values."""
         i = 0
         for group in self.param_groups:
-            for p in group["params"]:
+            for p in group[
+                "params"
+            ]:  # params only includes actual parameters, not buffers in case of e.g. ResNet
                 param_state = self.state[p]
                 param_tensor = torch.tensor(init_params[i])
                 p.data.copy_(param_tensor)

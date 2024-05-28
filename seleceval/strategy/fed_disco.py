@@ -14,10 +14,9 @@ from flwr.common import (
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate
-
 from ..selection.client_selection import ClientSelection
 from ..simulation.state import run_state_update
-from ..strategy.common import weighted_average
+from ..strategy.common import weighted_average, get_buf_indices_resnet18
 from ..util import Config
 from flwr.common.logger import log
 from ..simulation.state import get_discrepancy_level
@@ -90,79 +89,20 @@ class FedDisco(fl.server.strategy.FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+        # get discrepancy values that are central to this base strategy
         discrepany_vals = get_discrepancy_level(
             self.config.attributes["working_state_file"]
         )
 
-        """Current Workaround to aggregate buffers only based on number of samples"""
-        buf_indices = [
-            3,
-            4,
-            5,
-            9,
-            10,
-            11,
-            15,
-            16,
-            17,
-            21,
-            22,
-            23,
-            27,
-            28,
-            29,
-            33,
-            34,
-            35,
-            39,
-            40,
-            41,
-            45,
-            46,
-            47,
-            51,
-            52,
-            53,
-            57,
-            58,
-            59,
-            63,
-            64,
-            65,
-            69,
-            70,
-            71,
-            75,
-            76,
-            77,
-            81,
-            82,
-            83,
-            87,
-            88,
-            89,
-            93,
-            94,
-            95,
-            99,
-            100,
-            101,
-            105,
-            106,
-            107,
-            111,
-            112,
-            113,
-            117,
-            118,
-            119,
-        ]
+        """Current workaround special to ResNet-18 to aggregate buffers only based on number of samples (FedAvg for buffers)
+        instead of using the base strategy (FedDisco)"""
+        buf_indices = get_buf_indices_resnet18()
         buffers = []
         for _, fit_res in results:
             client_params = parameters_to_ndarrays(fit_res.parameters)
             client_buffers = [client_params[i] for i in buf_indices]
             buffers.append((client_buffers, fit_res.num_examples))
-
+        # aggregate buffers
         agg_buffers = aggregate(buffers)
 
         # Hyperparameter 1 and 2
@@ -173,8 +113,8 @@ class FedDisco(fl.server.strategy.FedAvg):
         no_clients = len(results)
         for client_proxy, fit_res in results:
             round_training_data_size += self.data_ratios[int(client_proxy.cid)]
-        # assign weights
 
+        # assign weights via strategy formula
         weights_results = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
@@ -183,11 +123,11 @@ class FedDisco(fl.server.strategy.FedAvg):
                     (
                         self.data_ratios[int(client_proxy.cid)]
                         / round_training_data_size
-                        - a * 10/no_clients * discrepany_vals[int(client_proxy.cid)]
-                        + b * 10/no_clients
+                        - a * 10 / no_clients * discrepany_vals[int(client_proxy.cid)]
+                        + b * 10 / no_clients
                     )
                     * 100000000,
-                )
+                ),
             )
             for client_proxy, fit_res in results
         ]

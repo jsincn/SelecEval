@@ -72,10 +72,6 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         filtered_results = [i for i in results if i[1].num_examples != -1]
         failures = [i for i in results if i[1].num_examples == -1]
         results = filtered_results
-        """TEST FOR IMPACT OF WEIGHTS ON AGGREGATION"""
-        #for i in results:
-            #i[1].num_examples = 1
-        """THIS IS THE END OF THE TEST CODE, TO BE COMMENTED OUT FOR ANY REAL EXPERIMENT"""
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 

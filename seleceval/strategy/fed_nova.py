@@ -1,11 +1,10 @@
-import os
 from logging import INFO
+import os
 from typing import Dict, List, Optional, Tuple, Union
 import torch.nn
 import numpy as np
 from flwr.server import ClientManager
 from ..models import proxSGD
-
 from seleceval.selection import ClientSelection
 from flwr.common import (
     Metrics,
@@ -23,7 +22,6 @@ from flwr.server.strategy.aggregate import aggregate
 import torch
 from flwr.common.logger import log
 from logging import WARNING
-
 from ..simulation.state import run_state_update
 
 
@@ -126,16 +124,18 @@ class FedNova(FedAvg):
             # res.metrics["local_norm"] contains total number of local update steps
             # for each client
             # res.metrics["weight"] contains the ratio of client dataset size
-            # Below corresponds to Eqn-6: Section 4.1 (update: does not necessarily correspond)
+            # Below corresponds to Eqn-6: Section 4.1
             scale = tau_eff / float(res.metrics["local_norm"])
             # division by round_training_data_size stems from partial participation,
-            scale *= (
-                float(res.metrics["weight"]) / round_training_data_size
-            )
+            scale *= float(res.metrics["weight"]) / round_training_data_size
             params = [param * scale for param in params]
             aggregate_parameters.append((params, int(scale * 1000000)))
-            aggregate_buffers.append((buffers, int(res.metrics["weight"]/round_training_data_size * 10000000)))
-
+            aggregate_buffers.append(
+                (
+                    buffers,
+                    int(res.metrics["weight"] / round_training_data_size * 10000000),
+                )
+            )
 
         # Aggregate all client buffers with a weighted average and all parameters by just summing up
         sum_of_weights = [np.zeros_like(layer) for layer in aggregate_parameters[0][0]]

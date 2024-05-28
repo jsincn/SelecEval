@@ -1,5 +1,6 @@
 """
 This module contains the Validation class, which is used to evaluate the performance of a federated learning run
+comparing base strategies
 """
 import os
 from datetime import datetime

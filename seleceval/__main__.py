@@ -4,34 +4,27 @@ Main file for the simulation
 import flwr as fl
 import torch
 import pandas as pd
-from flwr.common import ndarrays_to_parameters
-
 from seleceval.strategy.common import get_init_parameters
-from .models.model import Model
-
-pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
-from .datahandler.mnist import MNISTDataHandler
-from .strategy import strategy_dict
-from .validation.training import Training
-from .validation.training_bs import Training_BS
-from .client.client import Client
-from .client.client_fn import ClientFunction
-from .datahandler.cifar10 import Cifar10DataHandler
-from .models.resnet18 import Resnet18
-from .selection import algorithm_dict
-from typing import Dict, List
-from collections import OrderedDict
-from .simulation.state import (
+from datahandler.mnist import MNISTDataHandler
+from strategy import strategy_dict
+from validation.training import Training
+from validation.training_bs import Training_BS
+from client.client import Client
+from client.client_fn import ClientFunction
+from datahandler.cifar10 import Cifar10DataHandler
+from models.resnet18 import Resnet18
+from selection import algorithm_dict
+from simulation.state import (
     generate_initial_state,
     get_initial_state,
     start_working_state,
 )
-from .util import Arguments, Config
-from .validation.datadistribution import DataDistribution
-from .validation.validation import Validation
-from .validation.validation_bs import ValidationBS
-from .simulation.state import add_discrepancy_level, add_data_ratios
-from .client.helpers import get_parameters, set_parameters
+from util import Arguments, Config
+from validation.datadistribution import DataDistribution
+from validation.validation import Validation
+from validation.validation_bs import ValidationBS
+from simulation.state import add_discrepancy_level, add_data_ratios
+pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 
 
 def main():
@@ -94,7 +87,7 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
     # Evaluation generation
     if config.initial_config["validation_config"]["enable_validation"]:
         val = Validation(config, trainloaders, valloaders, datahandler)
-
+        # CS algorithm comparison or base strategy comparison
         if config.initial_config["compare_client_selection_algorithms"]:
             run_evaluation_cs(config, datahandler, trainloaders, valloaders)
 
@@ -119,7 +112,7 @@ def run_training_simulation(
     :param trainloaders: Trainloaders
     :param valloaders:
     """
-
+    # CS algorithm comparison or base strategy comparison
     if config.initial_config["compare_client_selection_algorithms"]:
         run_training_simulation_cs(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
@@ -140,7 +133,7 @@ def run_training_simulation_cs(
     DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
 ):
     """
-    Runs the training simulation
+    Runs the training simulation for client selection comparison mode
     :param DEVICE: Device to run the simulation on
     :param NUM_CLIENTS: Number of clients
     :param config: Config object
@@ -163,7 +156,12 @@ def run_training_simulation_cs(
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
         client_fn = ClientFunction(
-            Client, trainloaders, valloaders, model, config, config.initial_config["base_strategy"][0]
+            Client,
+            trainloaders,
+            valloaders,
+            model,
+            config,
+            config.initial_config["base_strategy"][0],
         ).client_fn
         config.generate_paths(
             algorithm,
@@ -183,6 +181,7 @@ def run_training_simulation_cs(
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
 
+        # in case of FedNova, FedAvgM, set initial parameters
         if config.initial_config["base_strategy"][0] in ["FedNova", "FedAvgM"]:
             strategy = strategy_dict[config.initial_config["base_strategy"][0]](
                 net=model.get_net(),
@@ -215,7 +214,7 @@ def run_training_simulation_bs(
     DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
 ):
     """
-    Runs the training simulation
+    Runs the training simulation for base strategy comparison mode
     :param DEVICE: Device to run the simulation on
     :param NUM_CLIENTS: Number of clients
     :param config: Config object
@@ -232,22 +231,17 @@ def run_training_simulation_bs(
         client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
 
     add_data_ratios(config.attributes["input_state_file"], trainloaders)
-    add_discrepancy_level(config.attributes["input_state_file"], datahandler, config.initial_config["distribute_data"],
-                          config.initial_config["generate_clients"])
+    add_discrepancy_level(
+        config.attributes["input_state_file"],
+        datahandler,
+        config.initial_config["distribute_data"],
+        config.initial_config["generate_clients"],
+    )
 
     algorithm = config.initial_config["algorithm"][0]
     for base_strategy in config.initial_config["base_strategy"]:
         start_working_state(config)
         model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
-        """print("MAIN: number of buffers in ResNet18: ", len(list(model.net.buffers())))
-        print(
-            "MAIN: number of parameters in ResNet18: ",
-            len(list(model.net.parameters())),
-        )
-        print(
-            "MAIN: number of relevant values for FL in Resnet18: ",
-            len(list(get_parameters(model.net))),
-        )"""
         client_fn = ClientFunction(
             Client, trainloaders, valloaders, model, config, base_strategy
         ).client_fn
@@ -268,6 +262,7 @@ def run_training_simulation_bs(
             base_strategy,
         )
         client_selector = algorithm_dict[algorithm](config, model.get_size())
+        # in case of FedNova, FedAvgM, set initial parameters
         if base_strategy in ["FedNova", "FedAvgM"]:
             strategy = strategy_dict[base_strategy](
                 net=model.get_net(),

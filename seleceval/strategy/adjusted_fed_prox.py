@@ -26,7 +26,7 @@ class AdjustedFedProx(fl.server.strategy.FedProx):
             # Min number of clients for evaluation
             min_available_clients=1,  # Not relevant in simulation
             evaluate_metrics_aggregation_fn=weighted_average,
-            proximal_mu=config.initial_config["base_strategy_config"]["FedProx"]["mu"]
+            proximal_mu=config.initial_config["base_strategy_config"]["FedProx"]["mu"] # proximal factor mu
         )
         self.client_selector = client_selector
         self.net = net

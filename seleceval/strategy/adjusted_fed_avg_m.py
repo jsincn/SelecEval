@@ -8,18 +8,21 @@ arXiv [cs.LG]. arXiv. http://arxiv.org/abs/1909.06335.
 from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
-import numpy as np
 import torch
-from flwr.common import FitRes, Scalar, Parameters, parameters_to_ndarrays, ndarrays_to_parameters
+from flwr.common import (
+    FitRes,
+    Scalar,
+    Parameters,
+    parameters_to_ndarrays,
+    ndarrays_to_parameters,
+)
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
-
 from ..selection.client_selection import ClientSelection
 from ..simulation.state import run_state_update
-from ..strategy.common import weighted_average
+from ..strategy.common import weighted_average, get_buf_indices_resnet18
 from ..util import Config
 from flwr.server.strategy.aggregate import aggregate
-
 
 
 class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
@@ -88,8 +91,7 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
         """Aggregate model weights using weighted average and store checkpoint"""
         """This is not very pretty code but it serves the purpose of not aggregating the buffers with momentum and is a 
         workaround for now"""
-        buf_indices = [3, 4, 5, 9, 10, 11, 15, 16, 17, 21, 22, 23, 27, 28, 29, 33, 34, 35, 39, 40, 41, 45, 46, 47, 51, 52, 53, 57, 58, 59, 63,
-                      64, 65, 69, 70, 71, 75, 76, 77, 81, 82, 83, 87, 88, 89, 93, 94, 95, 99, 100, 101, 105, 106, 107, 111, 112, 113, 117, 118, 119]
+        buf_indices = get_buf_indices_resnet18()  # inidces of buffers in parameter set
         buffers = []
         for _, fit_res in results:
             client_params = parameters_to_ndarrays(fit_res.parameters)
@@ -97,7 +99,7 @@ class AdjustedFedAvgM(fl.server.strategy.FedAvgM):
             buffers.append((client_buffers, fit_res.num_examples))
 
         agg_buffers = aggregate(buffers)
-        #Call aggregate_fit from base class (FedAvgM) to aggregate parameters and metrics
+        # Call aggregate_fit from base class (FedAvgM) to aggregate parameters and metrics
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )

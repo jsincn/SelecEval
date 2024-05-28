@@ -18,8 +18,6 @@ from .helpers import (
 from ..models import proxSGD
 from ..models.model import Model
 from flwr.common.typing import NDArrays, Scalar
-
-
 from torch.utils.data import DataLoader
 from seleceval.util.config import Config
 import flwr.common
@@ -129,9 +127,8 @@ class Client(fl.client.NumPyClient):
                 return get_parameters(self.net), -1, {}
         start_time = time.time()
 
-        if self.active_strategy == "FedNova":
+        if self.active_strategy == "FedNova": # FedNova specific
             if len(parameters) > 62:
-                print("parameters given to client fit longer than 63")
                 params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
                 state_dict = {
                     k: torch.Tensor(v)

@@ -17,6 +17,7 @@ import copy
 import flwr.common
 from torch.optim.optimizer import Optimizer
 
+
 class Resnet18(Model):
     """
     Resnet18 model for federated learning
@@ -50,6 +51,7 @@ class Resnet18(Model):
 
     def get_num_classes(self):
         return self.num_classes
+
     def __init__(self, device, num_classes: int):
         super().__init__(device)
         resnet = torchvision.models.resnet18()
@@ -74,16 +76,27 @@ class Resnet18(Model):
         :param client_name: Name of the current client
         :param epochs: Number of epochs to train
         :param verbose: Whether to print verbose outputs
+        :param ratio: data sample number ratio
+        :param optimizer: corresponding optimizer
         :return: Metrics of the training round
         """
+        # in order to calculate norm of difference, parameters need to be copied
         if config.initial_config["base_strategy"] == "FedProx":
             global_params = copy.deepcopy(self.get_net()).parameters()
 
         loss_function = torch.nn.CrossEntropyLoss()
         self.net.train()
-        output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader), "tau": float, "weight": float, "local_norm": int}
+        output = {
+            "accuracy": [],
+            "avg_epoch_loss": [],
+            "no_samples": len(trainloader),
+            "tau": float,
+            "weight": float,
+            "local_norm": int,
+        }
+
         if config.initial_config["base_strategy"] == "FedNova":
-            optimizer.reset_steps()
+            optimizer.reset_steps()  # reset_steps exists for FedNova optimizer
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -92,13 +105,23 @@ class Resnet18(Model):
                 optimizer.zero_grad()
                 out = self.net(images)
                 if config.initial_config["base_strategy"] == "FedProx":
-                    proximal_term = 0
+                    proximal_term = 0  # define additional proximal term
                     for local_weights, global_weights in zip(
                         self.net.parameters(), global_params
                     ):
-                        proximal_term += (local_weights - global_weights).norm(2)
-                    loss = (loss_function(out, labels) +
-                            (config.initial_config["base_strategy_config"]["FedProx"]["mu"] / 2) * proximal_term)
+                        proximal_term += (local_weights - global_weights).norm(
+                            2
+                        )  # FedProx formula
+                    loss = (
+                        loss_function(out, labels)
+                        + (
+                            config.initial_config["base_strategy_config"]["FedProx"][
+                                "mu"
+                            ]
+                            / 2
+                        )
+                        * proximal_term
+                    )
                 else:
                     loss = loss_function(out, labels)
                 loss.backward()
@@ -144,7 +167,7 @@ class Resnet18(Model):
             correct += (predicted == labels).sum().item()
             labels_full += labels.tolist()
             predicted_full += predicted.tolist()
-        # Calculate class statistics only if outputs was regularm otherwise return 0 array
+        # Calculate class statistics only if outputs was regular otherwise return 0 array
         try:
             class_statistics = mlp(tensor(predicted_full), tensor(labels_full)).tolist()
         except:
