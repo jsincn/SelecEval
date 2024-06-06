@@ -6,7 +6,6 @@ Specifically, this file contains the following functions:
 """
 
 from typing import List, Optional
-
 import numpy as np
 import torch
 from torch.optim.optimizer import Optimizer
