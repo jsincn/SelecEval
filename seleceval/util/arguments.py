@@ -28,7 +28,7 @@ class Arguments:
             required=False
         )
         self.parser.add_argument(
-            "--outputs-path", '-o',
+            "--output-path", '-o',
             dest="OUTPUT_DIRECTORY",
             type=str,
             help="Directory for the evaluation - only used when --evaluate-only is included",

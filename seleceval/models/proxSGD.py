@@ -3,12 +3,6 @@ from typing import Tuple, Dict, List, Optional
 import numpy as np
 import torch.nn
 from torch.optim.optimizer import Optimizer
-import torchvision
-from torch import nn, tensor
-from torch.utils.data import DataLoader
-from .model import Model
-from torchmetrics.classification import MulticlassPrecision
-import copy
 
 
 class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes

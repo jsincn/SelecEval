@@ -5,7 +5,7 @@ Specifically, this file contains the following functions:
     - set_parameters: Sets the parameters of a model from a list of numpy arrays
 """
 
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional
 
 import numpy as np
 import torch

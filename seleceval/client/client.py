@@ -56,6 +56,8 @@ class Client(fl.client.NumPyClient):
                     "momentum"
                 ],
             )
+        elif self.config.initial_config["compare_client_selection_algorithms"] and self.active_strategy == "FedAvg":
+            self.optimizer = torch.optim.Adam(self.net.parameters())
         else:
             learning_rate = self.config.initial_config["base_strategy_config"][
                 f"{active_strategy}"

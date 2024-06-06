@@ -9,12 +9,9 @@ import torchvision
 from torch import nn, tensor
 from torch.utils.data import DataLoader
 from seleceval.util.config import Config
-
-from . import proxSGD
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
 import copy
-import flwr.common
 from torch.optim.optimizer import Optimizer
 
 

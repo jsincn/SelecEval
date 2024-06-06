@@ -24,6 +24,7 @@ from validation.datadistribution import DataDistribution
 from validation.validation import Validation
 from validation.validation_bs import ValidationBS
 from simulation.state import add_discrepancy_level, add_data_ratios
+
 pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 
 
@@ -91,13 +92,9 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
         if config.initial_config["compare_client_selection_algorithms"]:
             run_evaluation_cs(config, datahandler, trainloaders, valloaders)
 
-        elif config.initial_config["compare_base_strategies"]:
-            run_evaluation_bs(config, datahandler, trainloaders, valloaders)
         else:
-            print(
-                "Neither compare_client_selection_algorithms nor compare_base_strategies set to true."
-            )
-            return
+            run_evaluation_bs(config, datahandler, trainloaders, valloaders)
+        return
 
 
 def run_training_simulation(
@@ -118,13 +115,9 @@ def run_training_simulation(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
         )
 
-    elif config.initial_config["compare_base_strategies"]:
+    else:
         run_training_simulation_bs(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
-        )
-    else:
-        print(
-            "Neither compare_client_selection_algorithms nor compare_base_strategies are set to true."
         )
         return
 

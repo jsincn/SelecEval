@@ -96,17 +96,17 @@ class Config:
                     "state_simulation_seed": {
                         "type": "integer",
                         "min": 0,
-                        "default": 1236712387,
+                        "default": 12367123871238713871,
                     },
                 },
             },
             "compare_client_selection_algorithms": {
                 "type": "boolean",
-                "default": False,
+                "default": True,
             },
             "compare_base_strategies": {
                 "type": "boolean",
-                "default": True,
+                "default": False,
             },
             "max_workers": {"type": "integer", "min": 1, "default": 32},
             "base_strategy": {
@@ -170,6 +170,16 @@ class Config:
             "data_distribution_output": self.initial_config["output_dir"]
             + "/data_distribution.csv",
         }
+        if (
+            self.initial_config["compare_client_selection_algorithms"]
+            ^ self.initial_config["compare_base_strategies"]
+        ):
+            pass
+        else:
+            # Raise an exception if both are the same (either both true or both false)
+            raise Exception(
+                "Either compare_client_selection_algorithms or compare_base_strategies must be True, but not both."
+            )
         # If necessary create outputs dir + subdirs
         if not os.path.isdir(self.initial_config["output_dir"]):
             os.mkdir(path=self.initial_config["output_dir"])
