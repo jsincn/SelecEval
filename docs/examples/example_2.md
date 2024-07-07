@@ -38,11 +38,11 @@
   "device": "cpu",
   "timeout": 120,
   "generate_clients": true,
-  "output_dir": "outputs/o",
+  "output_dir": "output/o",
   "client_state_file": "seleceval/client_states.csv",
   "client_configuration_file": "seleceval/client_configurations.csv",
   "distribute_data": true,
-  "data_distribution_file": "output/data_distribution.csv",
+  "data_distribution_file": "seleceval/data_distribution.csv",
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,

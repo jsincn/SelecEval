@@ -8,8 +8,11 @@ import torch.nn
 import torchvision
 from torch import nn, tensor
 from torch.utils.data import DataLoader
+from seleceval.util.config import Config
 from .model import Model
 from torchmetrics.classification import MulticlassPrecision
+import copy
+from torch.optim.optimizer import Optimizer
 
 
 class Resnet18(Model):
@@ -40,16 +43,26 @@ class Resnet18(Model):
 
         return size
 
+    def get_device(self):
+        return self.device
+
+    def get_num_classes(self):
+        return self.num_classes
+
     def __init__(self, device, num_classes: int):
         super().__init__(device)
         resnet = torchvision.models.resnet18()
         # Load model and data
+        self.device = device
         self.net = resnet.to(self.DEVICE)
         self.num_classes = num_classes
 
     def train(
         self,
+        config: Config,
+        optimizer: Optimizer,
         trainloader: DataLoader,
+        ratio: float,
         client_name: str,
         epochs: int,
         verbose: bool = False,
@@ -59,13 +72,28 @@ class Resnet18(Model):
         :param trainloader: Data loader for training data
         :param client_name: Name of the current client
         :param epochs: Number of epochs to train
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
+        :param ratio: data sample number ratio
+        :param optimizer: corresponding optimizer
         :return: Metrics of the training round
         """
+        # in order to calculate norm of difference, parameters need to be copied
+        if config.initial_config["base_strategy"] == "FedProx":
+            global_params = copy.deepcopy(self.get_net()).parameters()
+
         loss_function = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(self.net.parameters())
         self.net.train()
-        output = {"accuracy": [], "avg_epoch_loss": [], "no_samples": len(trainloader)}
+        output = {
+            "accuracy": [],
+            "avg_epoch_loss": [],
+            "no_samples": len(trainloader),
+            "tau": float,
+            "weight": float,
+            "local_norm": int,
+        }
+
+        if config.initial_config["base_strategy"] == "FedNova":
+            optimizer.reset_steps()  # reset_steps exists for FedNova optimizer
         for epoch in range(epochs):
             correct, total, avg_epoch_loss = 0, 0, 0.0
             total_epoch_loss = 0.0
@@ -73,7 +101,26 @@ class Resnet18(Model):
                 images, labels = images.to(self.DEVICE), labels.to(self.DEVICE)
                 optimizer.zero_grad()
                 out = self.net(images)
-                loss = loss_function(out, labels)
+                if config.initial_config["base_strategy"] == "FedProx":
+                    proximal_term = 0  # define additional proximal term
+                    for local_weights, global_weights in zip(
+                        self.net.parameters(), global_params
+                    ):
+                        proximal_term += (local_weights - global_weights).norm(
+                            2
+                        )  # FedProx formula
+                    loss = (
+                        loss_function(out, labels)
+                        + (
+                            config.initial_config["base_strategy_config"]["FedProx"][
+                                "mu"
+                            ]
+                            / 2
+                        )
+                        * proximal_term
+                    )
+                else:
+                    loss = loss_function(out, labels)
                 loss.backward()
                 optimizer.step()
                 total_epoch_loss += loss.item()
@@ -96,7 +143,7 @@ class Resnet18(Model):
         Method for running a test round
         :param testloader: Data loader for test data
         :param client_name: Name of the current client
-        :param verbose: Whether to print verbose output
+        :param verbose: Whether to print verbose outputs
         :return: Metrics of the test round
         """
         mlp = MulticlassPrecision(num_classes=self.num_classes, average=None)
@@ -117,7 +164,7 @@ class Resnet18(Model):
             correct += (predicted == labels).sum().item()
             labels_full += labels.tolist()
             predicted_full += predicted.tolist()
-        # Calculate class statistics only if output was regularm otherwise return 0 array
+        # Calculate class statistics only if outputs was regular otherwise return 0 array
         try:
             class_statistics = mlp(tensor(predicted_full), tensor(labels_full)).tolist()
         except:
@@ -126,7 +173,7 @@ class Resnet18(Model):
         accuracy = correct / total
         if verbose:
             print(
-                f"{client_name}: has reached accuracy {round(accuracy, 4) * 100} on the validation set"
+                f"{client_name}: has reached accuracy {round(accuracy, 4) * 100}% on the validation set"
             )
         further_results = {
             "correct": correct,

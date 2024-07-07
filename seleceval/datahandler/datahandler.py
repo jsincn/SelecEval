@@ -26,7 +26,8 @@ class DataHandler(ABC):
         self.NUM_CLIENTS = config.initial_config["no_clients"]
         self.BATCH_SIZE = config.initial_config["batch_size"]
         self.config = config
-        if config.initial_config['verbose']:
+        self.label_distribution = 0
+        if config.initial_config["verbose"]:
             print("Loading dataset")
 
     @abstractmethod
@@ -68,6 +69,7 @@ class DataHandler(ABC):
             ]
             label_distribution = c(self.config, self.get_classes())
             label_distribution = label_distribution.get_label_distribution()
+            self.label_distribution = label_distribution
             # Distribute data
             datasets = self.distribute_data(
                 label_distribution, partition_sizes, trainset
@@ -80,7 +82,9 @@ class DataHandler(ABC):
         trainloaders = []
         valloaders = []
         for ds in datasets:
-            len_val = int(len(ds) * self.config.initial_config["validation_split"])  # 10 % validation set
+            len_val = int(
+                len(ds) * self.config.initial_config["validation_split"]
+            )  # 10 % validation set
             len_train = len(ds) - len_val
             lengths = [len_train, len_val]
             print(lengths)
@@ -115,9 +119,7 @@ class DataHandler(ABC):
                 class_subsets.append(idx_to_keep[:label_count])
             # Add random samples to make sure the partition size is correct
             if total < 32:
-                class_subsets.append(
-                    random.choices(range(len(trainset)), k=32 - total)
-                )
+                class_subsets.append(random.choices(range(len(trainset)), k=32 - total))
             elif total % 32 != 0:
                 class_subsets.append(
                     random.choices(range(len(trainset)), k=32 - (total % 32))
@@ -130,7 +132,9 @@ class DataHandler(ABC):
             # class_subsets.append(Subset(temp_set, dataset_indices[:int(partition_sizes[i])]))
         data_distribution = pd.DataFrame()
         data_distribution["distr"] = data_set_ids
-        data_distribution["distr"] = data_distribution["distr"].apply(lambda x: "[" + " ".join(map(str, x)) + "]")
+        data_distribution["distr"] = data_distribution["distr"].apply(
+            lambda x: "[" + " ".join(map(str, x)) + "]"
+        )
         data_distribution.to_csv(
             self.config.attributes["data_distribution_output"], index=False
         )
@@ -142,22 +146,45 @@ class DataHandler(ABC):
         rng = np.random.default_rng()
         for j in range(no_classes):
             class_idx = [i for i, c in enumerate(trainset.targets) if c == j]
-            label_counts = (label_distribution[:, j] * partition_sizes + np.ones(len(partition_sizes))).astype(int)
-            temp_data = [rng.choice(class_idx, label_counts[x]) for x in range(self.NUM_CLIENTS)]
+            label_counts = (
+                label_distribution[:, j] * partition_sizes
+                + np.ones(len(partition_sizes))
+            ).astype(int)
+            temp_data = [
+                rng.choice(class_idx, label_counts[x]) for x in range(self.NUM_CLIENTS)
+            ]
             if len(client_data) > 0:
-                client_data = list(map(lambda x, y: np.concatenate((x, y)), temp_data, client_data))
+                client_data = list(
+                    map(lambda x, y: np.concatenate((x, y)), temp_data, client_data)
+                )
             else:
                 client_data = temp_data
 
-        client_data = list(map(lambda x: x if len(x) % self.BATCH_SIZE == 0 else np.concatenate(
-            (x, random.choices(range(len(trainset)), k = self.BATCH_SIZE - (len(x) % self.BATCH_SIZE)))), client_data))
+        client_data = list(
+            map(
+                lambda x: x
+                if len(x) % self.BATCH_SIZE == 0
+                else np.concatenate(
+                    (
+                        x,
+                        random.choices(
+                            range(len(trainset)),
+                            k=self.BATCH_SIZE - (len(x) % self.BATCH_SIZE),
+                        ),
+                    )
+                ),
+                client_data,
+            )
+        )
         data_distribution = pd.DataFrame()
         data_distribution["distr"] = client_data
-        data_distribution["distr"] = data_distribution["distr"].apply(lambda x: "[" + " ".join(map(str, x)) + "]")
+        data_distribution["distr"] = data_distribution["distr"].apply(
+            lambda x: "[" + " ".join(map(str, x)) + "]"
+        )
         data_distribution.to_csv(
             self.config.attributes["data_distribution_output"], index=False
         )
-        datasets = map(lambda x: Subset(trainset, x), client_data)
+        datasets = list(map(lambda x: Subset(trainset, x), client_data))
         return datasets
 
     def load_existing_distribution(self, trainset):
@@ -169,6 +196,9 @@ class DataHandler(ABC):
         datasets = []
         data_distribution = pd.read_csv(
             self.config.initial_config["data_distribution_file"]
+        )
+        data_distribution.to_csv(
+            self.config.attributes["data_distribution_output"], index=False
         )
         if len(data_distribution) < self.NUM_CLIENTS:
             raise Exception("Not enough clients in data distribution file")
@@ -199,3 +229,6 @@ class DataHandler(ABC):
         if data_feature_distribution_dict[skew] is not None:
             trans += [data_feature_distribution_dict[skew](self.config)]
         return transforms.Compose(trans)
+
+    def get_attribute_label_distribution(self):
+        return self.label_distribution

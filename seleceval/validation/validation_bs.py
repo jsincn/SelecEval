@@ -1,5 +1,6 @@
 """
 This module contains the Validation class, which is used to evaluate the performance of a federated learning run
+comparing base strategies
 """
 import os
 from datetime import datetime
@@ -19,15 +20,15 @@ from ..util import Config
 
 def _generate_time_to_accuracy(df):
     """
-    Generates a dictionary with the time to accuracy for each algorithm
+    Generates a dictionary with the time to accuracy for each base strategy
     :param df: Dataframe containing the data collected during validation
-    :return: Dictionary with the time to accuracy for each algorithm
+    :return: Dictionary with the time to accuracy for each base strategy
     """
     output = {}
-    for algorithm in df["algorithm"].unique():
-        output[algorithm] = {}
+    for base_strategy in df["base_strategy"].unique():
+        output[base_strategy] = {}
         df_tmp = (
-            df[df["algorithm"] == algorithm][["round", "acc"]]
+            df[df["base_strategy"] == base_strategy][["round", "acc"]]
             .groupby("round")
             .mean()
             .reset_index()
@@ -35,17 +36,17 @@ def _generate_time_to_accuracy(df):
         df_tmp_05 = df_tmp[df_tmp["acc"] >= 0.5]
         df_tmp_08 = df_tmp[df_tmp["acc"] >= 0.8]
         if len(df_tmp_05) == 0:
-            output[algorithm]["50%"] = "-1"
+            output[base_strategy]["50%"] = "-1"
         else:
-            output[algorithm]["50%"] = df_tmp_05["round"].min()
+            output[base_strategy]["50%"] = df_tmp_05["round"].min()
         if len(df_tmp_08) == 0:
-            output[algorithm]["80%"] = "-1"
+            output[base_strategy]["80%"] = "-1"
         else:
-            output[algorithm]["80%"] = df_tmp_08["round"].min()
+            output[base_strategy]["80%"] = df_tmp_08["round"].min()
     return output
 
 
-class Validation(Evaluator):
+class ValidationBS(Evaluator):
     def __init__(
         self,
         config: Config,
@@ -67,7 +68,7 @@ class Validation(Evaluator):
     def evaluate(self, current_run: dict):
         """
         Evaluates the performance of a federated learning run
-        :param current_run: Dictionary containing the parameters of the current run, e.g. algorithm, no_clients, etc.
+        :param current_run: Dictionary containing the parameters of the current run, e.g. algorithm, base strategy, no_clients, etc.
         :return: None
         """
         self.output_path = (
@@ -134,7 +135,7 @@ class Validation(Evaluator):
 
         output_df = pd.concat(output_dfs, ignore_index=True)
         output_df.to_csv(self.output_path, index=False)
-        self.output_dfs[current_run["algorithm"]] = output_df
+        self.output_dfs[current_run["base_strategy"]] = output_df
 
     def generate_report(self):
         """
@@ -147,7 +148,7 @@ class Validation(Evaluator):
             )
 
         for i in self.output_dfs.keys():
-            self.output_dfs[i]["algorithm"] = i
+            self.output_dfs[i]["base_strategy"] = i
         df = pd.concat(self.output_dfs.values(), ignore_index=True)
         if df["acc"].dropna().empty:
             raise ValueError("df accuracy is empty")
@@ -166,7 +167,7 @@ class Validation(Evaluator):
         template = env.get_template("templates/validation_performance.html")
         html = template.render(
             date=datetime.now(),
-            algorithm_config=self.config.initial_config["algorithm_config"],
+            algorithm_config=self.config.initial_config["base_strategy_config"],
             time_to_accuracy=time_to_accuracy,
         )
         with open(
@@ -176,29 +177,29 @@ class Validation(Evaluator):
 
     def _generate_mean_quantile_loss(self, df):
         """
-        Generates a plot with the mean loss and the 1% quantile of the loss for each algorithm
+        Generates a plot with the mean loss and the 1% quantile of the loss for each base strategy
         :param df: Dataframe collected during the validation
         :return: None
         """
         df_plot = (
-            df[["round", "loss", "algorithm"]]
-            .groupby(["algorithm", "round"])
+            df[["round", "loss", "base_strategy"]]
+            .groupby(["base_strategy", "round"])
             .mean()
             .reset_index()
         )
         df_plot_quantiles = (
-            df[["round", "loss", "algorithm"]]
-            .groupby(["algorithm", "round"])
+            df[["round", "loss", "base_strategy"]]
+            .groupby(["base_strategy", "round"])
             .quantile(0.01)
             .reset_index()
         )
         rounds = df_plot["round"].unique()
         mean_dict = {}
         quantile_dict = {}
-        for i in df_plot["algorithm"].unique():
-            mean_dict[i + " mean"] = df_plot[df_plot["algorithm"] == i]["loss"]
+        for i in df_plot["base_strategy"].unique():
+            mean_dict[i + " mean"] = df_plot[df_plot["base_strategy"] == i]["loss"]
             quantile_dict[i + " quantile"] = df_plot_quantiles[
-                df_plot_quantiles["algorithm"] == i
+                df_plot_quantiles["base_strategy"] == i
             ]["loss"]
         plt.figure(figsize=(10, 6))
         for key, value in mean_dict.items():
@@ -206,7 +207,7 @@ class Validation(Evaluator):
         for key, value in quantile_dict.items():
             plt.plot(rounds, value, label=key, linestyle="dashed")
         plt.ylabel("Loss")
-        plt.title("Input file/Algorithm average loss comparison")
+        plt.title("Input file/Base_strategy average loss comparison")
         plt.xticks(rounds)
         plt.xlabel("Round")
         plt.legend(loc="upper left", ncols=3)
@@ -219,20 +220,20 @@ class Validation(Evaluator):
 
     def _generate_mean_accuracy(self, df):
         """
-        Generates a plot with the mean accuracy for each algorithm
+        Generates a plot with the mean accuracy for each base strategy
         :param df: Dataframe collected during the validation
         :return: None
         """
         df_plot = (
-            df[["round", "acc", "algorithm"]]
-            .groupby(["algorithm", "round"])
+            df[["round", "acc", "base_strategy"]]
+            .groupby(["base_strategy", "round"])
             .mean()
             .reset_index()
         )
         rounds = df_plot["round"].unique()
         res_dict = {}
-        for i in df_plot["algorithm"].unique():
-            res_dict[i] = df_plot[df_plot["algorithm"] == i]["acc"]
+        for i in df_plot["base_strategy"].unique():
+            res_dict[i] = df_plot[df_plot["base_strategy"] == i]["acc"]
             if len(res_dict[i]) < len(rounds):
                 res_dict[i] = np.append(
                     res_dict[i], np.repeat(np.nan, len(rounds) - len(res_dict[i]))
@@ -248,7 +249,7 @@ class Validation(Evaluator):
             multiplier += 1
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_ylabel("Accuracy")
-        ax.set_title("Algorithm accuracy comparison")
+        ax.set_title("Base_strategy accuracy comparison")
         ax.set_xticks(x + width, rounds)
         ax.legend(loc="upper left", ncols=3)
         ax.set_ylim(0, 1)
@@ -261,29 +262,29 @@ class Validation(Evaluator):
 
     def _generate_mean_quantile_accuracy(self, df):
         """
-        Generate a plot with the mean accuracy and the 1% quantile of the accuracy for each algorithm on the validation set
+        Generate a plot with the mean accuracy and the 1% quantile of the accuracy for each base strategy on the validation set
         :param df: Dataframe collected during the validation
         :return: None
         """
         df_plot = (
-            df[["round", "acc", "algorithm"]]
-            .groupby(["algorithm", "round"])
+            df[["round", "acc", "base_strategy"]]
+            .groupby(["base_strategy", "round"])
             .mean()
             .reset_index()
         )
         df_plot_quantiles = (
-            df[["round", "acc", "algorithm"]]
-            .groupby(["algorithm", "round"])
+            df[["round", "acc", "base_strategy"]]
+            .groupby(["base_strategy", "round"])
             .quantile(0.1)
             .reset_index()
         )
         rounds = df_plot["round"].unique()
         mean_dict = {}
         quantile_dict = {}
-        for i in df_plot["algorithm"].unique():
-            mean_dict[i + " mean"] = df_plot[df_plot["algorithm"] == i]["acc"]
+        for i in df_plot["base_strategy"].unique():
+            mean_dict[i + " mean"] = df_plot[df_plot["base_strategy"] == i]["acc"]
             quantile_dict[i + " quantile"] = df_plot_quantiles[
-                df_plot_quantiles["algorithm"] == i
+                df_plot_quantiles["base_strategy"] == i
             ]["acc"]
         plt.figure(figsize=(10, 6))
         for key, value in mean_dict.items():
@@ -292,7 +293,7 @@ class Validation(Evaluator):
             plt.plot(rounds, value, label=key, linestyle="dashed")
         # Add some text for labels, title and custom x-axis tick labels, etc.z
         plt.ylabel("Accuracy")
-        plt.title("Algorithm average accuracy versus 1% lows")
+        plt.title("Base_strategy average accuracy versus 1% lows")
         plt.xticks(rounds)
         plt.xlabel("Round")
         plt.legend(loc="upper left", ncols=3)
@@ -305,12 +306,12 @@ class Validation(Evaluator):
 
     def _generate_fairness_diagrams(self, df):
         """
-        Generates a histogram and a boxplot of the accuracy for each client and algorithm
+        Generates a histogram and a boxplot of the accuracy for each client and base strategy
         :param df: Dataframe collected during the validation
         :return: None
         """
-        df_plot = df[df["round"] == max(df["round"])][["acc", "algorithm", "client"]]
-        g = sns.FacetGrid(df_plot, col="algorithm")
+        df_plot = df[df["round"] == max(df["round"])][["acc", "base_strategy", "client"]]
+        g = sns.FacetGrid(df_plot, col="base_strategy")
         g.map(sns.histplot, "acc", bins=10, binwidth=0.01)
         plt.savefig(
             self.config.initial_config["output_dir"]
@@ -319,8 +320,8 @@ class Validation(Evaluator):
         )
         plt.close()
 
-        df_plot = df[df["round"] == max(df["round"])][["acc", "algorithm", "client"]]
-        sns.boxplot(df_plot, x="acc", y="algorithm")
+        df_plot = df[df["round"] == max(df["round"])][["acc", "base_strategy", "client"]]
+        sns.boxplot(df_plot, x="acc", y="base_strategy")
         plt.savefig(
             self.config.initial_config["output_dir"] + "/figures/fairness_boxplot.svg",
             bbox_inches="tight",
@@ -329,30 +330,30 @@ class Validation(Evaluator):
 
     def _generate_class_fairness_final(self, df, classes):
         """
-        Generates a plot with the accuracy for each class and algorithm
+        Generates a plot with the accuracy for each class and base strategy
         :param df: Dataframe collected during the validation
         :param classes: Classes of the dataset
         :return: None
         """
-        df_plot = df[df["round"] == max(df["round"])][["class_accuracy", "algorithm"]]
+        df_plot = df[df["round"] == max(df["round"])][["class_accuracy", "base_strategy"]]
         df_temps = []
-        for i in df_plot["algorithm"].unique():
+        for i in df_plot["base_strategy"].unique():
             df_temp = pd.DataFrame(
-                df_plot[df_plot["algorithm"] == i]["class_accuracy"].to_list(),
+                df_plot[df_plot["base_strategy"] == i]["class_accuracy"].to_list(),
                 columns=classes,
             )
-            df_temp["algorithm"] = i
+            df_temp["base_strategy"] = i
             df_temps.append(df_temp)
-        df_plot = pd.concat(df_temps).groupby(["algorithm"]).mean().reset_index()
+        df_plot = pd.concat(df_temps).groupby(["base_strategy"]).mean().reset_index()
         df_plot = df_plot.melt(
-            id_vars=["algorithm"], var_name="class", value_name="acc"
+            id_vars=["base_strategy"], var_name="class", value_name="acc"
         )
         df_plot["class"] = df_plot["class"].astype("category")
         sns.catplot(
             df_plot,
             x="class",
             y="acc",
-            col="algorithm",
+            col="base_strategy",
             height=3,
             aspect=2,
             kind="bar",
@@ -367,31 +368,31 @@ class Validation(Evaluator):
 
     def _generate_class_fairness_progress(self, df, classes):
         """
-        Generates a plot with the accuracy for each class and algorithm across rounds
+        Generates a plot with the accuracy for each class and base strategy across rounds
         :param df: Dataframe collected during the validation
         :param classes: Classes of the dataset
         :return: None
         """
-        df_plot = df[["class_accuracy", "algorithm", "round"]]
+        df_plot = df[["class_accuracy", "base_strategy", "round"]]
         df_temps = []
-        for i in df_plot["algorithm"].unique():
+        for i in df_plot["base_strategy"].unique():
             for j in df_plot["round"].unique():
                 df_temp = df_plot[df_plot["round"] == j]
                 df_temp = pd.DataFrame(
-                    df_temp[df_temp["algorithm"] == i]["class_accuracy"].to_list(),
+                    df_temp[df_temp["base_strategy"] == i]["class_accuracy"].to_list(),
                     columns=classes,
                 )
-                df_temp["algorithm"] = i
+                df_temp["base_strategy"] = i
                 df_temp["round"] = j
                 df_temps.append(df_temp)
         df_plot = (
-            pd.concat(df_temps).groupby(["algorithm", "round"]).mean().reset_index()
+            pd.concat(df_temps).groupby(["base_strategy", "round"]).mean().reset_index()
         )
         df_plot = df_plot.melt(
-            id_vars=["algorithm", "round"], var_name="class", value_name="acc"
+            id_vars=["base_strategy", "round"], var_name="class", value_name="acc"
         )
         df_plot["class"] = df_plot["class"].astype("category")
-        sns.lineplot(data=df_plot, x="round", y="acc", hue="class", style="algorithm")
+        sns.lineplot(data=df_plot, x="round", y="acc", hue="class", style="base_strategy")
         plt.savefig(
             self.config.initial_config["output_dir"]
             + "/figures/class_fairness_progress.svg",

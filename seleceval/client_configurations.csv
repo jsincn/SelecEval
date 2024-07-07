@@ -1,5 +1,5 @@
 performace_tier,cpu,ram,expected_execution_time
-0,2,8,320
+3,16,64,40
 1,4,16,160
 2,8,32,80
-3,16,64,40
+0,2,8,320

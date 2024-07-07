@@ -46,7 +46,7 @@ nvidia-cuda-cupti-cu11==11.7.101
 nvidia-cuda-nvrtc-cu11==11.7.99
 nvidia-cuda-runtime-cu11==11.7.99
 nvidia-cudnn-cu11==8.5.0.96
-nvidia-cufft-cu11==10.9.0.58
+nvidia-cufft-cu11
 nvidia-curand-cu11==10.2.10.91
 nvidia-cusolver-cu11==11.4.0.1
 nvidia-cusparse-cu11==11.7.4.91
@@ -91,7 +91,7 @@ torchvision==0.15.2
 triton==2.0.0
 typing-extensions==4.7.1
 tzdata==2023.3
-urllib3
+urllib3<2.0
 virtualenv==20.21.0
 wcwidth==0.2.6
 yarl==1.9.2
