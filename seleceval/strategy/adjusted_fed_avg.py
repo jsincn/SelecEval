@@ -9,15 +9,19 @@ from typing import List, Tuple, Union, Dict, Optional
 
 import flwr as fl
 import numpy as np
+import pandas as pd
 import torch
 from flwr.common import FitRes, Scalar, Parameters
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
-
+import pdb
+from .helpers import dequant_results, quant_params, desparsify_results
+from ..filter.filter_manager import FilterManager
 from ..selection.client_selection import ClientSelection
-from ..simulation.state import run_state_update
+from ..simulation.state import run_state_update, add_quantization_scale
 from ..strategy.common import weighted_average
 from ..util import Config
+from collections import defaultdict
 
 
 class AdjustedFedAvg(fl.server.strategy.FedAvg):
@@ -35,6 +39,11 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         self.client_selector = client_selector
         self.net = net
         self.config = config
+        self.filter_manager = FilterManager(self.config.initial_config["client_filter"], self.config)
+        self.quantize = self.config.initial_config["compression_config"]["quantization"]["enable_quantization"]
+        if self.quantize:
+            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"]
+        self.sparse = self.config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -46,6 +55,8 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         :param client_manager: Client manager
         :return: List of clients to train
         """
+
+        self.filter_manager.filter_clients(client_manager, server_round)
         return self.client_selector.select_clients(
             client_manager, parameters, server_round
         )
@@ -63,6 +74,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         :param failures: List of failures from clients
         :return: Aggregated parameters and metrics
         """
+
         # Update client state
         run_state_update(self.config, server_round)
         self.config.set_current_round(server_round)
@@ -72,6 +84,17 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         filtered_results = [i for i in results if i[1].num_examples != -1]
         failures = [i for i in results if i[1].num_examples == -1]
         results = filtered_results
+        
+        # Desparsify filtered results
+        if self.sparse:
+            results = desparsify_results(self.net, results)
+        
+        # Dequantize filtered results
+        if self.quantize:
+            results = dequant_results(results, self.quantization_bits)
+        
+        
+           
         # Based on the Flower Example for storing model results
         """Aggregate model weights using weighted average and store checkpoint"""
 
@@ -79,6 +102,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
+        
         print("Saving aggregated_parameters...")
         if aggregated_parameters is not None:
             print(f"Saving round {server_round} aggregated_parameters...")
@@ -99,4 +123,11 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
                 f"{self.config.attributes['model_output_prefix']}{server_round}.pth",
             )
 
+            if self.quantize:
+                # Quantize aggregated params
+                quant_aggregated_params, scale = quant_params(aggregated_parameters, self.quantization_bits)
+                # Set Quant-Scale in Client Working State File
+                add_quantization_scale(self.config, server_round, scale)
+
+                return quant_aggregated_params, aggregated_metrics
         return aggregated_parameters, aggregated_metrics

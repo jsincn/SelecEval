@@ -82,3 +82,6 @@ def _handle_finished_future_after_evaluate(
 
     # Append failures if not successful
     failures.append(result)
+
+def decay_function(server_round: int, decay_factor: float = 0.01) -> float:
+    return (1 - decay_factor) ** (server_round - 1)

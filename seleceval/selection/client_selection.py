@@ -35,7 +35,37 @@ class ClientSelection(ABC):
         print("Starting Client Selection")
         self.config = config
         self.model_size = model_size
-        pass
+        self.client_reduction = config.initial_config["client_reduction"]["enable_client_reduction"]
+        if self.client_reduction:
+            self.decay_factor = config.initial_config["client_reduction"]["decay_factor"]
+            self.initial_c = config.initial_config["client_reduction"]["initial_c"]
+            self.threshold = self.initial_c
+        else:
+            self.set_threshold(config)
+
+    @abstractmethod
+    def set_threshold(self, config: Config):
+        """
+        Set the initial threshold. This should be overridden by derived classes if needed.
+        :param config: The configuration object
+        """
+        self.threshold = 1.0  # Default threshold value, override in derived class if necessary
+
+    def decay_function(self, server_round: int) -> float:
+        """
+        Calculate the decay value based on the server round and decay factor
+        :param server_round: The current server round
+        :return: Decay factor
+        """
+        return (1 - self.decay_factor) ** server_round
+    
+    def calculate_threshold(self, server_round: int):
+        """
+        Update the threshold based on the decay function if client reduction is enabled.
+        :param server_round: The current server round
+        """
+        if self.client_reduction:
+            self.threshold = self.initial_c * self.decay_function(server_round)
 
     @abstractmethod
     def select_clients(

@@ -98,7 +98,7 @@ class Config:
                         "min": 0,
                         "default": 12367123871238713871,
                     },
-                },
+                }
             },
             "compare_client_selection_algorithms": {
                 "type": "boolean",
@@ -143,6 +143,38 @@ class Config:
                     **data_feature_distribution_parameters,
                 },
             },
+            "compression_config":{
+                "type": "dict",
+                "default": {},
+                "schema": {
+                    "quantization": {
+                        "type": "dict",
+                        "default": {},
+                        "schema": {
+                            "enable_quantization": {"type": "boolean", "default": False},
+                            "bits": {"type": "integer", "allowed": [8,16], "default": 8}
+                        }
+                    },
+                    "sparsification": {
+                        "type": "dict",
+                        "default": {},
+                        "schema": {
+                            "enable_sparsification": {"type": "boolean", "default": False},
+                            "top_k_percent": {"type": "float", "min": 0, "max": 1, "default": 0.1}
+                        }
+                    }
+                }
+            },
+            "client_filter":{"type": "list", "default":[], "allowed": ["performance_based"]},
+            "client_reduction":{
+                "type": "dict",
+                "default": {},
+                "schema": {
+                    "enable_client_reduction": {"type": "boolean", "default": False},
+                    "decay_factor": {"type": "float", "min": 0, "max": 1, "default": 0.1},
+                    "initial_c": {"type": "float", "min": 0, "max": 1, "default": 1}
+                }
+            }
         }
 
         # Set data_config_schema

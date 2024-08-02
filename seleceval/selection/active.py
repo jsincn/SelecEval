@@ -28,6 +28,13 @@ class ActiveFL(ClientSelection):
         super().__init__(config, model_size)
         self.client_valuation = None
 
+    def set_threshold(self, config: Config):
+        """
+        Set the initial threshold for RandomSelection if client reduction is not enabled.
+        :param config: The configuration object
+        """
+        self.threshold = self.config.initial_config["algorithm_config"]["ActiveFL"]["c"]
+
     def select_clients(
         self,
         client_manager: fl.server.ClientManager,
@@ -42,6 +49,7 @@ class ActiveFL(ClientSelection):
         :return: Selected clients
         """
         config = {}
+        self.calculate_threshold(server_round) # Calculates new client reduced threshold with decay function, if client reduction is activated. Else initial threshold from set_threshold overwrite is used.
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
 
@@ -72,9 +80,7 @@ class ActiveFL(ClientSelection):
                 * possible_clients[i]["valuation"]
             )
 
-        clients_to_select = self.config.initial_config["algorithm_config"]["ActiveFL"][
-            "c"
-        ] * len(all_clients)
+        clients_to_select = self.threshold * len(all_clients)
         alpha3 = self.config.initial_config["algorithm_config"]["ActiveFL"]["alpha3"]
         clients_1_set = random.choices(
             possible_clients,

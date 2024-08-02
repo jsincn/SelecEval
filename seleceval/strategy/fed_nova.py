@@ -15,6 +15,8 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from .helpers import dequant_results, quant_params, desparsify_results
+from ..filter.filter_manager import FilterManager
 from flwr.common.typing import FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
@@ -22,7 +24,7 @@ from flwr.server.strategy.aggregate import aggregate
 import torch
 from flwr.common.logger import log
 from logging import WARNING
-from ..simulation.state import run_state_update
+from ..simulation.state import run_state_update, add_quantization_scale
 
 
 class FedNova(FedAvg):
@@ -62,6 +64,11 @@ class FedNova(FedAvg):
         # momentum parameter for the server/strategy side momentum buffer
         self.gmf = config.initial_config["base_strategy_config"]["FedNova"]["gmf"]
         self.best_test_acc = 0.0
+        self.filter_manager = FilterManager(self.config.initial_config["client_filter"], self.config)
+        self.quantize = self.config.initial_config["compression_config"]["quantization"]["enable_quantization"]
+        if self.quantize:
+            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"]
+        self.sparse = self.config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]
 
     def initialize_global_params(self):
         """intitialize global parameters if initial parameters chosen randomly from client"""
@@ -84,6 +91,13 @@ class FedNova(FedAvg):
         # This indicates an artificial failure
         failures = [i for i in results if i[1].num_examples == -1]
         results = [i for i in results if i[1].num_examples != -1]
+
+        # Desparsify filtered results
+        if self.sparse:
+            results = desparsify_results(self.net, results)
+        # Dequantize filtered results
+        if self.quantize:
+            results = dequant_results(results, self.quantization_bits)
 
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
@@ -182,7 +196,15 @@ class FedNova(FedAvg):
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
-
+        
+        if self.quantize:
+            # Quantize aggregated params
+            quant_aggregated_params, scale = quant_params(self.global_parameters, self.quantization_bits)
+            # Set Quant-Scale in Client Working State File
+            add_quantization_scale(self.config, server_round, scale)
+            quant_aggregated_params = ndarrays_to_parameters(quant_aggregated_params)
+            return quant_aggregated_params, metrics_aggregated
+        
         return ndarrays_to_parameters(self.global_parameters), metrics_aggregated
 
     def configure_fit(

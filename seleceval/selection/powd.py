@@ -23,10 +23,16 @@ class PowD(ClientSelection):
 
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
-        self.c_param = config.initial_config["algorithm_config"]["PowD"]["c"]
         self.pre_param = config.initial_config["algorithm_config"]["PowD"][
             "pre_sampling"
         ]
+    
+    def set_threshold(self, config: Config):
+        """
+        Set the initial threshold for RandomSelection if client reduction is not enabled.
+        :param config: The configuration object
+        """
+        self.threshold = config.initial_config["algorithm_config"]["PowD"]["c"]
 
     def select_clients(
             self,
@@ -42,6 +48,7 @@ class PowD(ClientSelection):
         :return: Selected clients
         """
         config = {}
+        self.calculate_threshold(server_round) # Calculates new client reduced threshold with decay function, if client reduction is activated. Else initial threshold from set_threshold overwrite is used.
         fit_ins = FitIns(parameters, config)
         all_clients: dict[str, ClientProxy] = client_manager.all()
         possible_clients = self.get_client_properties(list(all_clients.values()), calculate_sample_size=True)
@@ -60,7 +67,7 @@ class PowD(ClientSelection):
         for client_proxy, evaluate_res in results:
             possible_clients.append({"proxy": client_proxy, "loss": evaluate_res.loss})
 
-        total_client_count = max(self.c_param * len(all_clients), 1)
+        total_client_count = max(self.threshold * len(all_clients), 1)
         clients = []
         while total_client_count > 0:
             best_client = max(possible_clients, key=lambda x: x["loss"])

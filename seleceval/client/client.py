@@ -14,14 +14,23 @@ from .client_state import ClientState
 from .helpers import (
     get_parameters,
     set_parameters,
+    get_parameters_quantized,
+    set_parameters_quantized,
+    get_parametersFedNova_quantized,
+    calculate_quantized_size,
+    get_parameters_sparse,
+    get_parameters_compressed
 )
 from ..models import proxSGD
 from ..models.model import Model
+from ..compression.quantization import dequantize
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 from seleceval.util.config import Config
 import flwr.common
-
+import pdb
+from io import BytesIO
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Status, GetParametersIns, GetParametersRes, Code, Parameters
 
 class Client(fl.client.NumPyClient):
     def __init__(
@@ -44,6 +53,14 @@ class Client(fl.client.NumPyClient):
         self.output = ClientOutput(
             self.state, config.get_current_round(), config.attributes["output_path"]
         )
+        self.quantize = self.config.initial_config["compression_config"]["quantization"]["enable_quantization"]
+        self.quantization_bits = None
+        if self.quantize:
+            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"]
+        self.sparse = self.config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]
+        self.top_k_percent = None
+        if self.sparse:
+            self.top_k_percent = self.config.initial_config["compression_config"]["sparsification"]["top_k_percent"]
         self.net = self.model.get_net()
         if self.active_strategy == "FedNova":
             params = list(self.net.parameters())
@@ -76,6 +93,8 @@ class Client(fl.client.NumPyClient):
         ]
         if tensor_list[0] is None:
             print("parameter aka tensor list empty")
+        if self.quantize:
+            self.server_quant_scale = 1
 
     def fit(
         self, parameters: List[ndarray], config: flwr.common.FitIns
@@ -86,6 +105,10 @@ class Client(fl.client.NumPyClient):
         :param config: Configuration for this fit
         :return: The parameters of the local model, the number of samples used and the metrics
         """
+        
+        if "quant-scale" in self.state.get_all():
+            self.server_quant_scale = self.state.get("quant-scale")
+        
         verbose = self.config.initial_config["verbose"]
         client_name = self.state.get("client_name")
         execution_time = -1
@@ -95,9 +118,13 @@ class Client(fl.client.NumPyClient):
                 "i_performance_factor"
             )
             if self.state.get("network_bandwidth") > 0:
-                upload_time = (
-                    self.model.get_size() / self.state.get("network_bandwidth") * 8
-                )
+                if self.quantize or self.sparse:
+                    compressed_params, _ ,  _ = get_parameters_compressed(self.net, None, self.quantize, self.sparse, self.quantization_bits, self.top_k_percent)
+                    model_size = calculate_quantized_size(compressed_params)
+                    print(f"Compressed: {model_size}, Non-Compressed: {self.model.get_size()}")
+                else:
+                    model_size = self.model.get_size()
+                upload_time = (model_size / self.state.get("network_bandwidth")) * 8
             else:
                 upload_time = -1
 
@@ -129,7 +156,7 @@ class Client(fl.client.NumPyClient):
                 return get_parameters(self.net), -1, {}
         start_time = time.time()
 
-        if self.active_strategy == "FedNova": # FedNova specific
+        if self.active_strategy == "FedNova": # FedNova specific # Edit for quantization
             if len(parameters) > 62:
                 params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
                 state_dict = {
@@ -143,7 +170,11 @@ class Client(fl.client.NumPyClient):
             else:
                 self.set_parameters2(parameters)
         else:
-            set_parameters(self.net, parameters)
+            if self.quantize:
+                set_parameters_quantized(self.net, self.server_quant_scale, self.quantization_bits, parameters, self.config.get_current_round())
+            else:
+                set_parameters(self.net, parameters)
+                
         if self.config.initial_config["variable_epochs"]:
             seed_val = (
                 2024
@@ -173,6 +204,7 @@ class Client(fl.client.NumPyClient):
             no_epochs,
             verbose,
         )
+
         end_time = time.time()
         if self.active_strategy == "FedNova":
             grad_scaling_factor: Dict[
@@ -191,10 +223,23 @@ class Client(fl.client.NumPyClient):
         self.output.set("reason", "success")
         self.output.write()
 
-        if self.active_strategy == "FedNova":
-            return self.get_parametersFedNova({}), len(self.trainloader), train_output
+        if self.quantize or self.sparse:
+            if self.active_strategy == "FedNova":
+                compressed_params, scale = get_parametersFedNova_quantized(self.net, self.optimizer, self.quantization_bits, {})    
+            else:
+                compressed_params, indices, scale = get_parameters_compressed(self.net, parameters, self.quantize, self.sparse, self.quantization_bits, self.top_k_percent)
+            # add quant scale to train output
+            if indices is not None:
+                train_output["sparse_indices"] = indices
+            if scale is not None:
+                train_output["quant-scale"] = scale
+            return compressed_params, len(self.trainloader), train_output
         else:
-            return get_parameters(self.net), len(self.trainloader), train_output
+            if self.active_strategy == "FedNova":
+                return self.get_parametersFedNova({}), len(self.trainloader), train_output
+            else:  
+                return get_parameters(self.net), len(self.trainloader), train_output
+            
 
     def evaluate(self, parameters, config):
         """
@@ -203,7 +248,11 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-        if self.active_strategy == "FedNova":
+
+        if "quant-scale" in self.state.get_all():
+            self.server_quant_scale = self.state.get("quant-scale")
+            
+        if self.active_strategy == "FedNova": # Edit for quantization
             if len(parameters) > 62:
                 print("parameters given to client fit longer than 63")
                 params_dict = zip(self.model.get_net().state_dict().keys(), parameters)
@@ -218,7 +267,10 @@ class Client(fl.client.NumPyClient):
             else:
                 self.set_parameters2(parameters)
         else:
-            set_parameters(self.net, parameters)
+            if self.quantize:
+                set_parameters_quantized(self.net, self.server_quant_scale, self.quantization_bits, parameters, self.config.get_current_round())
+            else:
+                set_parameters(self.net, parameters)
 
         loss, accuracy, out_dict = self.model.test(
             self.valloader,
@@ -250,6 +302,13 @@ class Client(fl.client.NumPyClient):
 
     def set_parameters2(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
+        
+        if self.quantize:
+            dequantized_parameters = []
+            for x in parameters:
+                dequantized_parameters.append(dequantize(x, self.server_quant_scale, self.quantization_bits))
+            parameters = dequantized_parameters
+        
         self.optimizer.set_model_params(parameters)  # only used for FedNova --> proxSGD
 
     def get_properties(self, config=None) -> Dict:
@@ -287,3 +346,4 @@ class Client(fl.client.NumPyClient):
             "i_performance_factor"
         )
         return t
+    

@@ -12,6 +12,7 @@ from flwr.common import FitIns
 from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
+from .helpers import decay_function
 from ..util import Config
 
 
@@ -22,6 +23,12 @@ class RandomSelection(ClientSelection):
 
     def __init__(self, config: Config, model_size: int):
         super().__init__(config, model_size)
+    
+    def set_threshold(self, config: Config):
+        """
+        Set the initial threshold for RandomSelection if client reduction is not enabled.
+        :param config: The configuration object
+        """
         self.threshold = config.initial_config["algorithm_config"]["random"]["c"]
 
     def select_clients(
@@ -37,7 +44,10 @@ class RandomSelection(ClientSelection):
         :param server_round: The current server round
         :return: Selected Clients
         """
-        no_clients = int(round(self.threshold * len(client_manager.all()), 0))
+        self.calculate_threshold(server_round) # Calculates new client reduced threshold with decay function, if client reduction is activated. Else initial threshold from set_threshold overwrite is used.
+        no_clients = max(int(round(self.threshold * len(client_manager.all()), 0)), 1)
+        
+        print(f"New Number of selected Clients: {no_clients}")
         config = {}
         fit_ins = FitIns(parameters, config)
         clients = client_manager.sample(no_clients)

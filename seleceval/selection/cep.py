@@ -34,6 +34,13 @@ class CEP(ClientSelection):
         super().__init__(config, model_size)
         self.client_scores = None
 
+    def set_threshold(self, config: Config):
+        """
+        Set the initial threshold for RandomSelection if client reduction is not enabled.
+        :param config: The configuration object
+        """
+        self.threshold = self.config.initial_config["algorithm_config"]["CEP"]["c"]
+
     def select_clients(
         self,
         client_manager: fl.server.ClientManager,
@@ -48,6 +55,7 @@ class CEP(ClientSelection):
         :return: Selected clients
         """
         config = {}
+        self.calculate_threshold(server_round) # Calculates new client reduced threshold with decay function, if client reduction is activated. Else initial threshold from set_threshold overwrite is used.
         fit_ins = FitIns(parameters, config)
         all_clients = client_manager.all()
 
@@ -65,7 +73,7 @@ class CEP(ClientSelection):
         clients = []
         i = 0
         while len(clients) < (
-            self.config.initial_config["algorithm_config"]["CEP"]["c"]
+            self.threshold
             * len(all_clients)
         ) and i < len(possible_clients):
             c = possible_clients[i]

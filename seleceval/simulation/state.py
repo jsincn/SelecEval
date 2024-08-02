@@ -60,6 +60,7 @@ def generate_initial_state(num_clients: int, config: Config):
     df["expected_execution_time"] = df["performance_tier"].apply(
         lambda x: client_configurations[x]["expected_execution_time"]
     )
+    #df["quant-scale"] = 0
     df.to_csv(config.attributes["input_state_file"], index=False)
 
 
@@ -142,6 +143,14 @@ def add_discrepancy_level(csv_path, datahandler: DataHandler, distribute_data: b
 
     df.to_csv(csv_path, index=False)
 
+def add_quantization_scale(config: Config, server_round: int, scale: float):
+    state_df = pd.read_csv(config.attributes["working_state_file"])
+    state_df["quant-scale"] = scale
+    state_df.to_csv(config.attributes["working_state_file"], index=False)
+    state_df.to_csv(
+        config.attributes["state_output_prefix"] + str(server_round) + ".csv",
+        index=False,
+    )
 
 def get_discrepancy_level(csv_path):
     df = pd.read_csv(csv_path)
