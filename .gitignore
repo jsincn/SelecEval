@@ -183,3 +183,21 @@ fabric.properties
 
 # idea folder, uncomment if you don't need it
 # .idea
+dataset/cifar-10-python.tar.gz
+dataset/MNIST/raw/t10k-images-idx3-ubyte
+dataset/MNIST/raw/t10k-images-idx3-ubyte.gz
+dataset/MNIST/raw/t10k-labels-idx1-ubyte
+dataset/MNIST/raw/t10k-labels-idx1-ubyte.gz
+dataset/MNIST/raw/train-images-idx3-ubyte
+dataset/MNIST/raw/train-images-idx3-ubyte.gz
+dataset/MNIST/raw/train-labels-idx1-ubyte
+dataset/MNIST/raw/train-labels-idx1-ubyte.gz
+dataset/cifar-10-batches-py/batches.meta
+dataset/cifar-10-batches-py/data_batch_1
+dataset/cifar-10-batches-py/data_batch_2
+dataset/cifar-10-batches-py/data_batch_3
+dataset/cifar-10-batches-py/data_batch_4
+dataset/cifar-10-batches-py/data_batch_5
+dataset/cifar-10-batches-py/readme.html
+dataset/cifar-10-batches-py/test_batch
+examples/example_1.json
