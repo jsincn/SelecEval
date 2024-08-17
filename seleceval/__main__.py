@@ -317,10 +317,11 @@ def run_training_simulation_communication_reduction(
     quantization = quantization_config["enable_quantization"]
     sparsification = sparsification_config["enable_sparsification"]
     if quantization:
-        bits = [16]
+        bits = [8, 16]
         for quant_bits in bits:
-            start_working_state(config)
             quantization_config["bits"] = quant_bits
+            print(config.get_current_round())
+            start_working_state(config)
             model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
             client_fn = ClientFunction(
@@ -376,6 +377,7 @@ def run_training_simulation_communication_reduction(
                 client_resources=client_resources,
                 ray_init_args={"include_dashboard": True},
             )
+            config.set_current_round(0)
 
 
 def run_evaluation_cs(config, datahandler, trainloaders, valloaders):
@@ -419,7 +421,7 @@ def run_evaluation_communication_reduction(config, datahandler, trainloaders, va
     # Evaluation generation
     if config.initial_config["validation_config"]["enable_validation"]:
         val = ValidationCommunicationReduction(config, trainloaders, valloaders, datahandler)
-        for bits in [16]:
+        for bits in [8,16]:
             print("Generating validation data for ", bits, " bit quantization")
             current_run = {
                 "algorithm": f"{config.initial_config['algorithm'][0]}_{bits}Bit",

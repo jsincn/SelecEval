@@ -34,14 +34,14 @@
   },
   "compare_client_selection_algorithms": false,
   "compare_communication_reduction_methods": true,
-  "no_epochs": 3,
+  "no_epochs": 1,
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
   "no_clients": 10,
   "batch_size": 32,
   "verbose": true,
-  "device": "cuda",
+  "device": "cpu",
   "timeout": 240,
   "generate_clients": true,
   "create_synthetic_client_failures": true,
@@ -53,7 +53,7 @@
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
-    "device": "cuda"
+    "device": "cpu"
   },
   "c_evaluation_clients":  0.001,
   "max_workers": 32,
