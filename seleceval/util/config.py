@@ -108,6 +108,10 @@ class Config:
                 "type": "boolean",
                 "default": False,
             },
+            "compare_communication_reduction_methods": {
+                "type": "boolean",
+                "default": True,
+            },
             "max_workers": {"type": "integer", "min": 1, "default": 32},
             "base_strategy": {
                 "type": "list",
@@ -143,6 +147,14 @@ class Config:
                     **data_feature_distribution_parameters,
                 },
             },
+            "communication_reduction_methods": {
+                "type": "list",
+                "allowed": ["quantization",
+                            "sparsification",
+                            "client_reduction",
+                            "client_filter"],
+                "default": []
+                },
             "compression_config":{
                 "type": "dict",
                 "default": {},
@@ -205,12 +217,13 @@ class Config:
         if (
             self.initial_config["compare_client_selection_algorithms"]
             ^ self.initial_config["compare_base_strategies"]
+            ^ self.initial_config["compare_communication_reduction_methods"]
         ):
             pass
         else:
             # Raise an exception if both are the same (either both true or both false)
             raise Exception(
-                "Either compare_client_selection_algorithms or compare_base_strategies must be True, but not both."
+                "Either compare_client_selection_algorithms or compare_base_strategies or compare_communication_reduction_methods must be True, but not all."
             )
         # If necessary create outputs dir + subdirs
         if not os.path.isdir(self.initial_config["output_dir"]):

@@ -23,8 +23,10 @@ from .util import Arguments, Config
 from .validation.datadistribution import DataDistribution
 from .validation.validation import Validation
 from .validation.validation_bs import ValidationBS
+from .validation.validation_communication_reduction import ValidationCommunicationReduction
 from .simulation.state import add_discrepancy_level, add_data_ratios
-
+import os
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
 pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 
 
@@ -92,8 +94,10 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
         if config.initial_config["compare_client_selection_algorithms"]:
             run_evaluation_cs(config, datahandler, trainloaders, valloaders)
 
-        else:
+        elif config.initial_config["compare_base_strategies"]:
             run_evaluation_bs(config, datahandler, trainloaders, valloaders)
+        elif config.initial_config["compare_communication_reduction_methods"]:
+            run_evaluation_communication_reduction(config, datahandler, trainloaders, valloaders)
         return
 
 
@@ -115,11 +119,15 @@ def run_training_simulation(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
         )
 
-    else:
+    elif config.initial_config["compare_base_strategies"]:
         run_training_simulation_bs(
             DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
         )
-        return
+    elif config.initial_config["compare_communication_reduction_methods"]:
+        run_training_simulation_communication_reduction(
+            DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+        )
+    return
 
 
 def run_training_simulation_cs(
@@ -281,6 +289,94 @@ def run_training_simulation_bs(
             ray_init_args={"include_dashboard": True},
         )
 
+def run_training_simulation_communication_reduction(
+    DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+):
+    """
+    Runs the training simulation for client selection comparison mode
+    :param DEVICE: Device to run the simulation on
+    :param NUM_CLIENTS: Number of clients
+    :param config: Config object
+    :param datahandler: Datahandler object
+    :param trainloaders: Trainloaders
+    :param valloaders:
+    """
+    if DEVICE.type == "cuda":
+        client_resources = {
+            "num_gpus": config.initial_config["num_gpu_per_client"],
+            "num_cpus": config.initial_config["num_cpu_per_client"],
+        }
+    else:
+        client_resources = {"num_cpus": config.initial_config["num_cpu_per_client"]}
+    add_data_ratios(config.attributes["input_state_file"], trainloaders)
+    add_discrepancy_level(config.attributes["input_state_file"], datahandler)
+    
+    algorithm = config.initial_config["algorithm"][0]
+    quantization_config = config.initial_config["compression_config"]["quantization"]
+    sparsification_config = config.initial_config["compression_config"]["sparsification"]
+    quantization = quantization_config["enable_quantization"]
+    sparsification = sparsification_config["enable_sparsification"]
+    if quantization:
+        bits = [16]
+        for quant_bits in bits:
+            start_working_state(config)
+            quantization_config["bits"] = quant_bits
+            model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
+
+            client_fn = ClientFunction(
+                Client,
+                trainloaders,
+                valloaders,
+                model,
+                config,
+                config.initial_config["base_strategy"][0],
+            ).client_fn
+            config.generate_paths(
+                f"{config.initial_config['algorithm'][0]}_{quant_bits}Bit",
+                config.initial_config["base_strategy"][0],
+                config.initial_config["dataset"],
+                config.initial_config["no_clients"],
+            )
+            print(
+                "Simulating with",
+                f"{config.initial_config['algorithm'][0]}_{quant_bits}Bit",
+                "algorithm using",
+                config.initial_config["dataset"],
+                "dataset with",
+                config.initial_config["no_clients"],
+                "clients and",
+                config.initial_config["base_strategy"][0],
+            )
+            client_selector = algorithm_dict[algorithm](config, model.get_size())
+
+            # in case of FedNova, FedAvgM, set initial parameters
+            if config.initial_config["base_strategy"][0] in ["FedNova", "FedAvgM"]:
+                strategy = strategy_dict[config.initial_config["base_strategy"][0]](
+                    net=model.get_net(),
+                    init_parameters=get_init_parameters(
+                        model.get_net(), config.initial_config["base_strategy"][0]
+                    ),
+                    client_selector=client_selector,
+                    config=config,
+                )
+            else:
+                strategy = strategy_dict[config.initial_config["base_strategy"][0]](
+                    net=model.get_net(),
+                    client_selector=client_selector,
+                    config=config,
+                )
+
+            fl.simulation.start_simulation(
+                client_fn=client_fn,
+                num_clients=NUM_CLIENTS,
+                config=fl.server.ServerConfig(
+                    num_rounds=config.initial_config["no_rounds"]
+                ),
+                strategy=strategy,
+                client_resources=client_resources,
+                ray_init_args={"include_dashboard": True},
+            )
+
 
 def run_evaluation_cs(config, datahandler, trainloaders, valloaders):
     # Evaluation generation
@@ -310,6 +406,24 @@ def run_evaluation_bs(config, datahandler, trainloaders, valloaders):
             current_run = {
                 "algorithm": config.initial_config["algorithm"][0],
                 "base_strategy": base_strategy,
+                "dataset": config.initial_config["dataset"],
+                "no_clients": config.initial_config["no_clients"],
+            }
+            val.evaluate(current_run)
+        val.generate_report()
+
+    train = Training_BS(config, trainloaders, valloaders, datahandler)
+    train.generate_report()
+    
+def run_evaluation_communication_reduction(config, datahandler, trainloaders, valloaders):
+    # Evaluation generation
+    if config.initial_config["validation_config"]["enable_validation"]:
+        val = ValidationCommunicationReduction(config, trainloaders, valloaders, datahandler)
+        for bits in [16]:
+            print("Generating validation data for ", bits, " bit quantization")
+            current_run = {
+                "algorithm": f"{config.initial_config['algorithm'][0]}_{bits}Bit",
+                "base_strategy": config.initial_config["base_strategy"][0],
                 "dataset": config.initial_config["dataset"],
                 "no_clients": config.initial_config["no_clients"],
             }

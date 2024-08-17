@@ -1,5 +1,5 @@
 {
-  "no_rounds": 10,
+  "no_rounds": 3,
   "algorithm": [
     "random"
   ],
@@ -32,15 +32,16 @@
     "network_bandwidth_std": 0.0,
     "performance_factor_std": 0.0
   },
-
-  "no_epochs": 1,
+  "compare_client_selection_algorithms": false,
+  "compare_communication_reduction_methods": true,
+  "no_epochs": 3,
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 50,
+  "no_clients": 10,
   "batch_size": 32,
   "verbose": true,
-  "device": "cpu",
+  "device": "cuda",
   "timeout": 240,
   "generate_clients": true,
   "create_synthetic_client_failures": true,
@@ -52,18 +53,19 @@
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
-    "device": "cpu"
+    "device": "cuda"
   },
   "c_evaluation_clients":  0.001,
   "max_workers": 32,
   "base_strategy": ["FedAvg"],
+  "communication_reduction_methods": ["quantization", "sparsification", "client_reduction", "client_filter"],
   "compression_config":{
     "quantization": {
       "enable_quantization": true,
-      "bits": 8
+      "bits": 16
     },
     "sparsification": {
-      "enable_sparsification": true,
+      "enable_sparsification": false,
       "top_k_percent": 0.2
     }
   },

@@ -119,7 +119,7 @@ class Client(fl.client.NumPyClient):
             )
             if self.state.get("network_bandwidth") > 0:
                 if self.quantize or self.sparse:
-                    compressed_params, _ ,  _ = get_parameters_compressed(self.net, None, self.quantize, self.sparse, self.quantization_bits, self.top_k_percent)
+                    compressed_params, _ ,  _ = get_parameters_compressed(self.net, None, "cpu", self.quantize, self.sparse, self.quantization_bits, self.top_k_percent)
                     model_size = calculate_quantized_size(compressed_params)
                     print(f"Compressed: {model_size}, Non-Compressed: {self.model.get_size()}")
                 else:
@@ -227,7 +227,7 @@ class Client(fl.client.NumPyClient):
             if self.active_strategy == "FedNova":
                 compressed_params, scale = get_parametersFedNova_quantized(self.net, self.optimizer, self.quantization_bits, {})    
             else:
-                compressed_params, indices, scale = get_parameters_compressed(self.net, parameters, self.quantize, self.sparse, self.quantization_bits, self.top_k_percent)
+                compressed_params, indices, scale = get_parameters_compressed(self.net, parameters, "cpu", self.quantize, self.sparse,self.quantization_bits, self.top_k_percent)
             # add quant scale to train output
             if indices is not None:
                 train_output["sparse_indices"] = indices

@@ -1,9 +1,13 @@
 import numpy as np
-
+import torch
 def quantize(x, scale, quantization_bits):
     # Ensure x is a numpy array
-    x = np.asarray(x, dtype=np.float32)
-    
+    #x = np.asarray(x, dtype=np.float32)
+        # Check if x is a PyTorch tensor
+    if isinstance(x, torch.Tensor):
+        x = x.cpu().numpy().astype(np.float32)  # Move to CPU and convert to NumPy array
+    else:
+        x = np.asarray(x, dtype=np.float32)  # If not a tensor, just ensure it's a NumPy array
     # Validate the bit width and calculate the quantization range
     if quantization_bits not in [8, 16]:
         raise ValueError("Unsupported bit width. Only 8 and 16 bits are supported.")
@@ -34,8 +38,18 @@ def dequantize(q_x, scale, quantization_bits):
 def calculate_scale(global_vals, quantization_bits, percentile=99):
     n = quantization_bits - 1
     qmax = (2 ** n) - 1
+
+    # Check if global_vals is a PyTorch tensor
+    if isinstance(global_vals, torch.Tensor):
+        global_vals = global_vals.cpu().numpy()  # Move to CPU and convert to NumPy array
+
+    # Calculate the percentile value
     percentile_val = np.percentile(global_vals, percentile)
+    
+    # Handle the case where the percentile value is zero
     if percentile_val == 0.0:
         print(global_vals)
+    
+    # Calculate the scale
     scale = percentile_val / qmax
     return scale

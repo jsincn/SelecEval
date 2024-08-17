@@ -88,7 +88,6 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         # Desparsify filtered results
         if self.sparse:
             results = desparsify_results(self.net, results)
-        
         # Dequantize filtered results
         if self.quantize:
             results = dequant_results(results, self.quantization_bits)

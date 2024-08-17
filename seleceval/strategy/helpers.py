@@ -24,16 +24,13 @@ def dequant_results(results, quantization_bits):
 
 def desparsify_results(net, results):
     state_dict = net.state_dict()
-    total_param_count  = sum(p.numel() for p in state_dict.values())
     desparsified_results = []
 
     for client_proxy, fit_res in results:
         # Convert sparse parameters from parameter format to numpy arrays
         sparse_params_np, sparse_indices = parameters_to_ndarrays(fit_res.parameters), fit_res.metrics["sparse_indices"]
-
-        # Create a zero-initialized numpy array for full parameters
-        full_params = np.zeros(total_param_count, dtype=sparse_params_np[0].dtype)
-
+        full_params = torch.cat([v.view(-1) for v in state_dict.values()]).cpu().numpy()
+        
         # Place the sparse parameters at the corresponding indices
         np.put(full_params, sparse_indices, sparse_params_np)
 

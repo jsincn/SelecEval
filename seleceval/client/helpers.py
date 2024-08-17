@@ -71,19 +71,20 @@ def set_parameters_quantized(net, scale, bits, parameters, server_round):
             dequantized_state_dict[k] = torch.tensor(dequantize(v, scale, bits))
         net.load_state_dict(dequantized_state_dict, strict=True)
         
-def get_parameters_compressed(net, global_parameters, use_quantize=False, sparse=False, quantization_bits=None, top_k_percent=None):
+def get_parameters_compressed(net, global_parameters, device, use_quantize=False, sparse=False, quantization_bits=None, top_k_percent=None):
     state_dict = net.state_dict()
     indices = None
     scale = None
     if sparse:
         # Flatten parameters when sparsification is applied
-        local_params = torch.cat([v.view(-1) for v in state_dict.values()])
+        local_params = torch.cat([v.view(-1) for v in state_dict.values()]).to(device)
         if global_parameters is not None:
             global_params = torch.cat([
-                torch.from_numpy(param).view(-1) if isinstance(param, np.ndarray) else param.view(-1)
+                torch.from_numpy(param).view(-1) if isinstance(param, np.ndarray) else param.view(-1).to(device)
                 for param in global_parameters
             ])
             deltas = local_params - global_params
+            del global_params  # Free memory
         else:
             deltas = local_params
 
@@ -91,14 +92,18 @@ def get_parameters_compressed(net, global_parameters, use_quantize=False, sparse
         k = int(len(deltas) * top_k_percent)
         _, indices = torch.topk(torch.abs(deltas), k, sorted=False)
         sparsified_params = local_params[indices]
+        del deltas, local_params  # Free memory
         
         # Apply quantization after sparsification if requested
         if use_quantize and quantization_bits is not None:
             scale = calculate_scale(torch.abs(sparsified_params), quantization_bits)
             quantized_params = quantize(sparsified_params, scale, quantization_bits)
-            return [quantized_params], indices.numpy(), scale
+            del sparsified_params  # Free memory
+            torch.cuda.empty_cache()  # Free GPU memory
+            return [quantized_params], indices.cpu().numpy(), scale
         else:
-            return [np.asarray(sparsified_params)], indices.numpy(), scale
+            torch.cuda.empty_cache()  # Free GPU memory
+            return [np.asarray(sparsified_params)], indices.cpu().numpy(), scale
     elif use_quantize:
         # Apply quantization directly to non-flattened parameters when no sparsification is needed
         all_params = torch.cat([v.view(-1) for v in state_dict.values()])
@@ -108,6 +113,8 @@ def get_parameters_compressed(net, global_parameters, use_quantize=False, sparse
         for k, v in state_dict.items():
             quantized_params.append(quantize(v, scale, quantization_bits))
 
+        del all_params  # Free memory
+        torch.cuda.empty_cache()  # Free GPU memory
         return quantized_params, indices, scale
 
     # If no processing is done, return the original parameters
