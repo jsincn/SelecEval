@@ -1,12 +1,12 @@
 {
-  "no_rounds": 3,
+  "no_rounds": 5,
   "algorithm": [
     "random"
   ],
   "dataset": "cifar10",
   "algorithm_config": {
     "random": {
-      "c": 0.1
+      "c": 1
     },
     "CEP": {
       "c": 0.01
@@ -58,14 +58,14 @@
   "c_evaluation_clients":  0.001,
   "max_workers": 32,
   "base_strategy": ["FedAvg"],
-  "communication_reduction_methods": ["quantization", "sparsification", "client_reduction", "client_filter"],
+  "communication_reduction_methods": [],
   "compression_config":{
     "quantization": {
-      "enable_quantization": true,
-      "bits": 16
+      "enable_quantization": false,
+      "bits": 8
     },
     "sparsification": {
-      "enable_sparsification": false,
+      "enable_sparsification": true,
       "top_k_percent": 0.2
     }
   },
@@ -73,6 +73,6 @@
   "client_reduction": {
     "enable_client_reduction": false,
     "decay_factor": 0,
-    "initial_c": 0.4
+    "initial_c": 0.5
   }
 }

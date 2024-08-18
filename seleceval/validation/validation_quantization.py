@@ -45,7 +45,7 @@ def _generate_time_to_accuracy(df):
     return output
 
 
-class ValidationCommunicationReduction(Evaluator):
+class ValidationQuantization(Evaluator):
     def __init__(
         self,
         config: Config,

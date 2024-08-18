@@ -170,7 +170,7 @@ class Client(fl.client.NumPyClient):
             else:
                 self.set_parameters2(parameters)
         else:
-            if self.quantize:
+            if self.quantize and "quant-scale" in self.state.get_all():
                 set_parameters_quantized(self.net, self.server_quant_scale, self.quantization_bits, parameters, self.config.get_current_round())
             else:
                 set_parameters(self.net, parameters)
