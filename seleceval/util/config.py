@@ -24,7 +24,7 @@ class Config:
         schema = {
             "no_rounds": {"type": "integer", "min": 1},
             "algorithm": {"type": "list", "allowed": algorithm_parameter_dict.keys()},
-            "dataset": {"type": "string", "allowed": ["cifar10", "mnist"]},
+            "dataset": {"type": "string", "allowed": ["cifar10", "mnist", "cifar100"]},
             "algorithm_config": {
                 "type": "dict",
                 "default": {},

@@ -12,6 +12,7 @@ from validation.training_bs import Training_BS
 from client.client import Client
 from client.client_fn import ClientFunction
 from datahandler.cifar10 import Cifar10DataHandler
+from datahandler.cifar100 import Cifar100DataHandler
 from models.resnet18 import Resnet18
 from selection import algorithm_dict
 from simulation.state import (
@@ -51,6 +52,8 @@ def main():
         datahandler = Cifar10DataHandler(config)
     elif config.initial_config["dataset"] == "mnist":
         datahandler = MNISTDataHandler(config)
+    elif config.initial_config["dataset"] == "cifar100":
+        datahandler = Cifar100DataHandler(config)
     else:
         raise Exception("Dataset not supported")
     # Specify client resources if you need GPU (defaults to 1 CPU and 0 GPU)

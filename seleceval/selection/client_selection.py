@@ -23,7 +23,7 @@ from .helpers import (
     _handle_finished_future_after_evaluate,
     _handle_finished_future_after_properties_get,
 )
-from ..util import Config
+from seleceval.util import Config
 
 
 class ClientSelection(ABC):

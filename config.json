@@ -1,9 +1,9 @@
 {
-  "no_rounds": 100,
+  "no_rounds": 1,
   "algorithm": [
     "random"
   ],
-  "dataset": "cifar10",
+  "dataset": "cifar100",
   "algorithm_config": {
     "random": {
       "c": 0.1
@@ -37,22 +37,22 @@
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 500,
+  "no_clients": 10,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
   "timeout": 120,
-  "generate_clients": false,
+  "generate_clients": true,
   "create_synthetic_client_failures": true,
   "output_dir": "output/o",
-  "client_state_file": "seleceval/client_states.csv",
-  "client_configuration_file": "seleceval/client_configurations.csv",
-  "distribute_data": false,
-  "data_distribution_file": "seleceval/data_distribution.csv",
+  "client_state_file": "client_states.csv",
+  "client_configuration_file": "client_configurations.csv",
+  "distribute_data": true,
+  "data_distribution_file": "data_distribution.csv",
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
-    "device": "cuda"
+    "device": "cpu"
   },
   "c_evaluation_clients":  0.001,
   "max_workers": 32,

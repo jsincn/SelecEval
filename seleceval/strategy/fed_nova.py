@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import torch.nn
 import numpy as np
 from flwr.server import ClientManager
-from ..models import proxSGD
+from seleceval.models import proxSGD
 from seleceval.selection import ClientSelection
 from flwr.common import (
     Metrics,
@@ -22,7 +22,7 @@ from flwr.server.strategy.aggregate import aggregate
 import torch
 from flwr.common.logger import log
 from logging import WARNING
-from ..simulation.state import run_state_update
+from seleceval.simulation.state import run_state_update
 
 
 class FedNova(FedAvg):

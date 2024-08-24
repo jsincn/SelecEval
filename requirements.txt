@@ -96,3 +96,4 @@ virtualenv==20.21.0
 wcwidth==0.2.6
 yarl==1.9.2
 zipp==3.16.2
+datasets~=2.21.0
