@@ -1,5 +1,5 @@
 {
-  "no_rounds": 1,
+  "no_rounds": 10,
   "algorithm": [
     "random"
   ],
@@ -37,7 +37,7 @@
   "variable_epochs": false,
   "max_no_epochs": 5,
   "min_no_epochs": 1,
-  "no_clients": 10,
+  "no_clients": 100,
   "batch_size": 32,
   "verbose": true,
   "device": "cuda",
@@ -52,10 +52,10 @@
   "validation_config": {
     "enable_validation": true,
     "enable_data_distribution": true,
-    "device": "cpu"
+    "device": "cuda"
   },
-  "c_evaluation_clients":  0.001,
+  "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedNova"]
+  "base_strategy": ["FedAvg"]
 
 }
