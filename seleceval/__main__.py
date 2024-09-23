@@ -5,7 +5,7 @@ import flwr as fl
 import torch
 import pandas as pd
 from seleceval.strategy.common import get_init_parameters
-from seleceval.datahandler.mnist import MNISTDataHandler
+from datahandler.mnist import MNISTDataHandler
 from strategy import strategy_dict
 from validation.training import Training
 from validation.training_bs import Training_BS
