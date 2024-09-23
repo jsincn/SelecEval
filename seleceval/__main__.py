@@ -5,26 +5,26 @@ import flwr as fl
 import torch
 import pandas as pd
 from seleceval.strategy.common import get_init_parameters
-from datahandler.mnist import MNISTDataHandler
-from strategy import strategy_dict
-from validation.training import Training
-from validation.training_bs import Training_BS
-from client.client import Client
-from client.client_fn import ClientFunction
+from seleceval.datahandler.mnist import MNISTDataHandler
+from seleceval.strategy import strategy_dict
+from seleceval.validation.training import Training
+from seleceval.validation.training_bs import Training_BS
+from seleceval.client.client import Client
+from seleceval.client.client_fn import ClientFunction
 from seleceval.datahandler.cifar10 import Cifar10DataHandler
 from seleceval.datahandler.cifar100 import Cifar100DataHandler
-from models.resnet18 import Resnet18
-from selection import algorithm_dict
-from simulation.state import (
+from seleceval.models.resnet18 import Resnet18
+from seleceval.selection import algorithm_dict
+from seleceval.simulation.state import (
     generate_initial_state,
     get_initial_state,
     start_working_state,
 )
-from util import Arguments, Config
-from validation.datadistribution import DataDistribution
-from validation.validation import Validation
-from validation.validation_bs import ValidationBS
-from simulation.state import add_discrepancy_level, add_data_ratios
+from seleceval.util import Arguments, Config
+from seleceval.validation.datadistribution import DataDistribution
+from seleceval.validation.validation import Validation
+from seleceval.validation.validation_bs import ValidationBS
+from seleceval.simulation.state import add_discrepancy_level, add_data_ratios
 
 pd.options.mode.chained_assignment = None  # Disables warning for chained assignment
 

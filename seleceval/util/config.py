@@ -180,7 +180,7 @@ class Config:
             raise Exception(
                 "Either compare_client_selection_algorithms or compare_base_strategies must be True, but not both."
             )
-        # If necessary create outputs dir + subdirs
+        # If necessary create output dir + subdirs
         if not os.path.isdir(self.initial_config["output_dir"]):
             os.mkdir(path=self.initial_config["output_dir"])
         if not os.path.isdir(self.initial_config["output_dir"] + "/client_output"):
