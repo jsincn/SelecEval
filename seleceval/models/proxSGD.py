@@ -44,7 +44,7 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         self.local_steps = 0
         self.lr = lr
 
-        if lr is not 0 and lr < 0.0:
+        if lr != 0 and lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
             raise ValueError(f"Invalid momentum value: {momentum}")
