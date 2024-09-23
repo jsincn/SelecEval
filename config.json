@@ -46,7 +46,7 @@
   "create_synthetic_client_failures": true,
   "output_dir": "output/o",
   "client_state_file": "client_states.csv",
-  "client_configuration_file": "client_configurations.csv",
+  "client_configuration_file": "seleceval/client_configurations.csv",
   "distribute_data": true,
   "data_distribution_file": "data_distribution.csv",
   "validation_config": {
