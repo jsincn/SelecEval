@@ -10,7 +10,7 @@ base_strategy_parameter_dict = {
         "type": "dict",
         "default": {},
         "schema": {
-            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.001},
+            "lr": {"type": "float", "min": 0, "max": 1, "default": 0.01},
             "momentum": {"type": "float", "min": 0, "max": 1, "default": 0.0}
         },
     },
