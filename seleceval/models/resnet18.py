@@ -134,6 +134,7 @@ class Resnet18(Model):
                 print(
                     f"{client_name}: has reached accuracy {round(epoch_accuracy, 4) * 100} % in epoch {epoch + 1}"
                 )
+            torch.cuda.empty_cache()
         return output
 
     def test(

@@ -13,6 +13,7 @@ from .client.client import Client
 from .client.client_fn import ClientFunction
 from .datahandler.cifar10 import Cifar10DataHandler
 from .models.resnet18 import Resnet18
+from copy import deepcopy
 from .selection import algorithm_dict
 from .simulation.state import (
     generate_initial_state,
@@ -98,9 +99,20 @@ def run_evaluation(config, datahandler, trainloaders, valloaders):
             run_evaluation_bs(config, datahandler, trainloaders, valloaders)
         elif config.initial_config["compare_communication_reduction_methods"]:
             if config.initial_config["compression_config"]["quantization"]["enable_quantization"]:
-                run_evaluation_quantization(config, datahandler, trainloaders, valloaders)
+            # Temp config file to setup quantization without other functionalities
+                tmp_config = deepcopy(config)
+                tmp_config.initial_config["compression_config"]["quantization"]["val_bits"] = tmp_config.initial_config["compression_config"]["quantization"]["bits"].copy()
+                tmp_config.initial_config["compression_config"]["sparsification"]["enable_sparsification"] = False
+                tmp_config.initial_config["compression_config"]["sparsification"]["enable_client_reduction"] = False
+                tmp_config.initial_config["compression_config"]["sparsification"]["client_filter"] = []
+                run_evaluation_quantization(tmp_config, datahandler, trainloaders, valloaders)
             if config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]:
-                run_evaluation_sparsification(config, datahandler, trainloaders, valloaders)
+            # Temp config file to setup sparsification without other functionalities
+                tmp_config = deepcopy(config)
+                tmp_config.initial_config["compression_config"]["sparsification"]["enable_quantization"] = False
+                tmp_config.initial_config["compression_config"]["sparsification"]["enable_client_reduction"] = False
+                tmp_config.initial_config["compression_config"]["sparsification"]["client_filter"] = []
+                run_evaluation_sparsification(tmp_config, datahandler, trainloaders, valloaders)
         return
 
 
@@ -128,13 +140,26 @@ def run_training_simulation(
         )
     elif config.initial_config["compare_communication_reduction_methods"]:
         if config.initial_config["compression_config"]["quantization"]["enable_quantization"]:
+            # Temp config file to setup quantization without other functionalities
+            tmp_config = deepcopy(config)
+            tmp_config.initial_config["compression_config"]["quantization"]["val_bits"] = tmp_config.initial_config["compression_config"]["quantization"]["bits"].copy()
+            tmp_config.initial_config["compression_config"]["sparsification"]["enable_sparsification"] = False
+            tmp_config.initial_config["compression_config"]["sparsification"]["enable_client_reduction"] = False
+            tmp_config.initial_config["compression_config"]["sparsification"]["client_filter"] = []
             run_training_simulation_quantization(
-                DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+                DEVICE, NUM_CLIENTS, tmp_config, datahandler, trainloaders, valloaders
             )
+            del tmp_config
         if config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]:
+            # Temp config file to setup sparsification without other functionalities
+            tmp_config = deepcopy(config)
+            tmp_config.initial_config["compression_config"]["sparsification"]["enable_quantization"] = False
+            tmp_config.initial_config["compression_config"]["sparsification"]["enable_client_reduction"] = False
+            tmp_config.initial_config["compression_config"]["sparsification"]["client_filter"] = []
             run_training_simulation_sparsification(
-                DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
+                DEVICE, NUM_CLIENTS, tmp_config, datahandler, trainloaders, valloaders
             )
+            del tmp_config
     return
 
 
@@ -323,9 +348,9 @@ def run_training_simulation_quantization(
     quantization_config = config.initial_config["compression_config"]["quantization"]
     quantization = quantization_config["enable_quantization"]
     if quantization:
-        bits = [8, 16]
+        bits = quantization_config["val_bits"]
         for quant_bits in bits:
-            quantization_config["bits"] = quant_bits
+            quantization_config["bits"] = [quant_bits]
             start_working_state(config)
             model = Resnet18(device=DEVICE, num_classes=len(datahandler.get_classes()))
 
@@ -382,6 +407,7 @@ def run_training_simulation_quantization(
                 client_resources=client_resources,
                 ray_init_args={"include_dashboard": True},
             )
+    quantization_config["enable_quantization"] = False
 
 def run_training_simulation_sparsification(
     DEVICE, NUM_CLIENTS, config, datahandler, trainloaders, valloaders
@@ -409,7 +435,7 @@ def run_training_simulation_sparsification(
     sparsification_config = config.initial_config["compression_config"]["sparsification"]
     sparsification = sparsification_config["enable_sparsification"]
     if sparsification:
-        top_k_percent = [0.1, 0.5]
+        top_k_percent = [0.1, 1]
         for k in top_k_percent:
             sparsification_config["top_k_percent"] = k
             start_working_state(config)
@@ -511,10 +537,11 @@ def run_evaluation_quantization(config, datahandler, trainloaders, valloaders):
     # Evaluation generation
     if config.initial_config["validation_config"]["enable_validation"]:
         val = ValidationQuantization(config, trainloaders, valloaders, datahandler)
-        for bits in [8,16]:
-            print("Generating validation data for ", bits, " bit quantization")
+        bits = config.initial_config["compression_config"]["quantization"]["val_bits"]
+        for quant_bits in bits:
+            print("Generating validation data for ", quant_bits, " bit quantization")
             current_run = {
-                "algorithm": f"{config.initial_config['algorithm'][0]}_{bits}Bit",
+                "algorithm": f"{config.initial_config['algorithm'][0]}_{quant_bits}Bit",
                 "base_strategy": config.initial_config["base_strategy"][0],
                 "dataset": config.initial_config["dataset"],
                 "no_clients": config.initial_config["no_clients"],
@@ -529,7 +556,7 @@ def run_evaluation_sparsification(config, datahandler, trainloaders, valloaders)
     # Evaluation generation
     if config.initial_config["validation_config"]["enable_validation"]:
         val = ValidationQuantization(config, trainloaders, valloaders, datahandler)
-        top_k_percent = [0.1, 0.5]
+        top_k_percent = [0.1, 1]
         for k in top_k_percent:
             print("Generating validation data for ", k, "% Sparsification")
             current_run = {

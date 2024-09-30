@@ -20,6 +20,7 @@ def get_parameters(net) -> List[np.ndarray]:
     :param net: The model
     :return: The parameters of the model as a list of numpy arrays
     """
+    torch.cuda.empty_cache()
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
@@ -45,6 +46,7 @@ def set_parameters(net, parameters: List[np.ndarray], optimizer: Optional = None
                     # Update optimizer's 'param_state["params"]'
                     param_state["param_state"]["params"] = list(net.parameters())
                     param_state["old_init"] = p.data.clone()
+    torch.cuda.empty_cache()
 
 
 def update_optimizer_state_init_parameters(optimizer: Optimizer):

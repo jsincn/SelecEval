@@ -42,7 +42,7 @@ class AdjustedFedAvg(fl.server.strategy.FedAvg):
         self.filter_manager = FilterManager(self.config.initial_config["client_filter"], self.config)
         self.quantize = self.config.initial_config["compression_config"]["quantization"]["enable_quantization"]
         if self.quantize:
-            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"]
+            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"][0]
         self.sparse = self.config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]
 
     def configure_fit(

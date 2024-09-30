@@ -164,7 +164,7 @@ class Config:
                         "default": {},
                         "schema": {
                             "enable_quantization": {"type": "boolean", "default": False},
-                            "bits": {"type": "integer", "allowed": [8,16], "default": 8}
+                            "bits": {"type": "list", "default": []}
                         }
                     },
                     "sparsification": {

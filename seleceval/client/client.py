@@ -56,7 +56,7 @@ class Client(fl.client.NumPyClient):
         self.quantize = self.config.initial_config["compression_config"]["quantization"]["enable_quantization"]
         self.quantization_bits = None
         if self.quantize:
-            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"]
+            self.quantization_bits = self.config.initial_config["compression_config"]["quantization"]["bits"][0]
         self.sparse = self.config.initial_config["compression_config"]["sparsification"]["enable_sparsification"]
         self.top_k_percent = None
         if self.sparse:
