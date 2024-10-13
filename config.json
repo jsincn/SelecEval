@@ -1,5 +1,5 @@
 {
-  "no_rounds": 400,
+  "no_rounds": 300,
   "algorithm": [
     "random", "PowD"
   ],
