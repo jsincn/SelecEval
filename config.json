@@ -1,7 +1,7 @@
 {
-  "no_rounds": 50,
+  "no_rounds": 200,
   "algorithm": [
-    "random"
+    "random", "CEP"
   ],
   "dataset": "cifar100",
   "algorithm_config": {
@@ -9,7 +9,7 @@
       "c": 0.1
     },
     "CEP": {
-      "c": 0.01
+      "c": 0.1
     },
     "ActiveFL": {
       "c": 0.01
