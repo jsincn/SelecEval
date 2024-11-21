@@ -195,11 +195,25 @@ class Validation(Evaluator):
         rounds = df_plot["round"].unique()
         mean_dict = {}
         quantile_dict = {}
+
+        for i in df_plot["algorithm"].unique():
+            mean_values = df_plot[df_plot["algorithm"] == i]["loss"].values
+            if len(mean_values) < len(rounds):
+                mean_values = np.append(mean_values, np.repeat(np.nan, len(rounds) - len(mean_values)))
+            mean_dict[i + " mean"] = mean_values
+
+        for i in df_plot_quantiles["algorithm"].unique():
+            quantile_values = df_plot_quantiles[df_plot_quantiles["algorithm"] == i]["loss"].values
+            if len(quantile_values) < len(rounds):
+                quantile_values = np.append(quantile_values, np.repeat(np.nan, len(rounds) - len(quantile_values)))
+            quantile_dict[i + " quantile"] = quantile_values
+
+        """
         for i in df_plot["algorithm"].unique():
             mean_dict[i + " mean"] = df_plot[df_plot["algorithm"] == i]["loss"]
             quantile_dict[i + " quantile"] = df_plot_quantiles[
                 df_plot_quantiles["algorithm"] == i
-            ]["loss"]
+            ]["loss"]"""
         plt.figure(figsize=(10, 6))
         for key, value in mean_dict.items():
             plt.plot(rounds, value, label=key)
