@@ -1,5 +1,5 @@
 {
-  "no_rounds": 5,
+  "no_rounds": 250,
   "algorithm": [
     "random", "CEP", "ActiveFL", "FedCS", "PowD"
   ],
