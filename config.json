@@ -1,7 +1,7 @@
 {
   "no_rounds": 250,
   "algorithm": [
-    "random", "CEP", "ActiveFL", "FedCS", "PowD"
+    "random"
   ],
   "dataset": "cifar100",
   "algorithm_config": {
@@ -40,6 +40,8 @@
   "no_clients": 1000,
   "batch_size": 32,
   "verbose": true,
+  "compare_client_selection_algorithms":  false,
+  "compare_base_strategies": true,
   "device": "cuda",
   "timeout": 120,
   "generate_clients": true,
@@ -56,6 +58,6 @@
   },
   "c_evaluation_clients":  0.01,
   "max_workers": 32,
-  "base_strategy": ["FedAvg"]
+"base_strategy": ["FedAvg", "FedProx", "FedDisco", "FedAvgM"]
 
 }
