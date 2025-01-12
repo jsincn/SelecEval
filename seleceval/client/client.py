@@ -15,8 +15,8 @@ from .helpers import (
     get_parameters,
     set_parameters,
 )
-from ..models import proxSGD
-from ..models.model import Model
+from seleceval.models import proxSGD
+from seleceval.models.model import Model
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 from seleceval.util.config import Config

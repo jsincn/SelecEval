@@ -14,7 +14,7 @@ from torch.utils.data import Subset, random_split, DataLoader
 from .data_label_distribution import *
 from .data_feature_distribution import *
 from .data_quantity_distribution import *
-from ..util import Config
+from seleceval.util import Config
 
 
 class DataHandler(ABC):

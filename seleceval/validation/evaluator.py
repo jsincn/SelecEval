@@ -3,8 +3,8 @@ Abstract class for evaluators
 """
 from abc import ABC
 
-from ..datahandler.datahandler import DataHandler
-from ..util import Config
+from seleceval.datahandler.datahandler import DataHandler
+from seleceval.util import Config
 
 
 class Evaluator(ABC):

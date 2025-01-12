@@ -14,8 +14,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from .evaluator import Evaluator
-from ..datahandler.datahandler import DataHandler
-from ..util import Config
+from seleceval.datahandler.datahandler import DataHandler
+from seleceval.util import Config
 
 
 class Training_BS(Evaluator):

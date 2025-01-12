@@ -13,7 +13,7 @@ from flwr.server.client_proxy import ClientProxy
 
 import random
 from .client_selection import ClientSelection
-from ..util import Config
+from seleceval.util import Config
 
 
 class PowD(ClientSelection):

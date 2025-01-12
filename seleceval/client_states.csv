@@ -1,0 +1,6 @@
+cpu,ram,network_bandwidth,i_reliability,performance_tier,expected_execution_time,i_performance_factor,client_name
+16,64,51.44,0.5344,3,40,1.12,minty-consimilarity
+16,64,21.04,0.00296,3,40,0.96,gray-rate
+16,64,47.01,0.00165,3,40,1.05,savory-scale
+8,32,55.71,0.23006,2,80,0.81,new-annuity
+4,16,0.0,0.09633,1,160,0.76,witty-clover

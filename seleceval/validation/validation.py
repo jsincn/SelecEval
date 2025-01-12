@@ -12,9 +12,9 @@ import torch
 from matplotlib import pyplot as plt
 
 from .evaluator import Evaluator
-from ..datahandler.datahandler import DataHandler
-from ..models.resnet18 import Resnet18
-from ..util import Config
+from seleceval.datahandler.datahandler import DataHandler
+from seleceval.models.resnet18 import Resnet18
+from seleceval.util import Config
 
 
 def _generate_time_to_accuracy(df):

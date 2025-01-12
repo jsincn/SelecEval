@@ -182,19 +182,19 @@ class Config:
             )
         # If necessary create outputs dir + subdirs
         if not os.path.isdir(self.initial_config["output_dir"]):
-            os.mkdir(path=self.initial_config["output_dir"])
+            os.makedirs(self.initial_config["output_dir"], exist_ok=True)
         if not os.path.isdir(self.initial_config["output_dir"] + "/client_output"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/client_output")
+            os.makedirs(self.initial_config["output_dir"] + "/client_output")
         if not os.path.isdir(self.initial_config["output_dir"] + "/model_output"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/model_output")
+            os.makedirs(self.initial_config["output_dir"] + "/model_output")
         if not os.path.isdir(self.initial_config["output_dir"] + "/validation"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/validation")
+            os.makedirs(self.initial_config["output_dir"] + "/validation")
         if not os.path.isdir(self.initial_config["output_dir"] + "/state"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/state")
+            os.makedirs(self.initial_config["output_dir"] + "/state")
         if not os.path.isdir(self.initial_config["output_dir"] + "/data_distribution"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/data_distribution")
+            os.makedirs(self.initial_config["output_dir"] + "/data_distribution")
         if not os.path.isdir(self.initial_config["output_dir"] + "/figures"):
-            os.mkdir(path=self.initial_config["output_dir"] + "/figures")
+            os.makedirs(self.initial_config["output_dir"] + "/figures")
 
         with open(self.initial_config["output_dir"] + "/config.json", "w") as fp:
             json.dump(self.initial_config, fp)

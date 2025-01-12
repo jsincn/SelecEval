@@ -14,12 +14,12 @@ from flwr.common import (
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate
-from ..selection.client_selection import ClientSelection
-from ..simulation.state import run_state_update
-from ..strategy.common import weighted_average, get_buf_indices_resnet18
-from ..util import Config
+from seleceval.selection.client_selection import ClientSelection
+from seleceval.simulation.state import run_state_update
+from seleceval.strategy.common import weighted_average, get_buf_indices_resnet18
+from seleceval.util import Config
 from flwr.common.logger import log
-from ..simulation.state import get_discrepancy_level
+from seleceval.simulation.state import get_discrepancy_level
 
 
 class FedDisco(fl.server.strategy.FedAvg):

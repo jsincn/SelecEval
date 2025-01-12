@@ -2,7 +2,8 @@
 Utility class for handling client outputs
 """
 import datetime
-import fcntl
+#import fcntl
+import msvcrt
 import json
 from typing import Any, Union
 import numpy as np
@@ -41,7 +42,8 @@ class ClientOutput:
         """
         self.output_dict["current_timestamp"] = str(datetime.datetime.now())
         with open(self.file, "a") as g:
-            fcntl.flock(g, fcntl.LOCK_EX)
+            msvcrt.locking(g.fileno(), msvcrt.LK_LOCK, 1)
+            #fcntl.flock(g, fcntl.LOCK_EX)
             if (
                 self.output_dict.get("train_output", {}).get("tau") is float
                 or self.output_dict.get("train_output", {}).get("tau") is np.float32
@@ -51,4 +53,5 @@ class ClientOutput:
                     self.output_dict.get("train_output", {}).pop(key, None)
 
             g.write(json.dumps(self.output_dict) + "\n")
-            fcntl.flock(g, fcntl.LOCK_UN)
+            msvcrt.locking(g.fileno(), msvcrt.LK_UNLCK, 1)
+            #fcntl.flock(g, fcntl.LOCK_UN)

@@ -7,8 +7,8 @@ import pandas as pd
 import randomname
 import numpy as np
 
-from ..util import Config
-from ..datahandler.datahandler import DataHandler
+from seleceval.util import Config
+from seleceval.datahandler.datahandler import DataHandler
 
 
 def generate_initial_state(num_clients: int, config: Config):

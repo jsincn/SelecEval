@@ -14,10 +14,10 @@ from flwr.common import FitRes, Scalar, Parameters
 from flwr.server import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from ..selection.client_selection import ClientSelection
-from ..simulation.state import run_state_update
-from ..strategy.common import weighted_average
-from ..util import Config
+from seleceval.selection.client_selection import ClientSelection
+from seleceval.simulation.state import run_state_update
+from seleceval.strategy.common import weighted_average
+from seleceval.util import Config
 
 
 class AdjustedFedMedian(fl.server.strategy.FedMedian):

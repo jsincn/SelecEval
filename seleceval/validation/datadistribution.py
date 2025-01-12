@@ -14,8 +14,8 @@ import seaborn as sns
 import torchvision as torchvision
 
 from .evaluator import Evaluator
-from ..datahandler.datahandler import DataHandler
-from ..util import Config
+from seleceval.datahandler.datahandler import DataHandler
+from seleceval.util import Config
 
 
 class DataDistribution(Evaluator):

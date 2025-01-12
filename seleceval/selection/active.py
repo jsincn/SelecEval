@@ -16,7 +16,7 @@ from flwr.common import FitIns
 from flwr.server.client_proxy import ClientProxy
 
 from .client_selection import ClientSelection
-from ..util import Config
+from seleceval.util import Config
 
 
 class ActiveFL(ClientSelection):
