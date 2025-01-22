@@ -201,6 +201,14 @@ class ValidationBS(Evaluator):
             quantile_dict[i + " quantile"] = df_plot_quantiles[
                 df_plot_quantiles["base_strategy"] == i
             ]["loss"]
+
+        # Handle mismatched rounds for quantile values
+        for strategy in df_plot_quantiles["base_strategy"].unique():
+            quantile_values = df_plot_quantiles[df_plot_quantiles["base_strategy"] == strategy]["loss"].values
+            if len(quantile_values) < len(rounds):
+                quantile_values = np.append(quantile_values, np.repeat(np.nan, len(rounds) - len(quantile_values)))
+            quantile_dict[strategy + " quantile"] = quantile_values
+
         plt.figure(figsize=(10, 6))
         for key, value in mean_dict.items():
             plt.plot(rounds, value, label=key)
