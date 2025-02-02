@@ -204,9 +204,14 @@ class ValidationBS(Evaluator):
 
         # Handle mismatched rounds for quantile values
         for strategy in df_plot_quantiles["base_strategy"].unique():
-            quantile_values = df_plot_quantiles[df_plot_quantiles["base_strategy"] == strategy]["loss"].values
+            quantile_values = df_plot_quantiles[
+                df_plot_quantiles["base_strategy"] == strategy
+            ]["loss"].values
             if len(quantile_values) < len(rounds):
-                quantile_values = np.append(quantile_values, np.repeat(np.nan, len(rounds) - len(quantile_values)))
+                quantile_values = np.append(
+                    quantile_values,
+                    np.repeat(np.nan, len(rounds) - len(quantile_values)),
+                )
             quantile_dict[strategy + " quantile"] = quantile_values
 
         plt.figure(figsize=(10, 6))
@@ -274,18 +279,50 @@ class ValidationBS(Evaluator):
         :param df: Dataframe collected during the validation
         :return: None
         """
+        # Compute mean accuracy per round for each base strategy
         df_plot = (
             df[["round", "acc", "base_strategy"]]
             .groupby(["base_strategy", "round"])
             .mean()
             .reset_index()
         )
+
+        # Compute 10% quantile accuracy per round for each base strategy
         df_plot_quantiles = (
             df[["round", "acc", "base_strategy"]]
             .groupby(["base_strategy", "round"])
             .quantile(0.1)
             .reset_index()
         )
+
+        # Ensure all base strategies have values for ALL rounds
+        all_rounds = df["round"].unique()
+        all_strategies = df["base_strategy"].unique()
+
+        # Create a MultiIndex with all combinations of base_strategy and round
+        multi_index = pd.MultiIndex.from_product(
+            [all_strategies, all_rounds], names=["base_strategy", "round"]
+        )
+
+        # Reindex both DataFrames to fill missing values with NaN
+        df_plot = (
+            df_plot.set_index(["base_strategy", "round"])
+            .reindex(multi_index)
+            .reset_index()
+        )
+        df_plot_quantiles = (
+            df_plot_quantiles.set_index(["base_strategy", "round"])
+            .reindex(multi_index)
+            .reset_index()
+        )
+
+        # Print debug information to check dimensions
+        print(
+            f"df_plot shape: {df_plot.shape}, df_plot_quantiles shape: {df_plot_quantiles.shape}"
+        )
+
+
+
         rounds = df_plot["round"].unique()
         mean_dict = {}
         quantile_dict = {}
@@ -318,7 +355,9 @@ class ValidationBS(Evaluator):
         :param df: Dataframe collected during the validation
         :return: None
         """
-        df_plot = df[df["round"] == max(df["round"])][["acc", "base_strategy", "client"]]
+        df_plot = df[df["round"] == max(df["round"])][
+            ["acc", "base_strategy", "client"]
+        ]
         g = sns.FacetGrid(df_plot, col="base_strategy")
         g.map(sns.histplot, "acc", bins=10, binwidth=0.01)
         plt.savefig(
@@ -328,7 +367,9 @@ class ValidationBS(Evaluator):
         )
         plt.close()
 
-        df_plot = df[df["round"] == max(df["round"])][["acc", "base_strategy", "client"]]
+        df_plot = df[df["round"] == max(df["round"])][
+            ["acc", "base_strategy", "client"]
+        ]
         sns.boxplot(df_plot, x="acc", y="base_strategy")
         plt.savefig(
             self.config.initial_config["output_dir"] + "/figures/fairness_boxplot.svg",
@@ -343,7 +384,9 @@ class ValidationBS(Evaluator):
         :param classes: Classes of the dataset
         :return: None
         """
-        df_plot = df[df["round"] == max(df["round"])][["class_accuracy", "base_strategy"]]
+        df_plot = df[df["round"] == max(df["round"])][
+            ["class_accuracy", "base_strategy"]
+        ]
         df_temps = []
         for i in df_plot["base_strategy"].unique():
             df_temp = pd.DataFrame(
@@ -400,7 +443,9 @@ class ValidationBS(Evaluator):
             id_vars=["base_strategy", "round"], var_name="class", value_name="acc"
         )
         df_plot["class"] = df_plot["class"].astype("category")
-        sns.lineplot(data=df_plot, x="round", y="acc", hue="class", style="base_strategy")
+        sns.lineplot(
+            data=df_plot, x="round", y="acc", hue="class", style="base_strategy"
+        )
         plt.savefig(
             self.config.initial_config["output_dir"]
             + "/figures/class_fairness_progress.svg",
