@@ -205,6 +205,15 @@ class Client(fl.client.NumPyClient):
             verbose,
         )
 
+        # Replacement of Parameter processing here to get valid end-time
+        if self.quantize or self.sparse:
+            if self.active_strategy == "FedNova":
+                compressed_params, scale = get_parametersFedNova_quantized(self.net, self.optimizer, self.quantization_bits, {})    
+            else:
+                compressed_params, indices, scale = get_parameters_compressed(self.net, parameters, "cpu", self.quantize, self.sparse,self.quantization_bits, self.top_k_percent)
+            # add quant scale to train output
+            
+
         end_time = time.time()
         if self.active_strategy == "FedNova":
             grad_scaling_factor: Dict[
@@ -213,6 +222,7 @@ class Client(fl.client.NumPyClient):
             train_output.update(grad_scaling_factor)
 
         last_execution_time = end_time - start_time
+        print(last_execution_time)
         self.output.set("train_output", train_output)
         self.output.set("actual_execution_time", last_execution_time)
         self.output.set("execution_time", execution_time)
@@ -222,13 +232,9 @@ class Client(fl.client.NumPyClient):
         self.output.set("status", "success")
         self.output.set("reason", "success")
         self.output.write()
-
+        
+            
         if self.quantize or self.sparse:
-            if self.active_strategy == "FedNova":
-                compressed_params, scale = get_parametersFedNova_quantized(self.net, self.optimizer, self.quantization_bits, {})    
-            else:
-                compressed_params, indices, scale = get_parameters_compressed(self.net, parameters, "cpu", self.quantize, self.sparse,self.quantization_bits, self.top_k_percent)
-            # add quant scale to train output
             if indices is not None:
                 train_output["sparse_indices"] = indices
             if scale is not None:
@@ -248,7 +254,7 @@ class Client(fl.client.NumPyClient):
         :param config: configuration for this evaluation
         :return: loss, number of samples and metrics
         """
-
+        
         if "quant-scale" in self.state.get_all():
             self.server_quant_scale = self.state.get("quant-scale")
             
@@ -277,6 +283,7 @@ class Client(fl.client.NumPyClient):
             self.state.get("client_name"),
             self.config.initial_config["verbose"],
         )
+            
         return (
             float(loss),
             len(self.valloader),
