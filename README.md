@@ -56,10 +56,3 @@ You can monitor the progress of your runs in the included Ray Dashboard. It is u
 Configuration error should result in a clear error message. If you run into any other issues please open an issue on GitHub.
 During the report generation issues can occur if no clients participated in a round. This mostly only occurs when selecting a 
 very small number of clients for participation every round.
-
-## Citation
-
-If you use this code in your research please cite:
-
-```
-```
