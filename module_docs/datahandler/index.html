@@ -1,0 +1,2281 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://jsincn.github.io/SelecEval/module_docs/datahandler/">
+      
+      
+        <link rel="prev" href="../client/">
+      
+      
+        <link rel="next" href="../models/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>DataHandler - SelecEval Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#datahandler" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SelecEval Documentation" class="md-header__button md-logo" aria-label="SelecEval Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SelecEval Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              DataHandler
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jsincn/SelecEval" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SelecEval Documentation" class="md-nav__button md-logo" aria-label="SelecEval Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SelecEval Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jsincn/SelecEval" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../thesis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Thesis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Algorithms
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Algorithms
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithms/active/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ActiveFL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithms/cep/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CEP
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithms/fedcs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FedCS
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithms/powd/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pow-D
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../algorithms/random/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Random
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Data
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Data
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/adding_new_data_distributions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Adding new data distributions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Datasets
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            Datasets
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/datasets/CIFAR10/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CIFAR10
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/datasets/MNIST/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    MNIST
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/datasets/adding_new_datasets/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Adding new datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Feature distributions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            Feature distributions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/feature_distributions/gaussian/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gaussian
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Label distributions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            Label distributions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/label_distributions/dirichlet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dirichlet
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/label_distributions/discrete/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Discrete
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/label_distributions/uniform/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Uniform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Quantity distributions
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            Quantity distributions
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/quantity_distributions/dirichlet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dirichlet
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/quantity_distributions/uniform/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Uniform
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example Descriptions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/example_1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example 1
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/example_2/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Example 2
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Paper
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            Paper
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Thesis Configurations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/IID/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    IID
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/feature_skew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature skew
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/flexible_client_count/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flexible client count
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/label_quantity_skew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Label quantity skew
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/label_skew/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Label skew
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/paper/less_clients/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Less clients
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Module docs
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Module docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../__main__/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    __main__
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../client/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    DataHandler
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    DataHandler
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../selection/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Selection
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../strategy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Strategy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../util/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utility
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Simulation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            Simulation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../simulation/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../simulation/network_bandwidth/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Network Bandwidth
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../simulation/performance_factor/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Performance Factor
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../simulation/reliability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client Reliability
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Validation
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            Validation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/output/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Output
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_10_3" id="__nav_10_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced analytics
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10_3">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced analytics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/advanced_analytics/data_distribution_heatmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generate Data Distribution Heatmaps
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/advanced_analytics/different_accuracy_metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Accuracy Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/advanced_analytics/different_fairness_metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fairness metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/advanced_analytics/different_training_metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Training Failure Metrics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/advanced_analytics/loading_raw_files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Loading Raw Files
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="datahandler">DataHandler</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#datahandler.data_feature_distribution.gaussian">datahandler.data_feature_distribution.gaussian</a></li>
+<li><a href="#datahandler.data_feature_distribution.gaussian.GaussianNoiseTransform">GaussianNoiseTransform</a></li>
+<li><a href="#datahandler.data_feature_distribution">datahandler.data_feature_distribution</a></li>
+<li><a href="#datahandler.data_feature_distribution.data_feature_distribution">datahandler.data_feature_distribution.data_feature_distribution</a></li>
+<li><a href="#datahandler.data_feature_distribution.data_feature_distribution.DataFeatureDistribution">DataFeatureDistribution</a><ul>
+<li><a href="#datahandler.data_feature_distribution.data_feature_distribution.DataFeatureDistribution.apply_feature_skew">apply_feature_skew</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.datahandler">datahandler.datahandler</a></li>
+<li><a href="#datahandler.datahandler.DataHandler">DataHandler</a><ul>
+<li><a href="#datahandler.datahandler.DataHandler.load_distributed_datasets">load_distributed_datasets</a></li>
+<li><a href="#datahandler.datahandler.DataHandler.get_classes">get_classes</a></li>
+<li><a href="#datahandler.datahandler.DataHandler.split_and_transform_data">split_and_transform_data</a></li>
+<li><a href="#datahandler.datahandler.DataHandler.distribute_data">distribute_data</a></li>
+<li><a href="#datahandler.datahandler.DataHandler.load_existing_distribution">load_existing_distribution</a></li>
+<li><a href="#datahandler.datahandler.DataHandler.generate_transforms">generate_transforms</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_label_distribution.uniform">datahandler.data_label_distribution.uniform</a></li>
+<li><a href="#datahandler.data_label_distribution.uniform.Uniform">Uniform</a><ul>
+<li><a href="#datahandler.data_label_distribution.uniform.Uniform.get_label_distribution">get_label_distribution</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_label_distribution.data_label_distribution">datahandler.data_label_distribution.data_label_distribution</a></li>
+<li><a href="#datahandler.data_label_distribution.data_label_distribution.DataLabelDistribution">DataLabelDistribution</a><ul>
+<li><a href="#datahandler.data_label_distribution.data_label_distribution.DataLabelDistribution.get_label_distribution">get_label_distribution</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_label_distribution">datahandler.data_label_distribution</a></li>
+<li><a href="#datahandler.data_label_distribution.discrete">datahandler.data_label_distribution.discrete</a></li>
+<li><a href="#datahandler.data_label_distribution.discrete.Discrete">Discrete</a><ul>
+<li><a href="#datahandler.data_label_distribution.discrete.Discrete.get_label_distribution">get_label_distribution</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_label_distribution.dirichlet">datahandler.data_label_distribution.dirichlet</a></li>
+<li><a href="#datahandler.data_label_distribution.dirichlet.Dirichlet">Dirichlet</a><ul>
+<li><a href="#datahandler.data_label_distribution.dirichlet.Dirichlet.get_label_distribution">get_label_distribution</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.mnist">datahandler.mnist</a></li>
+<li><a href="#datahandler.mnist.MNISTDataHandler">MNISTDataHandler</a><ul>
+<li><a href="#datahandler.mnist.MNISTDataHandler.load_distributed_datasets">load_distributed_datasets</a></li>
+<li><a href="#datahandler.mnist.MNISTDataHandler.get_classes">get_classes</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.cifar10">datahandler.cifar10</a></li>
+<li><a href="#datahandler.cifar10.Cifar10DataHandler">Cifar10DataHandler</a><ul>
+<li><a href="#datahandler.cifar10.Cifar10DataHandler.load_distributed_datasets">load_distributed_datasets</a></li>
+<li><a href="#datahandler.cifar10.Cifar10DataHandler.get_classes">get_classes</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_quantity_distribution.uniform">datahandler.data_quantity_distribution.uniform</a></li>
+<li><a href="#datahandler.data_quantity_distribution.uniform.Uniform">Uniform</a><ul>
+<li><a href="#datahandler.data_quantity_distribution.uniform.Uniform.get_partition_sizes">get_partition_sizes</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_quantity_distribution.data_quantity_distribution">datahandler.data_quantity_distribution.data_quantity_distribution</a></li>
+<li><a href="#datahandler.data_quantity_distribution.data_quantity_distribution.DataQuantityDistribution">DataQuantityDistribution</a><ul>
+<li><a href="#datahandler.data_quantity_distribution.data_quantity_distribution.DataQuantityDistribution.get_partition_sizes">get_partition_sizes</a></li>
+</ul>
+</li>
+<li><a href="#datahandler.data_quantity_distribution">datahandler.data_quantity_distribution</a></li>
+<li><a href="#datahandler.data_quantity_distribution.dirichlet">datahandler.data_quantity_distribution.dirichlet</a></li>
+<li><a href="#datahandler.data_quantity_distribution.dirichlet.Dirichlet">Dirichlet</a><ul>
+<li><a href="#datahandler.data_quantity_distribution.dirichlet.Dirichlet.get_partition_sizes">get_partition_sizes</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="datahandler.data_feature_distribution.gaussian">datahandler.data_feature_distribution.gaussian</h1>
+
+<h2 id="datahandler.data_feature_distribution.gaussian.GaussianNoiseTransform">GaussianNoiseTransform Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">GaussianNoiseTransform</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Add Gaussian noise to a tensor</p>
+<h1 id="datahandler.data_feature_distribution">datahandler.data_feature_distribution</h1>
+
+<p>This module contains methods of skewing data features</p>
+<h1 id="datahandler.data_feature_distribution.data_feature_distribution">datahandler.data_feature_distribution.data_feature_distribution</h1>
+
+<p>DataFeatureDistribution is an abstract class that defines the interface for any implemented data feature distributions</p>
+<h2 id="datahandler.data_feature_distribution.data_feature_distribution.DataFeatureDistribution">DataFeatureDistribution Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataFeatureDistribution</span><span class="p">(</span><span class="n">ABC</span><span class="p">)</span>
+</span></code></pre></div>
+<p>DataFeatureDistribution is an abstract class that defines the interface for any implemented data feature distributions</p>
+<h4 id="datahandler.data_feature_distribution.data_feature_distribution.DataFeatureDistribution.apply_feature_skew">apply_feature_skew</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">apply_feature_skew</span><span class="p">(</span><span class="n">datahandler</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Applies the feature skew to the data</p>
+<h1 id="datahandler.datahandler">datahandler.datahandler</h1>
+
+<p>This contains the abstract data handler that defines the interface for any implemented
+data handlers and provides some universal methods</p>
+<h2 id="datahandler.datahandler.DataHandler">DataHandler Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataHandler</span><span class="p">(</span><span class="n">ABC</span><span class="p">)</span>
+</span></code></pre></div>
+<p>DataHandler is an abstract class that defines the interface for any implemented data handlers</p>
+<h4 id="datahandler.datahandler.DataHandler.load_distributed_datasets">load_distributed_datasets</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@abstractmethod</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_distributed_datasets</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Called to load the dataset</p>
+<h4 id="datahandler.datahandler.DataHandler.get_classes">get_classes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@abstractmethod</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_classes</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the classes of the dataset</p>
+<h4 id="datahandler.datahandler.DataHandler.split_and_transform_data">split_and_transform_data</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">split_and_transform_data</span><span class="p">(</span><span class="n">testset</span><span class="p">,</span> <span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Split the data into partitions and create DataLoaders</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>testset</code>: test dataset</li>
+<li><code>trainset</code>: training dataset</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<p>testloader, trainloaders, valloaders</p>
+<h4 id="datahandler.datahandler.DataHandler.distribute_data">distribute_data</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">distribute_data</span><span class="p">(</span><span class="n">label_distribution</span><span class="p">,</span> <span class="n">partition_sizes</span><span class="p">,</span> <span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Distribute the data according to the label distribution and partition sizes</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>label_distribution</code>: np.array of shape (NUM_CLIENTS, NUM_CLASSES)</li>
+<li><code>partition_sizes</code>: np.array of shape (NUM_CLIENTS)</li>
+<li><code>trainset</code>: torch.utils.data.Dataset</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<p>list of torch.utils.data.Subset</p>
+<h4 id="datahandler.datahandler.DataHandler.load_existing_distribution">load_existing_distribution</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_existing_distribution</span><span class="p">(</span><span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Load an existing data distribution from a file</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>trainset</code>: torch.utils.data.Dataset</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<p>List of torch.utils.data.Subset</p>
+<h4 id="datahandler.datahandler.DataHandler.generate_transforms">generate_transforms</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">generate_transforms</span><span class="p">(</span><span class="n">custom_transforms</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Generate the transforms for the dataset</p>
+<p>Custom transforms are applied after a tensor was created and before normalization and feature skewing</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>custom_transforms</code>: List of custom transforms</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<p>Composed transforms</p>
+<h1 id="datahandler.data_label_distribution.uniform">datahandler.data_label_distribution.uniform</h1>
+
+<p>Uniform distribution of labels</p>
+<h2 id="datahandler.data_label_distribution.uniform.Uniform">Uniform Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Uniform</span><span class="p">(</span><span class="n">DataLabelDistribution</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Uniform distribution of labels</p>
+<h4 id="datahandler.data_label_distribution.uniform.Uniform.get_label_distribution">get_label_distribution</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_label_distribution</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the label distribution as an array of dimension (no_clients, no_classes)</p>
+<p>Uses uniform distribution to (not-)skew the data label distribution</p>
+<p><strong>Returns</strong>:</p>
+<p>label_distribution</p>
+<h1 id="datahandler.data_label_distribution.data_label_distribution">datahandler.data_label_distribution.data_label_distribution</h1>
+
+<p>DataLabelDistribution is an abstract class that defines the interface for any implemented data label distributions</p>
+<h2 id="datahandler.data_label_distribution.data_label_distribution.DataLabelDistribution">DataLabelDistribution Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataLabelDistribution</span><span class="p">(</span><span class="n">ABC</span><span class="p">)</span>
+</span></code></pre></div>
+<p>DataLabelDistribution is an abstract class that defines the interface for any implemented data label distributions</p>
+<h4 id="datahandler.data_label_distribution.data_label_distribution.DataLabelDistribution.get_label_distribution">get_label_distribution</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_label_distribution</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the label distribution as an array of dimension (no_clients, no_classes)</p>
+<h1 id="datahandler.data_label_distribution">datahandler.data_label_distribution</h1>
+
+<p>This module contains methods of skewing data labels</p>
+<h1 id="datahandler.data_label_distribution.discrete">datahandler.data_label_distribution.discrete</h1>
+
+<p>Discrete data label distribution</p>
+<h2 id="datahandler.data_label_distribution.discrete.Discrete">Discrete Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Discrete</span><span class="p">(</span><span class="n">DataLabelDistribution</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Discrete data label distribution</p>
+<h4 id="datahandler.data_label_distribution.discrete.Discrete.get_label_distribution">get_label_distribution</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_label_distribution</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the label distribution as an array of dimension no_clients, no_classes</p>
+<p>Allows each client to have only a subset of the classes</p>
+<p><strong>Returns</strong>:</p>
+<p>label_distribution</p>
+<h1 id="datahandler.data_label_distribution.dirichlet">datahandler.data_label_distribution.dirichlet</h1>
+
+<p>Dirichlet distribution for data label distribution</p>
+<h2 id="datahandler.data_label_distribution.dirichlet.Dirichlet">Dirichlet Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Dirichlet</span><span class="p">(</span><span class="n">DataLabelDistribution</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Dirichlet distribution for data label distribution</p>
+<h4 id="datahandler.data_label_distribution.dirichlet.Dirichlet.get_label_distribution">get_label_distribution</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_label_distribution</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the label distribution as an array of dimension (no_clients, no_classes)</p>
+<p>Uses a dirichlet distribution to skew the data label distribution</p>
+<p><strong>Returns</strong>:</p>
+<p>label_distribution</p>
+<h1 id="datahandler.mnist">datahandler.mnist</h1>
+
+<p>MNIST data handler
+LeCun, Yann, Corinna Cortes, and C. J. Burges. n.d.
+“MNIST Handwritten Digit Database.”
+ATT Labs [Online]. Available: Http://yann. Lecun. Com/exdb/mnist.</p>
+<h2 id="datahandler.mnist.MNISTDataHandler">MNISTDataHandler Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">MNISTDataHandler</span><span class="p">(</span><span class="n">DataHandler</span><span class="p">)</span>
+</span></code></pre></div>
+<h4 id="datahandler.mnist.MNISTDataHandler.load_distributed_datasets">load_distributed_datasets</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_distributed_datasets</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Load the MNIST dataset and divide it into partitions</p>
+<h4 id="datahandler.mnist.MNISTDataHandler.get_classes">get_classes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_classes</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Returns the classes of the dataset</p>
+<p><strong>Returns</strong>:</p>
+<p>List of classes</p>
+<h1 id="datahandler.cifar10">datahandler.cifar10</h1>
+
+<p>CIFAR-10 data handler
+He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015.
+“Deep Residual Learning for Image Recognition.”
+arXiv [cs.CV]. arXiv. http://arxiv.org/abs/1512.03385.</p>
+<h2 id="datahandler.cifar10.Cifar10DataHandler">Cifar10DataHandler Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Cifar10DataHandler</span><span class="p">(</span><span class="n">DataHandler</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Data handler for CIFAR-10</p>
+<h4 id="datahandler.cifar10.Cifar10DataHandler.load_distributed_datasets">load_distributed_datasets</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_distributed_datasets</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Load the CIFAR-10 dataset and divide it into partitions</p>
+<p><strong>Returns</strong>:</p>
+<p>Train, validation and test data loaders</p>
+<h4 id="datahandler.cifar10.Cifar10DataHandler.get_classes">get_classes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_classes</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Get the classes of the CIFAR-10 dataset</p>
+<p><strong>Returns</strong>:</p>
+<p>List of classes</p>
+<h1 id="datahandler.data_quantity_distribution.uniform">datahandler.data_quantity_distribution.uniform</h1>
+
+<p>Uniform data quantity distribution</p>
+<h2 id="datahandler.data_quantity_distribution.uniform.Uniform">Uniform Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Uniform</span><span class="p">(</span><span class="n">DataQuantityDistribution</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Uniform data quantity distribution</p>
+<h4 id="datahandler.data_quantity_distribution.uniform.Uniform.get_partition_sizes">get_partition_sizes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_partition_sizes</span><span class="p">(</span><span class="n">testset</span><span class="p">,</span> <span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Returns the partition sizes as an array of dimension (no_clients)</p>
+<p>Uses a uniform distribution to (not-)skew the data quantities</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>testset</code>: test dataset</li>
+<li><code>trainset</code>: train dataset</li>
+</ul>
+<h1 id="datahandler.data_quantity_distribution.data_quantity_distribution">datahandler.data_quantity_distribution.data_quantity_distribution</h1>
+
+<p>This class contains the abstract class DataQuantityDistribution which
+is used to for all implemented data quantity distributions</p>
+<h2 id="datahandler.data_quantity_distribution.data_quantity_distribution.DataQuantityDistribution">DataQuantityDistribution Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DataQuantityDistribution</span><span class="p">(</span><span class="n">ABC</span><span class="p">)</span>
+</span></code></pre></div>
+<p>DataQuantityDistribution is an abstract class that defines the
+interface for any implemented data quantity distributions</p>
+<h4 id="datahandler.data_quantity_distribution.data_quantity_distribution.DataQuantityDistribution.get_partition_sizes">get_partition_sizes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_partition_sizes</span><span class="p">(</span><span class="n">testset</span><span class="p">,</span> <span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Returns the number of samples to be allocated to every client</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>testset</code>: test dataset</li>
+<li><code>trainset</code>: training dataset</li>
+</ul>
+<h1 id="datahandler.data_quantity_distribution">datahandler.data_quantity_distribution</h1>
+
+<p>This module contains the classes for skewing data quantity distributions</p>
+<h1 id="datahandler.data_quantity_distribution.dirichlet">datahandler.data_quantity_distribution.dirichlet</h1>
+
+<p>Dirichlet distribution for data quantity distribution</p>
+<h2 id="datahandler.data_quantity_distribution.dirichlet.Dirichlet">Dirichlet Objects</h2>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Dirichlet</span><span class="p">(</span><span class="n">DataQuantityDistribution</span><span class="p">)</span>
+</span></code></pre></div>
+<h4 id="datahandler.data_quantity_distribution.dirichlet.Dirichlet.get_partition_sizes">get_partition_sizes</h4>
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_partition_sizes</span><span class="p">(</span><span class="n">testset</span><span class="p">,</span> <span class="n">trainset</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Returns the number of samples to be allocated to every client</p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>testset</code>: test dataset</li>
+<li><code>trainset</code>: training dataset</li>
+</ul>
+<p><strong>Returns</strong>:</p>
+<p>Array of size (no_clients) containing the number of samples for every client</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+    
+  </body>
+</html>
